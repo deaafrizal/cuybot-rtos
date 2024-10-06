@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CUYBOT PROTONANO</title>
+    <link rel="stylesheet" href="/css/index.css" />
+  </head>
+  <body>
+    <div id="loadingOverlay">
+      <p>Loading, please wait...</p>
+    </div>
+
+    <div class="navbar">
+      <button
+        class="open-sidebar-btn"
+        aria-label="Open Sidebar"
+        onclick="toggleSidebar()"
+      >
+        ☰
+      </button>
+      <div class="title">CUYBOT</div>
+      <div></div>
+    </div>
+
+    <main class="layouts">
+      <virtual-joystick id="speedJoystick" data-lock="x"></virtual-joystick>
+      <virtual-joystick id="directionJoystick" data-lock="y"></virtual-joystick>
+      </div>
+    </main>
+    <div id="error-message" style="display: none">
+      Koneksi terputus, silahkan reload.
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="switch-container">
+        <div class="switch-item">
+          <label class="switch-label" for="obstacleSwitch">+Avoidance</label>
+          <label class="switch">
+            <input type="checkbox" id="obstacleSwitch" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="switch-item">
+          <label class="switch-label" for="followSwitch">Auto Follow</label>
+          <label class="switch">
+            <input type="checkbox" id="followSwitch" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="switch-item">
+          <label class="switch-label" for="patrolSwitch">Auto Patrol</label>
+          <label class="switch">
+            <input type="checkbox" id="patrolSwitch" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="sidebar-separator"></div>
+
+      <div class="sidebar-menu">
+        <button class="sidebar-btn" onclick="goToPage('/tuning')">
+          Tuning
+        </button>
+        <button class="sidebar-btn" onclick="goToPage('/monitoring')">
+          Monitoring
+        </button>
+
+        <button class="sidebar-btn" onclick="goToPage('/flash')">
+          Firmware
+        </button>
+        <button class="sidebar-btn" onclick="goToPage('/api-docs')">
+          API Docs
+        </button>
+        <button class="sidebar-btn" onclick="reloadPage()">Reload</button>
+        <button class="sidebar-btn reboot" onclick="rebootSystem()">
+          Reboot
+        </button>
+      </div>
+
+      <div class="sidebar-separator"></div>
+
+      <div class="sidebar-bottom">
+        <button class="close-sidebar-btn" onclick="toggleSidebar()">✖</button>
+      </div>
+    </aside>
+    <script src="/js/index/controller.js"></script>
+    <script src="/js/index/joystick.js"></script>
+    <script src="/js/index/main.js"></script>
+    <script src="/js/index/mode.js"></script>
+  </body>
+</html>
