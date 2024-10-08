@@ -2,8 +2,6 @@
 #define WEBSOCKET_TASK_H
 
 #include <WebSocketsServer.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 
 class WebSocketTask {
 public:

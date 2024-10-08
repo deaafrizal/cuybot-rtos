@@ -1,5 +1,7 @@
 #include <ModeSelection/ModeSelectionTask.h>
-#include <Arduino.h>
+#include <LedControl/LedControl.h>
+
+LedControl ledControl;
 
 extern int mode;
 ModeSelectionTask::ModeSelectionTask() {
@@ -30,47 +32,49 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
     self->webSocketTask.startTask();
 
     while (true) {
-        if (mode < 0 || mode >= 6) {
-            Serial.println("Invalid mode detected, ignoring...");
-            vTaskDelay(100 / portTICK_PERIOD_MS);
-            continue;
-        }
-
-        // Handle mode changes
         if (self->lastMode != mode) {
             switch (mode) {
-                case 0: // Main Page
-                    Serial.println("Resuming WebSocketTask (Main Page) mode 0.");
+                case 1: // Main Page
+                    Serial.println("Resuming WebSocketTask (Main Page) mode 1.");
+                    ledControl.setMode(1);
                     if (eTaskGetState(self->webSocketTask.getTaskHandle()) == eSuspended) {
                         self->webSocketTask.resumeTask();
                     }
                     break;
 
-                case 1: // Obstacle Mode
-                    Serial.println("Resuming WebSocketTask for Obstacle Mode, mode 1.");
+                case 2: // Obstacle Mode
+                    Serial.println("Resuming WebSocketTask for Obstacle Mode, mode 2.");
+                    ledControl.setMode(2);
                     if (eTaskGetState(self->webSocketTask.getTaskHandle()) == eSuspended) {
                         self->webSocketTask.resumeTask();
                     }
                     break;
 
-                case 2: // Auto Follow
-                    Serial.println("Suspending WebSocketTask and starting auto follow, mode 2.");
+                case 3: // Auto Follow
+                    ledControl.setMode(3);
+                    Serial.println("Suspending WebSocketTask and starting auto follow, mode 3.");
                     if (eTaskGetState(self->webSocketTask.getTaskHandle()) != eSuspended) {
                         self->webSocketTask.suspendTask();
                     }
                     // Add code to start ultrasonic & IR sensor here if needed
                     break;
 
-                case 3: // Auto Avoidance
-                    Serial.println("Suspending WebSocketTask and starting auto avoidance, mode 3.");
+                case 4: // Auto Avoidance
+                    Serial.println("Suspending WebSocketTask and starting auto avoidance, mode 4.");
+                    ledControl.setMode(4);
                     if (eTaskGetState(self->webSocketTask.getTaskHandle()) != eSuspended) {
                         self->webSocketTask.suspendTask();
                     }
                     break;
 
-                case 4: // Tuning Page
-                case 5: // Other Settings
-                    Serial.println("Suspending WebSocketTask and opening settings page (tuning, OTA & reboot page), mode 4/5.");
+                case 5: // Tuning Page
+                    Serial.println("Suspending WebSocketTask and opening TUNING page), mode 5");
+                    if (eTaskGetState(self->webSocketTask.getTaskHandle()) != eSuspended) {
+                        self->webSocketTask.suspendTask();
+                    }
+                    break;
+                case 6: // Other Settings
+                    Serial.println("Suspending WebSocketTask and opening OTA page), mode 6");
                     if (eTaskGetState(self->webSocketTask.getTaskHandle()) != eSuspended) {
                         self->webSocketTask.suspendTask();
                     }

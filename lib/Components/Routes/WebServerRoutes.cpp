@@ -10,8 +10,8 @@ void WebServerRoutes::setupRoutes() {
     server->serveStatic("/", SPIFFS, "/");
 
     server->on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        mode = 0;
-        Serial.println("Mode set to 0 (Manual Control)");
+        mode = 1;
+        Serial.println("Mode set to 1 (Manual Control)");
         request->send(SPIFFS, "/html/index.html", "text/html");
     });
 

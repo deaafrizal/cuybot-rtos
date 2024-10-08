@@ -2,8 +2,6 @@
 #define MODESELECTIONTASK_H
 
 #include <WebSocket/WebSocketTask.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 
 class ModeSelectionTask {
 public:
