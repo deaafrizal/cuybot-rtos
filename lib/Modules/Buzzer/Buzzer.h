@@ -2,8 +2,6 @@
 #define BUZZER_H
 
 #include <Arduino.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 
 class Buzzer {
 public:

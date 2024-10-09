@@ -5,7 +5,7 @@ MotorControl::MotorControl(MotorDriver &rightMotor, MotorDriver &leftMotor)
       _leftMotor(leftMotor),
       _currentSpeed(0),
       _maxSpeed(255),
-      _turnFactor(0.15) {
+      _turnFactor(0.5) {
         _rightMotor.motorBrake();
         _leftMotor.motorBrake();
       }
@@ -22,16 +22,40 @@ void MotorControl::backward()
     _leftMotor.motorRev(_currentSpeed);
 }
 
-void MotorControl::turnLeft()
+void MotorControl::turnLeft(int speed)
 {
-    _rightMotor.motorRev(_currentSpeed);
-    _leftMotor.motorGo(_currentSpeed);
+    Serial.print("right curspeed: ");
+    Serial.println(_currentSpeed);
+
+    if (speed > 0) {
+        Serial.println("Forward turn left");
+
+        _rightMotor.motorGo(_currentSpeed);
+        _leftMotor.motorGo(_currentSpeed * _turnFactor);
+    } else if (speed < 0) {
+        Serial.println("Backward turn left");
+
+        _rightMotor.motorRev(_currentSpeed);
+        _leftMotor.motorRev(_currentSpeed * _turnFactor);
+    }
 }
 
-void MotorControl::turnRight()
+void MotorControl::turnRight(int speed)
 {
-    _rightMotor.motorGo(_currentSpeed);
-    _leftMotor.motorRev(_currentSpeed);
+    Serial.print("right curspeed: ");
+    Serial.println(_currentSpeed);
+
+    if (speed > 0) {
+        Serial.println("Forward turn right");
+
+        _rightMotor.motorGo(_currentSpeed * _turnFactor);
+        _leftMotor.motorGo(_currentSpeed);
+    } else if (speed < 0) {
+        Serial.println("Backward turn right");
+
+        _rightMotor.motorRev(_currentSpeed * _turnFactor);
+        _leftMotor.motorRev(_currentSpeed);
+    }
 }
 
 void MotorControl::brake()
@@ -51,29 +75,43 @@ void MotorControl::setSpeed(int speed)
     _currentSpeed = constrain(speed, 0, _maxSpeed);
 }
 
-void MotorControl::setDirectionAndSpeed(int speed, char direction)
+void MotorControl::setDirectionAndSpeed(int speed, int direction)
 {
-    setSpeed(speed);
+    int pwmValue = map(abs(speed), 0, 100, 0, _maxSpeed);
 
-    switch (direction)
-    {
-    case 0:
+    if (speed > 0) {
+        switch (direction)
+        {
+        case 0:
+            _currentSpeed = pwmValue;
+            forward();
+            break;
+        case -1:
+            _currentSpeed = pwmValue;
+            turnLeft(speed);
+            break;
+        case 1:
+            _currentSpeed = pwmValue;
+            turnRight(speed);
+            break;
+        }
+    } else if (speed < 0) {
+        switch (direction)
+        {
+        case 0:
+            _currentSpeed = pwmValue;
+            backward();
+            break;
+        case -1: 
+            _currentSpeed = pwmValue;
+            turnLeft(speed);
+            break;
+        case 1:
+            _currentSpeed = pwmValue;
+            turnRight(speed);
+            break;
+        }
+    } else {
         stop();
-        break;
-    case 1:
-        forward();
-        break;
-    case 2:
-        backward();
-        break;
-    case 3:
-        turnRight();
-        break;
-    case 4:
-        turnLeft();
-        break;
-    default:
-        stop();
-        break;
     }
 }

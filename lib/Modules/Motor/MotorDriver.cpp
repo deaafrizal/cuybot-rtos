@@ -5,7 +5,7 @@ MotorDriver::MotorDriver(uint8_t pinA, uint8_t pinB) : _maxPwm(255)
     _pinA = pinA;
     _pinB = pinB;
     
-    digitalWrite(_pwm_standby_pin, LOW);
+    digitalWrite(_pwm_standby_pin, HIGH);
     
     pinMode(_pinA, OUTPUT);
     pinMode(_pinB, OUTPUT);

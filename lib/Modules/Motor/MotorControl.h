@@ -10,14 +10,14 @@ public:
 
     void forward();
     void backward();
-    void turnRight();
-    void turnLeft();
+    void turnRight(int speed);
+    void turnLeft(int speed);
 
     void brake();
     void stop();
     
     void setSpeed(int speed);
-    void setDirectionAndSpeed(int speed, char direction);
+    void setDirectionAndSpeed(int speed, int direction);
 
 private:
     MotorDriver &_rightMotor;

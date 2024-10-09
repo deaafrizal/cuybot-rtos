@@ -3,8 +3,6 @@
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 
 class OTA {
 public:
