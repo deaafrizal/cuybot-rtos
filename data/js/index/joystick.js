@@ -2,6 +2,10 @@ const loadingOverlay = document.getElementById("loadingOverlay") || null;
 const errorMessage = document.getElementById("error-message") || null;
 let websocket = null;
 
+document.addEventListener('contextmenu', function (event) {
+  event.preventDefault();
+});
+
 // Function to initialize WebSocket connection
 function connectWebSocket() {
   websocket = new WebSocket("ws://cuybot.local:81");
