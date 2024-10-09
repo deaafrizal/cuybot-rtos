@@ -6,20 +6,25 @@
 #include <freertos/task.h>
 #include <WebServer/WebServerTask.h>
 #include <ModeSelection/ModeSelectionTask.h>
+#include <Motor/MotorTask.h>
+#include <OTA/OTA.h>
 
-#define PWM_STANDBY 8
-#define PWM_A1 4
-#define PWM_A2 3
-#define PWM_B1 5
-#define PWM_B2 6
+#define PWM_A1 3
+#define PWM_A2 4
+#define PWM_B1 6
+#define PWM_B2 5
 
 #define SSID "cuybot"
 #define PASSWORD "123456789"
 
 int mode = 1;
+int speed = 0;
+int direction = 0;
 
 WebServerTask webServerTask;
+OTA ota("cuybot");
 ModeSelectionTask modeSelectionTask;
+MotorTask motorTask(PWM_A1, PWM_A2, PWM_B1, PWM_B2);
 
 void setup() {
     Serial.begin(115200);
@@ -36,16 +41,22 @@ void setup() {
     delay(2000);
     Serial.println("WiFi OK!");
 
-    pinMode(PWM_STANDBY, OUTPUT);
+    Serial.println("Setting up OTA service...");
+    ota.begin();
+    ota.startOTATask();
+    Serial.println("Setting up OTA service done!");
+
     pinMode(PWM_A1, OUTPUT);
     pinMode(PWM_A2, OUTPUT);
     pinMode(PWM_B1, OUTPUT);
     pinMode(PWM_B2, OUTPUT);
 
-    digitalWrite(PWM_STANDBY, LOW);
+    
+
     Serial.println("Setting up RTOS...");
     webServerTask.startTask();
     modeSelectionTask.startTask();
+    motorTask.startTask();
     Serial.println("RTOS OK!");
 
     Serial.println("Setup complete. controller: http://cuybot.local ready!");

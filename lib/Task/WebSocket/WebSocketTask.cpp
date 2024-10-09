@@ -1,5 +1,8 @@
 #include <WebSocket/WebSocketTask.h>
 
+extern int speed;
+extern int direction;
+
 WebSocketsServer WebSocketTask::webSocket = WebSocketsServer(81);
 WebSocketTask* WebSocketTask::instance = nullptr;
 
@@ -91,9 +94,19 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
 
         case WStype_TEXT:
             if(self->activeClientCount > 0) {
-                Serial.printf("[%u] Received text: %s\n", num, payload);
+                String receivedData = String((char*)payload);
+
+                int sIndex = receivedData.indexOf('S');
+                int dIndex = receivedData.indexOf('D');
+                
+                if (sIndex != -1 && dIndex != -1) {
+                    int newSpeed = receivedData.substring(sIndex + 1, dIndex).toInt();
+                    int newDirection = receivedData.substring(dIndex + 1).toInt();
+
+                    speed = newSpeed;
+                    direction = newDirection;
+                }
             }
-            // Handle your WebSocket messages here (e.g., motor control commands)
             break;
 
         default:
