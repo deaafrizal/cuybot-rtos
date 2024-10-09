@@ -24,17 +24,10 @@ void MotorControl::backward()
 
 void MotorControl::turnLeft(int speed)
 {
-    Serial.print("right curspeed: ");
-    Serial.println(_currentSpeed);
-
     if (speed > 0) {
-        Serial.println("Forward turn left");
-
         _rightMotor.motorGo(_currentSpeed);
         _leftMotor.motorGo(_currentSpeed * _turnFactor);
     } else if (speed < 0) {
-        Serial.println("Backward turn left");
-
         _rightMotor.motorRev(_currentSpeed);
         _leftMotor.motorRev(_currentSpeed * _turnFactor);
     }
@@ -42,17 +35,10 @@ void MotorControl::turnLeft(int speed)
 
 void MotorControl::turnRight(int speed)
 {
-    Serial.print("right curspeed: ");
-    Serial.println(_currentSpeed);
-
     if (speed > 0) {
-        Serial.println("Forward turn right");
-
         _rightMotor.motorGo(_currentSpeed * _turnFactor);
         _leftMotor.motorGo(_currentSpeed);
     } else if (speed < 0) {
-        Serial.println("Backward turn right");
-
         _rightMotor.motorRev(_currentSpeed * _turnFactor);
         _leftMotor.motorRev(_currentSpeed);
     }

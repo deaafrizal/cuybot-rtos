@@ -1,3 +1,16 @@
+/* Disable text selection */
+* {
+  user-select: none; /* Disable text selection on all elements */
+  -webkit-user-select: none; /* For Safari */
+  -moz-user-select: none; /* For Firefox */
+  -ms-user-select: none; /* For older IE */
+}
+
+/* Disable long-press to show context menu (copy/paste) */
+.virtual-joystick {
+  touch-action: none; /* Prevents long-press context menu */
+}
+
 /* General Resets */
 *,
 html {
