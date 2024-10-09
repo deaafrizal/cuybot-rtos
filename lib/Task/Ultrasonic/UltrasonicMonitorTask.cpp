@@ -1,4 +1,4 @@
-#include "UltrasonicMonitorTask.h"
+#include <Ultrasonic/UltrasonicMonitorTask.h>
 
 // Constructor: Initialize with a reference to the Ultrasonic sensor and the Ultrasonic task
 UltrasonicMonitorTask::UltrasonicMonitorTask(Ultrasonic &ultrasonicSensor, UltrasonicTask &ultrasonicTask)
@@ -26,9 +26,16 @@ void UltrasonicMonitorTask::stopTask() {
     }
 }
 
-// Static function for monitoring the ultrasonic sensor
+TaskHandle_t UltrasonicMonitorTask::getTaskHandle() {
+    return _taskHandle;
+}
+
+
 void UltrasonicMonitorTask::monitorTask(void *_parameters) {
     UltrasonicMonitorTask *self = static_cast<UltrasonicMonitorTask *>(_parameters);
+
+    int noEchoTime = 0;  // Counter to track how long there has been no echo
+    const int maxNoEchoTime = 10000;  // Maximum time (10 seconds) without echo before killing the task
 
     while (true) {
         // Check if the ultrasonic task is running
@@ -39,12 +46,20 @@ void UltrasonicMonitorTask::monitorTask(void *_parameters) {
             if (distance != -1) {
                 Serial.println("Echo detected again. Restarting ultrasonic task...");
                 self->_ultrasonicTask.startTask();
+                noEchoTime = 0;  // Reset no echo timer when echo is detected
             } else {
-                Serial.println("Waiting for ultrasonic sensor to power up...");
+                noEchoTime += 5000;  // Accumulate the delay time (5 seconds per iteration)
+                Serial.printf("Waiting for ultrasonic sensor to power up... (%d ms of %d ms)\n", noEchoTime, maxNoEchoTime);
             }
         }
 
+        // If no echo for more than 10 seconds, terminate the task
+        if (noEchoTime >= maxNoEchoTime) {
+            Serial.println("No echo detected for 10 seconds. Terminating monitor task...");
+            vTaskDelete(NULL);  // Self-delete the task
+        }
+
         // Delay between checks
-        vTaskDelay(pdMS_TO_TICKS(5000));  // 1 second delay
+        vTaskDelay(pdMS_TO_TICKS(5000));  // 5 second delay between checks
     }
 }

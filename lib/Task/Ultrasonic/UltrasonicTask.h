@@ -15,6 +15,8 @@ public:
     void resumeTask();     // Resume the FreeRTOS task
     void printLog();       // Print log of distance measured
     bool taskRunning;      // Status of the task (running or not)
+    TaskHandle_t getTaskHandle();
+
 
 private:
     Ultrasonic &_ultrasonic;  // Reference to the Ultrasonic object

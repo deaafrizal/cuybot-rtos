@@ -9,6 +9,7 @@ public:
     UltrasonicMonitorTask(Ultrasonic &ultrasonicSensor, UltrasonicTask &ultrasonicTask);  // Constructor
     void startTask();    // Start the FreeRTOS task for monitoring
     void stopTask();     // Stop the monitor task
+    TaskHandle_t getTaskHandle();
 
 private:
     Ultrasonic &_ultrasonic;         // Reference to the Ultrasonic object

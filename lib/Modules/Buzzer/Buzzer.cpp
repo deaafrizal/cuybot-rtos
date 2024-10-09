@@ -1,31 +1,24 @@
 #include <Buzzer/Buzzer.h>
 
-Buzzer::Buzzer() : _state(false) {}
+Buzzer::Buzzer(int pin) : _pin(pin), _state(false) {}
 
 void Buzzer::begin() {
-    pinMode(_buzzer_pin, OUTPUT);
-    off();
+    pinMode(_pin, OUTPUT);
+    off();  // Ensure the buzzer is off initially
 }
 
 void Buzzer::on() {
-    digitalWrite(_buzzer_pin, HIGH);
+    digitalWrite(_pin, HIGH);
+    _state = true;
 }
 
 void Buzzer::off() {
-    digitalWrite(_buzzer_pin, LOW);
+    digitalWrite(_pin, LOW);
+    _state = false;
 }
 
 void Buzzer::beep(int duration) {
-    on();
-    delay(duration);
-    off();
-}
-
-
-bool Buzzer::getState() {
-    return _state;
-}
-
-void Buzzer::setState(bool state) {
-    _state = state;
+    on();  // Turn the buzzer on
+    vTaskDelay(pdMS_TO_TICKS(duration));  // Use non-blocking delay
+    off();  // Turn the buzzer off after the delay
 }

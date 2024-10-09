@@ -10,34 +10,43 @@ void UltrasonicTask::startTask() {
         xTaskCreate(
             distanceMeasureTask,
             "DistanceMeasureTask",
-            2048,
+            4096,
             this,
-            1,                     
+            5,                     
             &_taskHandle         
         );
-        taskRunning = true; 
+        if(_taskHandle != NULL) {
+            taskRunning = true; 
+            Serial.println("Ultrasonic task started.");
+        }
     }
 }
 
 // Stop the FreeRTOS task
 void UltrasonicTask::stopTask() {
     if (_taskHandle != NULL) {
-        _taskHandle = NULL;  
-        taskRunning = false;
-        Serial.println("Task stopped, task handle cleared.");
+        taskRunning = false;  // Set flag to stop the task
+        Serial.println("Ultrasonic task stop requested.");
     }
+}
+
+TaskHandle_t UltrasonicTask::getTaskHandle() {
+    return _taskHandle;
 }
 
 // Suspend the FreeRTOS task
 void UltrasonicTask::suspendTask() {
     if (_taskHandle != NULL) {
-        vTaskSuspend(_taskHandle); 
+        vTaskSuspend(_taskHandle);
+        Serial.println("Ultrasonic task suspended.");
     }
 }
 
+// Resume the FreeRTOS task
 void UltrasonicTask::resumeTask() {
     if (_taskHandle != NULL) {
         vTaskResume(_taskHandle); 
+        Serial.println("Ultrasonic task resumed.");
     }
 }
 
@@ -53,50 +62,46 @@ void UltrasonicTask::printLog() {
 
 // Apply exponential smoothing to the distance values
 long UltrasonicTask::applyExponentialSmoothing(long newDistance, float alpha) {
-    // If the first reading, initialize smoothed distance with the first distance
     if (_smoothedDistance == 0) {
-        _smoothedDistance = newDistance;
+        _smoothedDistance = newDistance;  // Initialize smoothed distance
     } else {
-        // Apply exponential smoothing formula
-        _smoothedDistance = alpha * newDistance + (1 - alpha) * _smoothedDistance;
+        _smoothedDistance = alpha * newDistance + (1 - alpha) * _smoothedDistance;  // Apply smoothing
     }
     return _smoothedDistance;
 }
 
 void UltrasonicTask::distanceMeasureTask(void *_parameters) {
     UltrasonicTask *self = static_cast<UltrasonicTask *>(_parameters);
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    int noEchoTime = 0;  // Tracks time without a valid echo
+    float alpha = 0.2;   // Smoothing factor
 
-    int noEchoTime = 0;
-    float alpha = 0.2;  // Smoothing factor (you can adjust this value for more/less smoothing)
-
-    while (true) {
+    while (self->taskRunning) {
         // Get the raw distance value from the sensor
         self->_distance = self->_ultrasonic.getDistance();
 
         // Apply exponential smoothing to the distance
-        long smoothedValue = self->applyExponentialSmoothing(self->_distance, alpha);
+        self->applyExponentialSmoothing(self->_distance, alpha);
 
-        // If no echo is detected (-1), increment noEchoTime
-        if (self->_distance == -1) {
-            noEchoTime += self->_vdelayTime;
-        } else {
-            noEchoTime = 0;
-        }
-
-        // Print the smoothed distance value
+        // Print the smoothed distance
         self->printLog();
 
-        // Check if no valid echo has been detected for the timeout period
-        if (noEchoTime >= self->_timeoutPeriod) {
-            Serial.println("No echo detected for 10 seconds. Stopping task...");
-            self->stopTask();
-            break;
+        // Check for no echo (-1)
+        if (self->_distance == -1) {
+            noEchoTime += self->_vdelayTime;
+            if (noEchoTime >= self->_timeoutPeriod) {
+                Serial.println("No echo detected for 10 seconds. Stopping task...");
+                break;
+            }
+        } else {
+            noEchoTime = 0;  // Reset no-echo counter
         }
 
         // Wait for the next measurement
-        vTaskDelay(pdMS_TO_TICKS(self->_vdelayTime));
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(self->_vdelayTime));
     }
 
-    Serial.println("Task deleted, FreeRTOS cleanup.");
-    vTaskDelete(NULL);
+    Serial.println("Ultrasonic task exiting.");
+    self->_taskHandle = NULL;  // Clear task handle after exiting
+    vTaskDelete(NULL);  // Delete the task
 }

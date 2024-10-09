@@ -8,7 +8,7 @@ public:
     ModeSelectionTask();
     ~ModeSelectionTask();
 
-    void startTask(int stackSize = 2048);
+    void startTask(int stackSize = 8192);
     void stopTask();
 
 private:
