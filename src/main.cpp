@@ -6,6 +6,7 @@
 #include <freertos/task.h>
 #include <WebServer/WebServerTask.h>
 #include <ModeSelection/ModeSelectionTask.h>
+#include <OTA/OTA.h>
 
 #define PWM_STANDBY 8
 #define PWM_A1 4
@@ -19,6 +20,7 @@
 int mode = 1;
 
 WebServerTask webServerTask;
+OTA ota("cuybot");
 ModeSelectionTask modeSelectionTask;
 
 void setup() {
@@ -35,6 +37,11 @@ void setup() {
     
     delay(2000);
     Serial.println("WiFi OK!");
+
+    Serial.println("Setting up OTA service...");
+    ota.begin();
+    ota.startOTATask();
+    Serial.println("Setting up OTA service done!");
 
     pinMode(PWM_STANDBY, OUTPUT);
     pinMode(PWM_A1, OUTPUT);
