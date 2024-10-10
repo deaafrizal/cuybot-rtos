@@ -20,6 +20,7 @@
 int mode = 1;
 int speed = 0;
 int direction = 0;
+bool userControllingDirection = false;
 
 WebServerTask webServerTask;
 OTA ota("cuybot");

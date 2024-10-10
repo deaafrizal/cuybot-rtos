@@ -15,8 +15,7 @@ void MotorTask::startTask()
     xTaskCreate(runTask, "MotorControlTask", 3048, this, 8, NULL);
 }
 
-void MotorTask::setSpeedAndDirection(int newSpeed, int newDirection) {
-    speed = newSpeed;
+void MotorTask::setDirection(int newDirection) {
     direction = newDirection;
 }
 

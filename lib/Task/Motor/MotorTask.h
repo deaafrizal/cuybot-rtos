@@ -7,7 +7,7 @@ class MotorTask
 {
 public:
     MotorTask(uint8_t rightMotorPinA, uint8_t rightMotorPinB, uint8_t leftMotorPinA, uint8_t leftMotorPinB);
-    void setSpeedAndDirection(int speed, int direction);
+    void setDirection(int direction);
     void startTask();
 
 private:

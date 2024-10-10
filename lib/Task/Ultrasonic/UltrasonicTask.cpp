@@ -1,7 +1,9 @@
 #include <Ultrasonic/UltrasonicTask.h>
 
+extern bool userControllingDirection;
+
 UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorTask &motorTask) 
-    : _ultrasonic(ultrasonic), _motorTask(motorTask),_distance(0), _smoothedDistance(0), _taskHandle(NULL), taskRunning(false) {
+    : _ultrasonic(ultrasonic), _motorTask(motorTask),_distance(0), _taskHandle(NULL), taskRunning(false) {
         ultrasonic.begin();
     }
 
@@ -47,41 +49,23 @@ void UltrasonicTask::resumeTask() {
     }
 }
 
-void UltrasonicTask::printLog() {
-    if (_smoothedDistance == -1) {
-        Serial.println("Error: No echo detected");
-    } else {
-        Serial.print("Smoothed Distance: ");
-        Serial.print(_smoothedDistance);
-        Serial.println(" cm");
-    }
-}
-
-long UltrasonicTask::applyExponentialSmoothing(long newDistance, float alpha) {
-    if (_smoothedDistance == 0) {
-        _smoothedDistance = newDistance;
-    } else {
-        _smoothedDistance = alpha * newDistance + (1 - alpha) * _smoothedDistance;
-    }
-    return _smoothedDistance;
-}
-
 void UltrasonicTask::distanceMeasureTask(void *_parameters) {
     UltrasonicTask *self = static_cast<UltrasonicTask *>(_parameters);
     TickType_t xLastWakeTime = xTaskGetTickCount();
     int noEchoTime = 0;
-    float alpha = 0.2;
 
     while (self->taskRunning) {
         self->_distance = self->_ultrasonic.getDistance();
 
-        long range = self->applyExponentialSmoothing(self->_distance, alpha);
-
-        if (range != -1 && range < 12) {
-            self->_motorTask.setSpeedAndDirection(0, 0);
+        if (self->_distance > self->_minDistance && self->_distance <= self->_maxDistance) {
+            Serial.println("Obstacle detected! Turning to avoid.");
+            self->_motorTask.setDirection(1);
+        } 
+        else if (self->_distance > self->_maxDistance && !userControllingDirection){
+            self->_motorTask.setDirection(0);
         }
 
-        if (range == -1) {
+        if (self->_distance == -1) {
             noEchoTime += self->_vdelayTime;
             if (noEchoTime >= self->_timeoutPeriod) {
                 Serial.println("No echo detected for 10 seconds. Stopping task...");
@@ -90,10 +74,8 @@ void UltrasonicTask::distanceMeasureTask(void *_parameters) {
         } else {
             noEchoTime = 0;
         }
-
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(self->_vdelayTime));
     }
-
     Serial.println("Ultrasonic task exiting.");
     self->_taskHandle = NULL;
     vTaskDelete(NULL);

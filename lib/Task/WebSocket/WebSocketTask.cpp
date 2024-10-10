@@ -2,6 +2,7 @@
 
 extern int speed;
 extern int direction;
+extern bool userControllingDirection;
 
 WebSocketsServer WebSocketTask::webSocket = WebSocketsServer(81);
 WebSocketTask* WebSocketTask::instance = nullptr;
@@ -103,6 +104,13 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
 
                     speed = newSpeed;
                     direction = newDirection;
+
+                    if (direction != 0) {
+                        userControllingDirection = true;  // User is actively controlling direction
+                    } else {
+                        userControllingDirection = false; // Joystick is in neutral position
+                    }
+
                 }
             }
             break;
