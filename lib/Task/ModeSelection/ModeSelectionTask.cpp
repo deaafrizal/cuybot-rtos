@@ -1,32 +1,20 @@
 #include <ModeSelection/ModeSelectionTask.h>
 #include <LedControl/LedControl.h>
-#include <Ultrasonic/UltrasonicTask.h>
-#include <Ultrasonic/UltrasonicMonitorTask.h>
-#include <IR/IR.h>
-#include <IRReading/IRTask.h>
 #include <Buzzer/Buzzer.h>
 
 LedControl ledControl;
-// IR ir;
-// IRTask irTask(ir);
-Ultrasonic ultrasonic;
-UltrasonicTask ultrasonicTask(ultrasonic);
-UltrasonicMonitorTask ultrasonicMonitorTask(ultrasonic, ultrasonicTask);
-
 Buzzer buzzer(1);
 extern int mode;
 
-ModeSelectionTask::ModeSelectionTask() {
-    Serial.println("ModeSelection Task initialize...");
-    taskHandle = NULL;
-    lastMode = -1;
-    ultrasonic.begin();
-    buzzer.begin();
-}
+ModeSelectionTask::ModeSelectionTask(MotorTask &motor, UltrasonicTask &ultrasonicTask)
+    : _motorTask(motor), _ultrasonicTask(ultrasonicTask), lastMode(-1){
+        Serial.println("initializing modeselection...");
+        taskHandle = NULL;
+        buzzer.begin();
+    }
 
 ModeSelectionTask::~ModeSelectionTask() {
-        Serial.println("ModeSelection Task cleanup...");
-
+    Serial.println("ModeSelection Task cleanup...");
     stopTask();
 }
 
@@ -62,33 +50,30 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                         self->webSocketTask.resumeTask();
                     }
 
-                    if (ultrasonicTask.getTaskHandle() != NULL) {
-                        if (eTaskGetState(ultrasonicTask.getTaskHandle()) != eSuspended) {
-                            ultrasonicTask.stopTask();
-                            ultrasonicMonitorTask.stopTask();
-                            Serial.println("UltrasonicTask and UltrasonicMonitorTask stopped.");
+                    if (self->_ultrasonicTask.getTaskHandle() != NULL) {
+                        if (eTaskGetState(self->_ultrasonicTask.getTaskHandle()) != eSuspended) {
+                            self->_ultrasonicTask.stopTask();
+                            Serial.println("UltrasonicTask and");
                         }
                     }
                     buzzer.beep(100);
                     break;
                 case 2: // Obstacle Mode
                     Serial.println("Resuming WebSocketTask for Obstacle Mode, mode 2.");
-
                     ledControl.setMode(2);
 
                     if (eTaskGetState(self->webSocketTask.getTaskHandle()) == eSuspended) {
                         self->webSocketTask.resumeTask();
                     }
                     
-                    if (ultrasonicTask.getTaskHandle() != NULL) {
-                        if (eTaskGetState(ultrasonicTask.getTaskHandle()) == eSuspended) {
+                    if (self->_ultrasonicTask.getTaskHandle() != NULL) {
+                        if (eTaskGetState(self->_ultrasonicTask.getTaskHandle()) == eSuspended) {
                             Serial.println("from mode: resuming ultrasonic task");
-                            ultrasonicTask.resumeTask();
+                            self->_ultrasonicTask.resumeTask();
                         } 
-                    } else {
-                            Serial.println("from mode: starting ultrasonic task");
-                            ultrasonicTask.startTask();
-                            ultrasonicMonitorTask.startTask();
+                    }else {
+                        Serial.println("from mode: starting ultrasonic task");
+                        self->_ultrasonicTask.startTask();
                     }
                     buzzer.beep(200);
                     break;

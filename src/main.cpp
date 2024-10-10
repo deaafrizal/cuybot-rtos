@@ -20,11 +20,14 @@
 int mode = 1;
 int speed = 0;
 int direction = 0;
+bool userControllingDirection = false;
 
 WebServerTask webServerTask;
 OTA ota("cuybot");
-ModeSelectionTask modeSelectionTask;
 MotorTask motorTask(PWM_A1, PWM_A2, PWM_B1, PWM_B2);
+Ultrasonic ultrasonic;
+UltrasonicTask ultrasonicTask(ultrasonic, motorTask);
+ModeSelectionTask modeSelectionTask(motorTask, ultrasonicTask);
 
 void setup() {
     Serial.begin(115200);

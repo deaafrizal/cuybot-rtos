@@ -9,7 +9,7 @@ public:
     WebServerTask();
     ~WebServerTask();
     
-    void startTask(int stackSize = 2176);
+    void startTask(int stackSize = 2776);
     void stopTask();
 
 private:
