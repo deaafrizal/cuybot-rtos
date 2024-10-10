@@ -1,14 +1,16 @@
 #include <Ultrasonic/UltrasonicTask.h>
 
-UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonicSensor) 
-    : _ultrasonic(ultrasonicSensor), _distance(0), _smoothedDistance(0), _taskHandle(NULL), taskRunning(false) {}
+UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorTask &motorTask) 
+    : _ultrasonic(ultrasonic), _motorTask(motorTask),_distance(0), _smoothedDistance(0), _taskHandle(NULL), taskRunning(false) {
+        ultrasonic.begin();
+    }
 
 void UltrasonicTask::startTask() {
     if (_taskHandle == NULL) {
         xTaskCreate(
             distanceMeasureTask,
             "DistanceMeasureTask",
-            1536,
+            3048,
             this,
             6,                     
             &_taskHandle         
@@ -73,11 +75,13 @@ void UltrasonicTask::distanceMeasureTask(void *_parameters) {
     while (self->taskRunning) {
         self->_distance = self->_ultrasonic.getDistance();
 
-        self->applyExponentialSmoothing(self->_distance, alpha);
+        long range = self->applyExponentialSmoothing(self->_distance, alpha);
 
-        self->printLog();
+        if (range != -1 && range < 12) {
+            self->_motorTask.setSpeedAndDirection(0, 0);
+        }
 
-        if (self->_distance == -1) {
+        if (range == -1) {
             noEchoTime += self->_vdelayTime;
             if (noEchoTime >= self->_timeoutPeriod) {
                 Serial.println("No echo detected for 10 seconds. Stopping task...");

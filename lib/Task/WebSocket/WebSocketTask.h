@@ -8,7 +8,7 @@ public:
     WebSocketTask();
     ~WebSocketTask();
     
-    void startTask(int stackSize = 4096);
+    void startTask(int stackSize = 6000);
     void stopTask();
     void suspendTask();
     void resumeTask();

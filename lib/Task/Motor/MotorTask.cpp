@@ -8,12 +8,16 @@ MotorTask::MotorTask(uint8_t rightMotorPinA, uint8_t rightMotorPinB, uint8_t lef
       _leftMotor(leftMotorPinA, leftMotorPinB),   
       _motorControl(_rightMotor, _leftMotor)
 {
-    
 }
 
 void MotorTask::startTask()
 {
-    xTaskCreate(runTask, "MotorControlTask", 2048, this, 8, NULL);
+    xTaskCreate(runTask, "MotorControlTask", 3048, this, 8, NULL);
+}
+
+void MotorTask::setSpeedAndDirection(int newSpeed, int newDirection) {
+    speed = newSpeed;
+    direction = newDirection;
 }
 
 void MotorTask::runTask(void *pvParameters)
