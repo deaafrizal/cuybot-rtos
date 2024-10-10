@@ -16,7 +16,7 @@ void IRTask::irMeasureTask(void *_parameters) {
 
 void IRTask::startTask() {
     if (_taskHandle == NULL) {
-        xTaskCreate(irMeasureTask, "IR Task", 2048, this, 4, &_taskHandle);
+        xTaskCreate(irMeasureTask, "IR Task", 2048, this, 5, &_taskHandle);
     }
 }
 

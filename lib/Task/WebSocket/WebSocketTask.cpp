@@ -23,7 +23,7 @@ void WebSocketTask::startTask(int stackSize) {
 
     if (taskHandle == NULL) {
         instance = this;
-        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, 6, &taskHandle);
+        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, 7, &taskHandle);
         Serial.println("WebSocket task created and running.");
     }
 }
@@ -55,12 +55,10 @@ void WebSocketTask::resumeTask() {
     }
 }
 
-// Return the task handle
 TaskHandle_t WebSocketTask::getTaskHandle() {
     return taskHandle;
 }
 
-// WebSocket task function
 void WebSocketTask::webSocketTaskFunction(void *parameter) {
     Serial.println("WS Task: begining event...");
     WebSocketTask *self = static_cast<WebSocketTask*>(parameter);

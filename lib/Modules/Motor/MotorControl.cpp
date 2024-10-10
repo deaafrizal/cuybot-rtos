@@ -5,7 +5,7 @@ MotorControl::MotorControl(MotorDriver &rightMotor, MotorDriver &leftMotor)
       _leftMotor(leftMotor),
       _currentSpeed(0),
       _maxSpeed(255),
-      _turnFactor(0.5) {
+      _turnFactor(0.18) {
         _rightMotor.motorBrake();
         _leftMotor.motorBrake();
       }
@@ -18,8 +18,8 @@ void MotorControl::forward()
 
 void MotorControl::backward()
 {
-    _rightMotor.motorRev(_currentSpeed);
-    _leftMotor.motorRev(_currentSpeed);
+    _rightMotor.motorRev(_currentSpeed * 0.85);
+    _leftMotor.motorRev(_currentSpeed * 0.85);
 }
 
 void MotorControl::turnLeft(int speed)
@@ -28,7 +28,7 @@ void MotorControl::turnLeft(int speed)
         _rightMotor.motorGo(_currentSpeed);
         _leftMotor.motorGo(_currentSpeed * _turnFactor);
     } else if (speed < 0) {
-        _rightMotor.motorRev(_currentSpeed);
+        _rightMotor.motorRev(_currentSpeed * 0.85);
         _leftMotor.motorRev(_currentSpeed * _turnFactor);
     }
 }
@@ -40,7 +40,7 @@ void MotorControl::turnRight(int speed)
         _leftMotor.motorGo(_currentSpeed);
     } else if (speed < 0) {
         _rightMotor.motorRev(_currentSpeed * _turnFactor);
-        _leftMotor.motorRev(_currentSpeed);
+        _leftMotor.motorRev(_currentSpeed * 0.85);
     }
 }
 

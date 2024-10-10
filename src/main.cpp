@@ -51,8 +51,6 @@ void setup() {
     pinMode(PWM_B1, OUTPUT);
     pinMode(PWM_B2, OUTPUT);
 
-    
-
     Serial.println("Setting up RTOS...");
     webServerTask.startTask();
     modeSelectionTask.startTask();
@@ -60,8 +58,17 @@ void setup() {
     Serial.println("RTOS OK!");
 
     Serial.println("Setup complete. controller: http://cuybot.local ready!");
+    esp_reset_reason_t reason = esp_reset_reason();
+    Serial.print("Reset reason: ");
+    Serial.println(reason);
 }
 
 void loop() {
-    //
+//
 }
+
+/* !Monitor The Stack Size
+    UBaseType_t highWaterMark = uxTaskGetStackHighWaterMark(self->_taskHandle); // NULL instead if no pointer
+    Serial.print("Initial free stack space (bytes): ");
+    Serial.println(highWaterMark * sizeof(StackType_t));
+*/

@@ -12,7 +12,7 @@ void UltrasonicMonitorTask::startTask() {
             "MonitorUltrasonic",   // Task name
             2048,                  // Stack size
             this,                  // Parameter passed to task
-            1,                     // Task priority
+            5,                     // Task priority
             &_taskHandle           // Task handle for controlling the task
         );
     }

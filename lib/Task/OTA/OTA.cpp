@@ -44,12 +44,13 @@ void OTA::begin() {
 void OTA::otaTask(void *parameter) {
     while (true) {
         ArduinoOTA.handle();
+    
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
 void OTA::startOTATask() {
     if (_taskHandle == NULL) {
-        xTaskCreate(otaTask, "OTATask", 4096, this, 2, &_taskHandle);
+        xTaskCreate(otaTask, "OTATask", 2048, this, 3, &_taskHandle);
     }
 }

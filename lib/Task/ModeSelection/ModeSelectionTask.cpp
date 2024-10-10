@@ -33,7 +33,7 @@ ModeSelectionTask::~ModeSelectionTask() {
 void ModeSelectionTask::startTask(int stackSize) {
     Serial.println("ModeSelection Task starting up...");
     if (taskHandle == NULL) {
-        xTaskCreate(modeSelectionTaskFunction, "ModeSelectionTask", stackSize, this, 3, &taskHandle);
+        xTaskCreate(modeSelectionTaskFunction, "ModeSelectionTask", stackSize, this, 6, &taskHandle);
     }
 }
 

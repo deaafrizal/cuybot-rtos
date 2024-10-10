@@ -13,20 +13,31 @@ MotorTask::MotorTask(uint8_t rightMotorPinA, uint8_t rightMotorPinB, uint8_t lef
 
 void MotorTask::startTask()
 {
-    xTaskCreate(runTask, "MotorControlTask", 4096, this, 8, NULL);
+    xTaskCreate(runTask, "MotorControlTask", 2048, this, 8, NULL);
 }
 
 void MotorTask::runTask(void *pvParameters)
 {
     MotorTask *motorTask = static_cast<MotorTask *>(pvParameters);
-
+    
+    int currentSpeed = 0;
+    
     while (true)
     {
-        int currentSpeed = speed;
-        int currentDirection = direction;
+        int targetSpeed = speed;
 
-        motorTask->_motorControl.setDirectionAndSpeed(currentSpeed, currentDirection);
+        if (currentSpeed < targetSpeed) {
+            currentSpeed += 20;
+        } else if (currentSpeed > targetSpeed) {
+            currentSpeed -= 20;
+        }
 
-        vTaskDelay(pdMS_TO_TICKS(50));
+        if (currentSpeed == 0) {
+            motorTask->_motorControl.stop();
+        } else {
+            motorTask->_motorControl.setDirectionAndSpeed(currentSpeed, direction);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(30));
     }
 }
