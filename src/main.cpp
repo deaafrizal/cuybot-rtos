@@ -8,6 +8,8 @@
 #include <ModeSelection/ModeSelectionTask.h>
 #include <Motor/MotorTask.h>
 #include <OTA/OTA.h>
+#include <IR/IR.h>
+#include <IRReading/IRTask.h>
 
 #define PWM_A1 3
 #define PWM_A2 4
@@ -26,8 +28,10 @@ WebServerTask webServerTask;
 OTA ota("cuybot");
 MotorTask motorTask(PWM_A1, PWM_A2, PWM_B1, PWM_B2);
 Ultrasonic ultrasonic;
+IR ir;
+IRTask irTask(ir, motorTask);
 UltrasonicTask ultrasonicTask(ultrasonic, motorTask);
-ModeSelectionTask modeSelectionTask(motorTask, ultrasonicTask);
+ModeSelectionTask modeSelectionTask(motorTask, ultrasonicTask, irTask);
 
 void setup() {
     Serial.begin(115200);
@@ -67,7 +71,7 @@ void setup() {
 }
 
 void loop() {
-//
+    //
 }
 
 /* !Monitor The Stack Size

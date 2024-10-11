@@ -6,8 +6,8 @@ LedControl ledControl;
 Buzzer buzzer(1);
 extern int mode;
 
-ModeSelectionTask::ModeSelectionTask(MotorTask &motor, UltrasonicTask &ultrasonicTask)
-    : _motorTask(motor), _ultrasonicTask(ultrasonicTask), lastMode(-1){
+ModeSelectionTask::ModeSelectionTask(MotorTask &motor, UltrasonicTask &ultrasonicTask, IRTask &irTask)
+    : _motorTask(motor), _ultrasonicTask(ultrasonicTask), _irTask(irTask), lastMode(-1){
         Serial.println("initializing modeselection...");
         taskHandle = NULL;
         buzzer.begin();
@@ -54,6 +54,7 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                         if (eTaskGetState(self->_ultrasonicTask.getTaskHandle()) != eSuspended) {
                             self->_ultrasonicTask.stopTask();
                             Serial.println("UltrasonicTask and");
+                            self->_irTask.stopTask();
                         }
                     }
                     buzzer.beep(100);
@@ -68,12 +69,14 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     
                     if (self->_ultrasonicTask.getTaskHandle() != NULL) {
                         if (eTaskGetState(self->_ultrasonicTask.getTaskHandle()) == eSuspended) {
-                            Serial.println("from mode: resuming ultrasonic task");
+                            Serial.println("from mode: resuming IR&US task");
                             self->_ultrasonicTask.resumeTask();
+                            self->_irTask.resumeTask();
                         } 
                     }else {
-                        Serial.println("from mode: starting ultrasonic task");
+                        Serial.println("from mode: starting US&IR task");
                         self->_ultrasonicTask.startTask();
+                        self->_irTask.startTask();
                     }
                     buzzer.beep(200);
                     break;
