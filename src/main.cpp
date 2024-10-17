@@ -1,3 +1,4 @@
+#include <EEPROM_config.h>
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #include <Arduino.h>
@@ -10,6 +11,10 @@
 #include <OTA/OTA.h>
 #include <IR/IR.h>
 #include <IRReading/IRTask.h>
+#include <Motor/MotorControl.h>
+#include <Motor/MotorDriver.h>
+
+EEPROMConfig eepromConfig;
 
 #define PWM_A1 3
 #define PWM_A2 4
@@ -17,35 +22,62 @@
 #define PWM_B2 5
 
 #define SSID "cuybot"
-#define PASSWORD "123456789"
+const char* password = "123456789";
 
-int mode = 1;
-int speed = 0;
-int direction = 0;
+int mode = 0;
+int motorSpeed = 0;
+int motorDirection = 0;
+uint8_t motorMaxSpeed = 60;
+uint8_t motorWeight = 45;
+float motorTurnFactor = 0.15;
 bool userControllingDirection = false;
 
 WebServerTask webServerTask;
 OTA ota("cuybot");
-MotorTask motorTask(PWM_A1, PWM_A2, PWM_B1, PWM_B2);
-Ultrasonic ultrasonic;
+
+MotorDriver leftMotor(PWM_B1, PWM_B2);
+MotorDriver rightMotor(PWM_A1, PWM_A2);
+
+MotorControl motorControl(rightMotor, leftMotor);
+MotorTask motorTask(rightMotor, leftMotor);
+
 IR ir;
-IRTask irTask(ir, motorTask);
+IRTask irTask(ir, motorControl);
+
+Ultrasonic ultrasonic;
 UltrasonicTask ultrasonicTask(ultrasonic, motorTask);
+
 ModeSelectionTask modeSelectionTask(motorTask, ultrasonicTask, irTask);
 
 void setup() {
     Serial.begin(115200);
     Serial.println("Starting serial communication...");
     delay(1000);
-
+    
+    eepromConfig.loadSettings(motorMaxSpeed, motorWeight, motorTurnFactor);
+    
     Serial.println("Serial communication OK!");
     Serial.println("Setting up WiFi...");
-    WiFi.softAP(SSID, PASSWORD);
+    
+    String macAddr = WiFi.macAddress();
+    macAddr.replace(":", "_");
+    
+    String ssid = String(SSID) + "_" + macAddr;
+
+    if (WiFi.softAP(ssid.c_str(), password)) {
+        Serial.println("Wi-Fi AP started successfully");
+        Serial.print("AP IP address: ");
+        Serial.println(WiFi.softAPIP());
+    } else {
+        Serial.println("Failed to start Wi-Fi AP");
+    }
+
+    delay(1000);
+    
     if (!MDNS.begin("cuybot")) {
         Serial.println("DNS Cannot be started!");
     }
     
-    delay(2000);
     Serial.println("WiFi OK!");
 
     Serial.println("Setting up OTA service...");
@@ -63,11 +95,6 @@ void setup() {
     modeSelectionTask.startTask();
     motorTask.startTask();
     Serial.println("RTOS OK!");
-
-    Serial.println("Setup complete. controller: http://cuybot.local ready!");
-    esp_reset_reason_t reason = esp_reset_reason();
-    Serial.print("Reset reason: ");
-    Serial.println(reason);
 }
 
 void loop() {

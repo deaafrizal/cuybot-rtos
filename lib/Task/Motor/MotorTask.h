@@ -2,12 +2,14 @@
 #define MOTORTASK_H
 
 #include <Motor/MotorControl.h>
+#include <Motor/MotorDriver.h>
 
 class MotorTask
 {
 public:
-    MotorTask(uint8_t rightMotorPinA, uint8_t rightMotorPinB, uint8_t leftMotorPinA, uint8_t leftMotorPinB);
+    MotorTask(MotorDriver &rightMotor, MotorDriver &leftMotor);
     void setDirection(int direction);
+    void setSpeed(int speed);
     void startTask();
 
 private:

@@ -34,6 +34,17 @@ function connectWebSocket() {
     console.log("WebSocket connection closed, retrying...");
     setTimeout(connectWebSocket, 5000);
   };
+
+  websocket.onmessage = function (event) {
+    var data = JSON.parse(event.data);
+
+    // Update battery voltage and percentage
+    var batteryVoltage = data.batteryVoltage.toFixed(2);
+    var batteryPercentage = data.batteryPercentage.toFixed(2);
+
+    document.getElementById('battery-voltage').innerText = "⚡ " + batteryVoltage + "v";
+    document.getElementById('battery-percentage').innerText = "🔋 " + batteryPercentage + "%";
+  };
 }
 
 connectWebSocket();

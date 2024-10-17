@@ -18,7 +18,7 @@ WebServerTask::~WebServerTask() {
 void WebServerTask::startTask(int stackSize) {
     Serial.println("starting webserver task...");
     if (taskHandle == NULL) {
-        xTaskCreate(webServerTaskFunction, "WebServerTask", stackSize, NULL, 4, &taskHandle);
+        xTaskCreate(webServerTaskFunction, "WebServerTask", stackSize, NULL, 6, &taskHandle);
     }
 }
 
@@ -47,6 +47,6 @@ void WebServerTask::webServerTaskFunction(void *parameter) {
     for (;;) {
         dnsServer.processNextRequest();
 
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

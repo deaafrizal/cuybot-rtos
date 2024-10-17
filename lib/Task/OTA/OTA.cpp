@@ -45,7 +45,7 @@ void OTA::otaTask(void *parameter) {
     while (true) {
         ArduinoOTA.handle();
     
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
 }
 

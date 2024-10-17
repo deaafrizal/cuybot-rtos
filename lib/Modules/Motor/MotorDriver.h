@@ -10,10 +10,9 @@ class MotorDriver
 public:
     MotorDriver(uint8_t pinA, uint8_t pinB);
 
-    void motorGo(uint8_t pwm);
-    void motorRev(uint8_t pwm);
-    void motorStop();
-    void motorBrake();
+    void forward(uint8_t pwm);
+    void backward(uint8_t pwm);
+    void stop();
 
 private:
     const uint8_t _pwm_standby_pin = PWM_STANDBY;

@@ -20,14 +20,17 @@
         ☰
       </button>
       <div class="title">CUYBOT</div>
-      <div></div>
+      <div class="battery">
+        <div class="battery-info"><span id="battery-voltage">waiting</span></div>
+        <div class="battery-info"><span id="battery-percentage">waiting</span></div>
+      </div>
     </div>
 
     <main class="layouts">
       <virtual-joystick id="speedJoystick" data-lock="x"></virtual-joystick>
       <virtual-joystick id="directionJoystick" data-lock="y"></virtual-joystick>
-      </div>
     </main>
+    
     <div id="error-message" style="display: none">
       Koneksi terputus, silahkan reload.
     </div>
@@ -44,7 +47,7 @@
         </div>
 
         <div class="switch-item">
-          <label class="switch-label" for="followSwitch">Auto Follow</label>
+          <label class="switch-label" for="followSwitch">Line Following</label>
           <label class="switch">
             <input type="checkbox" id="followSwitch" />
             <span class="slider"></span>

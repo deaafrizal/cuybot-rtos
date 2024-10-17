@@ -1,14 +1,15 @@
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
+  const joystickContainer = document.getElementById('joystickContainer');
 
-  // Toggle the open class to show/hide the sidebar
-  sidebar.classList.toggle('open');
-
-  // Add or remove the closed class based on the sidebar state
   if (sidebar.classList.contains('open')) {
-    sidebar.classList.remove('closed'); // Remove closed class when opening
+    // Close the sidebar, show joysticks
+    sidebar.classList.remove('open');
+    joystickContainer.style.display = 'flex'; // Show joysticks again
   } else {
-    sidebar.classList.add('closed'); // Add closed class when closing
+    // Open the sidebar, hide joysticks
+    sidebar.classList.add('open');
+    joystickContainer.style.display = 'none'; // Hide the joysticks
   }
 }
 // Handle navigation to different pages
@@ -36,4 +37,8 @@ function rebootSystem() {
 // Back button functionality
 function goBack() {
   window.history.back(); // Go back to the previous page
+}
+
+function reloadPage() {
+  window.location.reload();
 }

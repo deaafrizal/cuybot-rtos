@@ -19,9 +19,9 @@ private:
     MotorTask &_motorTask;
     UltrasonicTask &_ultrasonicTask;
     IRTask &_irTask;
-    TaskHandle_t taskHandle;
-    int lastMode;
-    WebSocketTask webSocketTask;
+    TaskHandle_t _taskHandle;
+    int _lastMode;
+    WebSocketTask _webSocketTask;
 };
 
 #endif

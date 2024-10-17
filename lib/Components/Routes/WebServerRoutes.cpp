@@ -27,8 +27,9 @@ void WebServerRoutes::setupRoutes() {
         request->send(SPIFFS, "/html/flash.html", "text/html");
     });
 
-    server->on("/api/setMaxSpeed", HTTP_POST, WebServerHandlers::handleSetMaxSpeed);
-
+    server->on("/api/getSystemData", HTTP_GET, WebServerHandlers::handleGetSystemData);
+    server->on("/api/setMotorMaxSpeed", HTTP_POST, WebServerHandlers::handleSetMotorMaxSpeed);
+    server->on("/api/setMotorWeight", HTTP_POST, WebServerHandlers::handleSetMotorWeight);
     server->on("/api/setMode", HTTP_POST, WebServerHandlers::handleSetMode);
 
     server->onNotFound(WebServerHandlers::handleNotFound);

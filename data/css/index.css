@@ -1,36 +1,42 @@
-/* Disable text selection */
-* {
-  user-select: none; /* Disable text selection on all elements */
-  -webkit-user-select: none; /* For Safari */
-  -moz-user-select: none; /* For Firefox */
-  -ms-user-select: none; /* For older IE */
-}
-
-/* Disable long-press to show context menu (copy/paste) */
-.virtual-joystick {
-  touch-action: none; /* Prevents long-press context menu */
-}
-
-/* General Resets */
 *,
 html {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  "Helvetica Neue", Arial, sans-serif;
+  scrollbar-width: none;
+}
+
+.battery {
+  justify-content: end;
+  align-items: end;
+  font-size: 12px;
+  padding: 0 8px;
+}
+
+#battery-voltage, #battery-percentage {
+  font-style: italic;
+  color: #f7f7f7;
+}
+
+/* Disable long-press to show context menu (copy/paste) */
+.virtual-joystick {
+  touch-action: none; /* Prevents long-press context menu */
+  pointer-events: auto; /* Allow interaction by default */
+  z-index: 2; /* Joystick z-index */
+  -moz-user-select: none; /* For Firefox */
 }
 
 /* Body Styles */
 body {
   overflow: hidden;
-  background-color: #e8f5ff; /* Light blue background */
+  background-color: #f7f7f7;
 }
 
 /* Layout Styles */
 .layouts {
+  position: relative;
   width: 100%;
   display: flex;
   min-height: 100vh;
@@ -38,7 +44,6 @@ body {
   gap: 20px;
   justify-content: center;
   align-items: center;
-  background-color: #ffffff;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
@@ -54,7 +59,7 @@ body {
   padding: 16px;
   background-color: #007aff; /* Cuybot Blue */
   color: white;
-  z-index: 1000; /* Make sure it's above other elements */
+  z-index: 5; /* Make sure it's above other elements */
 }
 
 /* Title Styles */
@@ -83,7 +88,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 10;
   animation: fadeIn 0.5s ease-in-out;
 }
 
@@ -113,31 +118,21 @@ body {
 .sidebar {
   position: fixed;
   bottom: -100%; /* Initially hidden off the screen (below the viewport) */
-  right: 0; /* Align the sidebar to the right */
   width: 100%; /* Width of the sidebar */
-  max-height: 70vh; /* Set max height to account for the navbar */
+  height: 100vh; /* Full viewport height */
   background-color: #f0f4f8; /* Light background for sidebar */
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  justify-content: flex-start; /* Start at the top */
   transition: bottom 0.5s ease; /* Animate the bottom property */
-  z-index: 1100;
+  z-index: 100; /* Ensure it's on top of other elements */
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
   overflow-y: auto; /* Allow vertical scrolling */
+  pointer-events: all;
 }
 
 /* Sidebar Open Class */
 .sidebar.open {
   bottom: 0; /* Slide in from the bottom when open */
-}
-
-/* Sidebar Menu Styles */
-.sidebar-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  pointer-events: all;
 }
 
 /* Sidebar Button Styles */
@@ -159,6 +154,7 @@ body {
 
 /* Sidebar Menu Styles */
 .sidebar-menu {
+  margin: 16px 0;
   display: grid;
   grid-template-columns: repeat(
     auto-fill,
@@ -169,8 +165,10 @@ body {
 
 /* Sidebar Bottom Adjustments */
 .sidebar-bottom {
-  margin-top: auto; /* Pushes the button to the bottom */
-  border: none;
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  cursor: pointer;
 }
 
 .close-sidebar-btn {

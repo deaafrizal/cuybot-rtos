@@ -11,7 +11,7 @@ MotorDriver::MotorDriver(uint8_t pinA, uint8_t pinB) : _maxPwm(255)
     pinMode(_pinB, OUTPUT);
 }
 
-void MotorDriver::motorGo(uint8_t pwm)
+void MotorDriver::forward(uint8_t pwm)
 {
     _pwm = constrain(pwm, 0, _maxPwm);
     // normal
@@ -23,7 +23,7 @@ void MotorDriver::motorGo(uint8_t pwm)
     //analogWrite(_pinB, _pwm);  
 }
 
-void MotorDriver::motorRev(uint8_t pwm)
+void MotorDriver::backward(uint8_t pwm)
 {
     _pwm = constrain(pwm, 0, _maxPwm);
     //normal
@@ -35,13 +35,7 @@ void MotorDriver::motorRev(uint8_t pwm)
     //analogWrite(_pinB, 0);
 }
 
-void MotorDriver::motorBrake()
-{
-    analogWrite(_pinA, _maxPwm);
-    analogWrite(_pinB, _maxPwm);
-}
-
-void MotorDriver::motorStop()
+void MotorDriver::stop()
 {
     analogWrite(_pinA, 0);
     analogWrite(_pinB, 0);

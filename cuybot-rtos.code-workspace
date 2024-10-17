@@ -26,7 +26,10 @@
       "initializer_list": "cpp",
       "regex": "cpp",
       "algorithm": "cpp",
-      "chrono": "cpp"
+      "chrono": "cpp",
+      "optional": "cpp",
+      "system_error": "cpp",
+      "unordered_set": "cpp"
     }
   }
 }

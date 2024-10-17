@@ -3,11 +3,11 @@
 
 #include <Arduino.h>
 #include <IR/ir.h>
-#include <Motor/MotorTask.h>
+#include <Motor/MotorControl.h>
 
 class IRTask {
 public:
-    IRTask(IR &ir, MotorTask &motorTask);
+    IRTask(IR &ir, MotorControl &motorControl);
     void startTask();
     void stopTask(); 
     void suspendTask();
@@ -16,7 +16,7 @@ public:
 
 private:
     IR &_ir;
-    MotorTask &_motorTask;
+    MotorControl &_motorControl;
     static void irMeasureTask(void *_parameters);
     TaskHandle_t _taskHandle;
     
