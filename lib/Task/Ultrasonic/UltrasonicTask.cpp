@@ -1,33 +1,28 @@
 #include <Ultrasonic/UltrasonicTask.h>
+#include <Arduino.h>
 
+extern int motorSpeed;
+extern int motorDirection;
 extern bool userControllingDirection;
 
-UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorTask &motorTask) 
-    : _ultrasonic(ultrasonic), _motorTask(motorTask),_distance(0), _taskHandle(NULL), taskRunning(false) {
-        ultrasonic.begin();
-    }
+UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorControl &motorControl)
+    : _ultrasonic(ultrasonic), _motorControl(motorControl), _distance(0), taskRunning(false), _taskHandle(nullptr) {
+    _ultrasonic.begin();  // Initialize the ultrasonic sensor
+}
 
 void UltrasonicTask::startTask() {
-    if (_taskHandle == NULL) {
-        xTaskCreate(
-            distanceMeasureTask,
-            "DistanceMeasureTask",
-            3048,
-            this,
-            6,                     
-            &_taskHandle         
-        );
-        if(_taskHandle != NULL) {
-            taskRunning = true; 
-            Serial.println("Ultrasonic task started.");
-        }
+    if (_taskHandle == nullptr) {
+        taskRunning = true;
+        xTaskCreate(distanceMeasureTask, "DistanceMeasureTask", 3048, this, 6, &_taskHandle);
     }
 }
 
 void UltrasonicTask::stopTask() {
-    if (_taskHandle != NULL) {
+    if (_taskHandle != nullptr) {
         taskRunning = false;
-        Serial.println("Ultrasonic task stop requested.");
+        vTaskDelete(_taskHandle);
+        _taskHandle = nullptr;
+        Serial.println("Ultrasonic task stopped.");
     }
 }
 
@@ -36,47 +31,39 @@ TaskHandle_t UltrasonicTask::getTaskHandle() {
 }
 
 void UltrasonicTask::suspendTask() {
-    if (_taskHandle != NULL) {
+    if (_taskHandle != nullptr) {
+        taskRunning = false;
         vTaskSuspend(_taskHandle);
         Serial.println("Ultrasonic task suspended.");
     }
 }
 
 void UltrasonicTask::resumeTask() {
-    if (_taskHandle != NULL) {
-        vTaskResume(_taskHandle); 
+    if (_taskHandle != nullptr) {
+        taskRunning = true;
+        vTaskResume(_taskHandle);
         Serial.println("Ultrasonic task resumed.");
     }
 }
 
-void UltrasonicTask::distanceMeasureTask(void *_parameters) {
-    UltrasonicTask *self = static_cast<UltrasonicTask *>(_parameters);
-    TickType_t xLastWakeTime = xTaskGetTickCount();
-    int noEchoTime = 0;
+void UltrasonicTask::distanceMeasureTask(void *parameters) {
+    UltrasonicTask *self = static_cast<UltrasonicTask *>(parameters);
 
     while (self->taskRunning) {
         self->_distance = self->_ultrasonic.getDistance();
 
         if (self->_distance > self->_minDistance && self->_distance <= self->_maxDistance) {
-            Serial.println("Obstacle detected! Turning to avoid.");
-            self->_motorTask.setDirection(1);
-        } 
-        else if (self->_distance > self->_maxDistance && !userControllingDirection){
-            self->_motorTask.setDirection(0);
-        }
+            self->_motorControl.stop();
+            Serial.println("Obstacle detected! Stopping and turning back.");
+            vTaskDelay(pdMS_TO_TICKS(500));
 
-        if (self->_distance == -1) {
-            noEchoTime += self->_vdelayTime;
-            if (noEchoTime >= self->_timeoutPeriod) {
-                Serial.println("No echo detected for 10 seconds. Stopping task...");
-                break;
-            }
-        } else {
-            noEchoTime = 0;
-        }
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(self->_vdelayTime));
+            self->_motorControl.turnRight(200);
+            vTaskDelay(pdMS_TO_TICKS(500));
+
+            self->_motorControl.stop();
+            vTaskDelay(pdMS_TO_TICKS(500));
+        } 
+
+        vTaskDelay(pdMS_TO_TICKS(self->_vdelayTime));
     }
-    Serial.println("Ultrasonic task exiting.");
-    self->_taskHandle = NULL;
-    vTaskDelete(NULL);
 }

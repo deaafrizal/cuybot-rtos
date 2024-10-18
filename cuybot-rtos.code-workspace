@@ -1,10 +1,14 @@
 {
   "folders": [
-	{
-		"name": "cuybot-rtos",
-		"path": "."
-	}
-],
+    {
+      "name": "cuybot-rtos",
+      "path": "."
+    },
+    {
+      "name": "esp32c3supermini-test",
+      "path": "../../../Documents/PlatformIO/Projects/esp32c3supermini-test"
+    }
+  ],
   "settings": {
     "files.associations": {
       "*.embeddedhtml": "html",
@@ -26,7 +30,10 @@
       "initializer_list": "cpp",
       "regex": "cpp",
       "algorithm": "cpp",
-      "chrono": "cpp"
+      "chrono": "cpp",
+      "optional": "cpp",
+      "system_error": "cpp",
+      "unordered_set": "cpp"
     }
   }
 }

@@ -9,10 +9,9 @@ class IR
     public:
         IR();
         void begin();
-        void avoidance();
-        void followMe();
-        void lineFollowing();
         void printLog();
+        int getIRLeft();
+        int getIRRight();
         
     private:
         const int _IR_Left_Pin = IR_LEFT_PIN;

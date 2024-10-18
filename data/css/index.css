@@ -1,17 +1,10 @@
-/* Disable text selection */
 * {
-  user-select: none; /* Disable text selection on all elements */
-  -webkit-user-select: none; /* For Safari */
-  -moz-user-select: none; /* For Firefox */
-  -ms-user-select: none; /* For older IE */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer */
+  user-select: none; /* Standard Syntax */
 }
 
-/* Disable long-press to show context menu (copy/paste) */
-.virtual-joystick {
-  touch-action: none; /* Prevents long-press context menu */
-}
-
-/* General Resets */
 *,
 html {
   margin: 0;
@@ -19,18 +12,39 @@ html {
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
+}
+
+.battery {
+  justify-content: end;
+  align-items: end;
+  font-size: 12px;
+  padding: 0 8px;
+}
+
+#battery-voltage,
+#battery-percentage {
+  font-style: italic;
+  color: #f7f7f7;
+}
+
+/* Disable long-press to show context menu (copy/paste) */
+.virtual-joystick {
+  touch-action: none; /* Prevents long-press context menu */
+  pointer-events: auto; /* Allow interaction by default */
+  z-index: 2; /* Joystick z-index */
+  -moz-user-select: none; /* For Firefox */
 }
 
 /* Body Styles */
 body {
   overflow: hidden;
-  background-color: #e8f5ff; /* Light blue background */
+  background-color: #f7f7f7;
 }
 
 /* Layout Styles */
 .layouts {
+  position: relative;
   width: 100%;
   display: flex;
   min-height: 100vh;
@@ -38,7 +52,6 @@ body {
   gap: 20px;
   justify-content: center;
   align-items: center;
-  background-color: #ffffff;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
@@ -54,7 +67,7 @@ body {
   padding: 16px;
   background-color: #007aff; /* Cuybot Blue */
   color: white;
-  z-index: 1000; /* Make sure it's above other elements */
+  z-index: 5; /* Make sure it's above other elements */
 }
 
 /* Title Styles */
@@ -83,7 +96,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 10;
   animation: fadeIn 0.5s ease-in-out;
 }
 
@@ -112,18 +125,13 @@ body {
 /* Sidebar Styles */
 .sidebar {
   position: fixed;
-  bottom: -100%; /* Initially hidden off the screen (below the viewport) */
-  right: 0; /* Align the sidebar to the right */
+  bottom: -100vh; /* Initially hidden off the screen (below the viewport) */
   width: 100%; /* Width of the sidebar */
-  max-height: 70vh; /* Set max height to account for the navbar */
+  min-height: 100%; /* Full viewport height */
   background-color: #f0f4f8; /* Light background for sidebar */
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  justify-content: flex-start; /* Start at the top */
   transition: bottom 0.5s ease; /* Animate the bottom property */
-  z-index: 1100;
+  z-index: 100; /* Ensure it's on top of other elements */
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
   overflow-y: auto; /* Allow vertical scrolling */
 }
@@ -131,26 +139,20 @@ body {
 /* Sidebar Open Class */
 .sidebar.open {
   bottom: 0; /* Slide in from the bottom when open */
-}
-
-/* Sidebar Menu Styles */
-.sidebar-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  background-color: #f7f7f7;
 }
 
 /* Sidebar Button Styles */
 .sidebar-btn {
   background-color: #007aff; /* Cuybot Blue */
   color: white;
-  font-size: 16px; /* Slightly smaller font size for better fit */
-  padding: 12px 8px; /* Adjusted padding for a more compact button */
+  font-size: 16px;
+  padding: 12px 8px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
-  text-align: center; /* Center text within button */
+  text-align: center;
 }
 
 .reboot {
@@ -159,6 +161,7 @@ body {
 
 /* Sidebar Menu Styles */
 .sidebar-menu {
+  margin: 16px 0;
   display: grid;
   grid-template-columns: repeat(
     auto-fill,
@@ -169,8 +172,10 @@ body {
 
 /* Sidebar Bottom Adjustments */
 .sidebar-bottom {
-  margin-top: auto; /* Pushes the button to the bottom */
-  border: none;
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  cursor: pointer;
 }
 
 .close-sidebar-btn {
@@ -229,8 +234,9 @@ body {
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px; /* Width of the switch */
-  height: 34px; /* Height of the switch */
+  width: 60px;
+  height: 34px;
+  touch-action: none; /* Prevent default touch gestures */
 }
 
 /* Hidden Checkbox */
@@ -248,37 +254,34 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc; /* Default color */
-  border-radius: 34px; /* Rounded corners */
-  transition: background-color 0.4s ease; /* Smooth transition for color change */
+  background-color: #ccc;
+  border-radius: 34px;
+  transition: background-color 0.4s ease, transform 0.4s ease;
+  touch-action: none; /* Prevent default touch gestures */
 }
-
-/* Slider Circle */
 .slider:before {
   position: absolute;
-  border-radius: 100%;
   content: "";
   height: 26px;
   width: 26px;
-  left: 4px; /* Positioning */
-  bottom: 4px; /* Positioning */
-  background-color: white; /* Circle color */
-  transition: transform 0.4s ease; /* Smooth transition for the circle */
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  border-radius: 100%;
+  transition: transform 0.4s ease;
 }
 
-/* Checked State */
 input:checked + .slider {
-  background-color: #007aff; /* Color when checked */
+  background-color: #007aff;
 }
 
 input:checked + .slider:before {
-  transform: translateX(26px); /* Slide to the right when checked */
+  transform: translateX(26px);
 }
 
-/* Add focus outline */
 .switch input:focus + .slider {
   outline: none;
-  box-shadow: 0 0 0 4px rgba(50, 150, 255, 0.5); /* Outline for accessibility */
+  box-shadow: 0 0 0 4px rgba(50, 150, 255, 0.5);
 }
 
 /* Responsive Design */
@@ -289,11 +292,69 @@ input:checked + .slider:before {
 }
 
 @media (max-width: 480px) {
+  .switch {
+    width: 50px; /* Adjust width for smaller screens */
+    height: 28px; /* Adjust height for smaller screens */
+  }
+
+  .slider:before {
+    height: 22px; /* Adjust slider size for smaller screens */
+    width: 22px;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(22px); /* Adjust transform distance */
+  }
+
   .title {
     font-size: 20px;
   }
 
   .close-sidebar-btn {
     margin-bottom: 20px; /* Adjust bottom margin if needed */
+  }
+}
+
+.notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #007aff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  z-index: 9999;
+  animation: fadeIn 0.5s, fadeOut 0.5s 2.5s;
+}
+
+.notification.loading {
+  background-color: #f0ad4e; /* Orange for loading */
+}
+
+.notification.success {
+  background-color: #5cb85c; /* Green for success */
+}
+
+.notification.error {
+  background-color: #d9534f; /* Red for error */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }

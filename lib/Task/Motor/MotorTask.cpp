@@ -1,22 +1,24 @@
 #include <Motor/MotorTask.h>
 
-extern int speed;
-extern int direction;
+extern int motorSpeed;
+extern int motorDirection;
 
-MotorTask::MotorTask(uint8_t rightMotorPinA, uint8_t rightMotorPinB, uint8_t leftMotorPinA, uint8_t leftMotorPinB)
-    : _rightMotor(rightMotorPinA, rightMotorPinB), 
-      _leftMotor(leftMotorPinA, leftMotorPinB),   
-      _motorControl(_rightMotor, _leftMotor)
+MotorTask::MotorTask(MotorDriver &rightMotor, MotorDriver &leftMotor)
+    : _rightMotor(rightMotor), _leftMotor(leftMotor), _motorControl(_rightMotor, _leftMotor)
 {
 }
 
 void MotorTask::startTask()
 {
-    xTaskCreate(runTask, "MotorControlTask", 3048, this, 8, NULL);
+    xTaskCreate(runTask, "MotorControlTask", 3048, this, 6, NULL);
 }
 
 void MotorTask::setDirection(int newDirection) {
-    direction = newDirection;
+    motorDirection = newDirection;
+}
+
+void MotorTask::setSpeed(int newSpeed) {
+    motorSpeed = newSpeed;
 }
 
 void MotorTask::runTask(void *pvParameters)
@@ -27,20 +29,20 @@ void MotorTask::runTask(void *pvParameters)
     
     while (true)
     {
-        int targetSpeed = speed;
+        int targetSpeed = motorSpeed;
 
         if (currentSpeed < targetSpeed) {
-            currentSpeed += 20;
+            currentSpeed += 25;
         } else if (currentSpeed > targetSpeed) {
-            currentSpeed -= 20;
+            currentSpeed -= 25;
         }
 
         if (currentSpeed == 0) {
             motorTask->_motorControl.stop();
         } else {
-            motorTask->_motorControl.setDirectionAndSpeed(currentSpeed, direction);
+            motorTask->_motorControl.setSpeedAndDirection(currentSpeed, motorDirection);
         }
 
-        vTaskDelay(pdMS_TO_TICKS(30));
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }

@@ -1,34 +1,32 @@
-#ifndef ULTRASONIC_TASK_H
-#define ULTRASONIC_TASK_H
+#ifndef ULTRASONICTASK_H
+#define ULTRASONICTASK_H
 
-#include <Arduino.h>
 #include <Ultrasonic/Ultrasonic.h>
-#include <Motor/MotorTask.h>
-
-#define ULTRASONIC_FILTER_SIZE 5
+#include <Motor/MotorControl.h>
 
 class UltrasonicTask {
 public:
-    UltrasonicTask(Ultrasonic &ultrasonicSensor, MotorTask &motorTask);
+    UltrasonicTask(Ultrasonic &ultrasonic, MotorControl &motorControl);
+
+    // Task management functions
     void startTask();
     void stopTask();
     void suspendTask();
-    void resumeTask(); 
-    bool taskRunning; 
+    void resumeTask();
     TaskHandle_t getTaskHandle();
 
-
 private:
-    Ultrasonic &_ultrasonic;
-    MotorTask &_motorTask;
-    long _distance;
+    // Task function to measure distance
+    static void distanceMeasureTask(void *parameters);
 
-    TaskHandle_t _taskHandle;
-    const int _minDistance = 0;
-    const int _maxDistance = 30;
-    const int _timeoutPeriod = 15000;
-    const int _vdelayTime = 70;
-    static void distanceMeasureTask(void *_parameters);
+    Ultrasonic &_ultrasonic;  // Ultrasonic sensor object
+    MotorControl &_motorControl;  // MotorControl object
+    float _distance;  // Measured distance
+    bool taskRunning;  // Flag to check task state
+    TaskHandle_t _taskHandle;  // Handle for the FreeRTOS task
+    const int _vdelayTime = 100;  // Delay between measurements (ms)
+    const float _minDistance = 10.0;  // Minimum distance for obstacle detection
+    const float _maxDistance = 50.0;  // Maximum distance for obstacle detection
 };
 
-#endif
+#endif // ULTRASONICTASK_H

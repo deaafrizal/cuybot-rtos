@@ -13,25 +13,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
   initSwitches();
 
+  function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+
+  const debouncedHandleSwitchChange = debounce(handleSwitchChange, 300);
+
   function initSwitches() {
     // Event listener for obstacleSwitch
     obstacleSwitch.addEventListener("change", function () {
-      handleSwitchChange(obstacleSwitch, [followSwitch, patrolSwitch], MODES.OBSTACLE);
+      debouncedHandleSwitchChange(obstacleSwitch, [followSwitch, patrolSwitch], MODES.OBSTACLE);
     });
 
-    // Event listener for followSwitch
     followSwitch.addEventListener("change", function () {
-      handleSwitchChange(followSwitch, [obstacleSwitch, patrolSwitch], MODES.FOLLOW);
+      debouncedHandleSwitchChange(followSwitch, [obstacleSwitch, patrolSwitch], MODES.FOLLOW);
     });
 
-    // Event listener for patrolSwitch
     patrolSwitch.addEventListener("change", function () {
-      handleSwitchChange(patrolSwitch, [obstacleSwitch, followSwitch], MODES.PATROL);
+      debouncedHandleSwitchChange(patrolSwitch, [obstacleSwitch, followSwitch], MODES.PATROL);
     });
   }
 
   function handleSwitchChange(activeSwitch, inactiveSwitches, mode) {
-  // Temporarily disable all switches until the response is received
+    // Disable all switches temporarily and show loading notification
+    showNotification("Mengaktivasi...", "loading");
+
     obstacleSwitch.disabled = true;
     followSwitch.disabled = true;
     patrolSwitch.disabled = true;
@@ -42,12 +52,16 @@ document.addEventListener("DOMContentLoaded", function () {
     updateMode(selectedMode)
       .then(success => {
         if (success) {
-          // Server responded with success, update the switch states
+          // Server responded with success
+          showNotification("Aktivasi berhasil!", "success");
+
+          // Update the switch states
           inactiveSwitches.forEach(switchElement => switchElement.checked = false); // Turn off inactive switches
           activeSwitch.checked = isActive; // Keep the active switch checked
         } else {
-          // If not successful, revert the switch state
+          // If not successful, revert the switch state and show error
           activeSwitch.checked = !isActive;
+          showNotification("Aktivasi gagal!", "error");
         }
 
         // Re-enable the switches
@@ -59,6 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Handle any errors and revert switch state
         console.error("Error:", error);
         activeSwitch.checked = !isActive; // Revert switch state if error
+        showNotification("Terjadi kesalahan!", "error");
 
         // Re-enable the switches
         obstacleSwitch.disabled = false;
@@ -92,4 +107,17 @@ document.addEventListener("DOMContentLoaded", function () {
         return false; // Indicate failure
       });
   }
+
+  function showNotification(message, type) {
+    const notification = document.createElement("div");
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
 });
+

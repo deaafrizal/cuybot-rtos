@@ -6,22 +6,20 @@
 class MotorControl
 {
 public:
-    MotorControl(MotorDriver &rightMotor, MotorDriver &leftMotor);
+    MotorControl(MotorDriver &rightSide, MotorDriver &leftSide);
 
     void forward();
     void backward();
     void turnRight(int speed);
     void turnLeft(int speed);
-
-    void brake();
     void stop();
     
-    void setSpeed(int speed);
-    void setDirectionAndSpeed(int speed, int direction);
+    void setSpeed(int leftSpeed, int rightSpeed);
+    void setSpeedAndDirection(int speed, int direction);
 
 private:
-    MotorDriver &_rightMotor;
-    MotorDriver &_leftMotor;
+    MotorDriver &_rightSide;
+    MotorDriver &_leftSide;
     int _currentSpeed;
     int _maxSpeed;
     float _turnFactor;

@@ -2,6 +2,7 @@
 #define WEBSOCKET_TASK_H
 
 #include <WebSocketsServer.h>
+#include <BatteryMonitor/BatteryMonitorTask.h>
 
 class WebSocketTask {
 public:
@@ -15,13 +16,17 @@ public:
     TaskHandle_t getTaskHandle();
 
 private:
-    static void webSocketTaskFunction(void *parameter);
-    static void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
-
+    static BatteryMonitorTask batteryMonitorTask;
     static WebSocketsServer webSocket;
     static WebSocketTask* instance;
+
+    static void webSocketTaskFunction(void *parameter);
+    static void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
+    
     TaskHandle_t taskHandle;
     int activeClientCount;
+
+    void sendBatteryData();
 };
 
 #endif

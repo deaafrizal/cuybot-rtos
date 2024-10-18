@@ -1,11 +1,15 @@
 #include <WebSocket/WebSocketTask.h>
 
-extern int speed;
-extern int direction;
+extern int motorSpeed;
+extern int motorDirection;
 extern bool userControllingDirection;
+
+#define BATTERY_ADC_PIN 0
+#define VOLTAGE_DIVIDER_FACTOR 2
 
 WebSocketsServer WebSocketTask::webSocket = WebSocketsServer(81);
 WebSocketTask* WebSocketTask::instance = nullptr;
+BatteryMonitorTask WebSocketTask::batteryMonitorTask(BATTERY_ADC_PIN, 3.0, 4.2, VOLTAGE_DIVIDER_FACTOR);
 
 WebSocketTask::WebSocketTask() {
     Serial.println("WS Task initialize...");
@@ -24,6 +28,7 @@ void WebSocketTask::startTask(int stackSize) {
 
     if (taskHandle == NULL) {
         instance = this;
+        batteryMonitorTask.startMonitoring();
         xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, 7, &taskHandle);
         Serial.println("WebSocket task created and running.");
     }
@@ -31,11 +36,12 @@ void WebSocketTask::startTask(int stackSize) {
 
 void WebSocketTask::stopTask() {
     Serial.println("WS TASK: Stoping...");
-
     if (taskHandle != NULL) {
-        vTaskDelete(taskHandle);
-        taskHandle = NULL;
+        vTaskSuspend(taskHandle);
         webSocket.close();
+        vTaskDelete(taskHandle);
+        batteryMonitorTask.stopMonitoring();
+        taskHandle = NULL;
         Serial.println("WebSocket task stopped and deleted.");
     }
 }
@@ -68,8 +74,15 @@ void WebSocketTask::webSocketTaskFunction(void *parameter) {
 
     for (;;) {
         self->webSocket.loop();
-        vTaskDelay(10 / portTICK_PERIOD_MS);
+        
+        static unsigned long lastSent = 0;
+        if (millis() - lastSent > 5000) {
+            self->sendBatteryData();
+            lastSent = millis();
+        }
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
+    vTaskSuspend(NULL);
 }
 
 void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
@@ -102,15 +115,10 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
                     int newSpeed = receivedData.substring(sIndex + 1, dIndex).toInt();
                     int newDirection = receivedData.substring(dIndex + 1).toInt();
 
-                    speed = newSpeed;
-                    direction = newDirection;
+                    motorSpeed = newSpeed;
+                    motorDirection = newDirection;
 
-                    if (direction != 0) {
-                        userControllingDirection = true;  // User is actively controlling direction
-                    } else {
-                        userControllingDirection = false; // Joystick is in neutral position
-                    }
-
+                    motorDirection != 0 ? userControllingDirection = true : userControllingDirection = false; 
                 }
             }
             break;
@@ -118,4 +126,15 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
         default:
             break;
     }
+}
+
+void WebSocketTask::sendBatteryData() {
+    // Get battery voltage and percentage
+    float batteryVoltage = batteryMonitorTask.getBatteryVoltage();
+    float batteryPercentage = batteryMonitorTask.getBatteryPercentage();
+    
+    String jsonData = "{\"batteryVoltage\": " + String(batteryVoltage, 2) + 
+                      ", \"batteryPercentage\": " + String(batteryPercentage, 2) + "}";
+    
+    webSocket.broadcastTXT(jsonData);
 }
