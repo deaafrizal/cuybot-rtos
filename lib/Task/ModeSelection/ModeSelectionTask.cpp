@@ -7,7 +7,6 @@ LedControl ledControl;
 Buzzer buzzer(1);
 extern int mode;
 
-// Create the semaphore
 SemaphoreHandle_t modeChangeSemaphore;
 
 ModeSelectionTask::ModeSelectionTask(MotorTask &motor, UltrasonicTask &ultrasonicTask, IRTask &irTask)
@@ -39,88 +38,79 @@ void ModeSelectionTask::stopTask() {
     }
 }
 
-bool isTaskSuspended(TaskHandle_t taskHandle) {
-    return (taskHandle != NULL) && (eTaskGetState(taskHandle) == eSuspended);
-}
-
-template<typename T>
-void resumeTaskIfSuspended(TaskHandle_t taskHandle, T &task) {
-    if (isTaskSuspended(taskHandle)) {
-        task.resumeTask();
-    }
-}
-
-template<typename T>
-void suspendTaskIfRunning(TaskHandle_t taskHandle, T &task) {
-    if (!isTaskSuspended(taskHandle)) {
-        task.suspendTask();
-    }
-}
-
-// Task function using semaphore to detect mode change
 void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
     ModeSelectionTask *self = static_cast<ModeSelectionTask*>(parameter);
 
-    // Store task handles once to reduce overhead
-    TaskHandle_t wsTaskHandle = self->_webSocketTask.getTaskHandle();
-    TaskHandle_t ultrasonicTaskHandle = self->_ultrasonicTask.getTaskHandle();
-    TaskHandle_t irTaskHandle = self->_irTask.getTaskHandle();
-
-    // Start necessary tasks initially
-    self->_webSocketTask.startTask();
+    // Ensure tasks are started and suspended initially
     self->_ultrasonicTask.startTask();
     self->_irTask.startTask();
 
-    // Suspend irrelevant tasks at startup
-    self->_ultrasonicTask.suspendTask();
-    self->_irTask.suspendTask();
+    TaskHandle_t ultrasonicTaskHandle = self->_ultrasonicTask.getTaskHandle();
+    TaskHandle_t irTaskHandle = self->_irTask.getTaskHandle();
 
     while (true) {
-        // Wait for the semaphore to be given when mode changes
+        Serial.print("Current mode: ");
+        Serial.println(mode);
+
         if (xSemaphoreTake(modeChangeSemaphore, portMAX_DELAY) == pdTRUE) {
             buzzer.beep(100);  // Beep on mode change
 
-            // Detect mode change and act accordingly
+            // Suspend both tasks before changing modes
+            if (ultrasonicTaskHandle != nullptr) {
+                Serial.println("Suspending Ultrasonic task...");
+                vTaskSuspend(ultrasonicTaskHandle);
+                Serial.println("Ultrasonic task suspended.");
+            } else {
+                Serial.println("Ultrasonic task handle is null, cannot suspend.");
+            }
+
+            if (irTaskHandle != nullptr) {
+                Serial.println("Suspending IR task...");
+                vTaskSuspend(irTaskHandle);
+                Serial.println("IR task suspended.");
+            } else {
+                Serial.println("IR task handle is null, cannot suspend.");
+            }
+
+            // Handle mode changes and resume tasks accordingly
             switch (mode) {
                 case 1: // WebSocketTask only
-                    Serial.println("Mode 1: WebSocketTask only");
+                    Serial.println("Mode 1: WebSocketTask only. No tasks resumed.");
                     ledControl.setMode(1);
-
-                    // Enable WebSocketTask, disable others
-                    resumeTaskIfSuspended(wsTaskHandle, self->_webSocketTask);
-                    suspendTaskIfRunning(ultrasonicTaskHandle, self->_ultrasonicTask);
-                    suspendTaskIfRunning(irTaskHandle, self->_irTask);
                     break;
 
                 case 2: // WebSocketTask + UltrasonicTask
                     Serial.println("Mode 2: WebSocketTask + UltrasonicTask");
                     ledControl.setMode(2);
-
-                    // Enable WebSocketTask and UltrasonicTask
-                    resumeTaskIfSuspended(wsTaskHandle, self->_webSocketTask);
-                    resumeTaskIfSuspended(ultrasonicTaskHandle, self->_ultrasonicTask);
-                    suspendTaskIfRunning(irTaskHandle, self->_irTask);
+                    if (ultrasonicTaskHandle != nullptr) {
+                        Serial.println("Resuming Ultrasonic task...");
+                        vTaskResume(ultrasonicTaskHandle);
+                        Serial.println("Ultrasonic task resumed.");
+                    } else {
+                        Serial.println("Ultrasonic task handle is null, cannot resume.");
+                    }
                     break;
 
                 case 3: // IRTask only (Line Following)
-                    Serial.println("Mode 3: IRTask only");
+                    Serial.println("Mode 3: IRTask only (Line Following)");
                     ledControl.setMode(3);
-
-                    // Enable IRTask, disable others
-                    resumeTaskIfSuspended(irTaskHandle, self->_irTask);
-                    suspendTaskIfRunning(ultrasonicTaskHandle, self->_ultrasonicTask);
-                    suspendTaskIfRunning(wsTaskHandle, self->_webSocketTask);
+                    if (irTaskHandle != nullptr) {
+                        Serial.println("Resuming IR task...");
+                        vTaskResume(irTaskHandle);
+                        Serial.println("IR task resumed.");
+                    } else {
+                        Serial.println("IR task handle is null, cannot resume.");
+                    }
                     break;
 
                 case 4: // Patrol Mode or Tuning
                     Serial.println("Mode 4: Patrol Mode");
                     ledControl.setMode(4);
+                    // Additional logic for Patrol Mode
                     break;
 
-                // Add more modes here...
-
                 default:
-                    Serial.println("Unknown mode, no action taken.");
+                    Serial.println("Unknown mode. No action taken.");
                     break;
             }
 
@@ -130,7 +120,7 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
 }
 
 // Function to signal mode change
-void triggerModeChange(int newMode) {
+void ModeSelectionTask::triggerModeChange(int newMode) {
     mode = newMode;
     xSemaphoreGive(modeChangeSemaphore);  // Signal the semaphore to handle the new mode
 }

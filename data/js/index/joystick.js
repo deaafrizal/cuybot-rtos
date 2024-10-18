@@ -1,10 +1,26 @@
 const loadingOverlay = document.getElementById("loadingOverlay") || null;
 const errorMessage = document.getElementById("error-message") || null;
-let websocket = null;
-let reconnecting = false; // Reconnection flag to prevent multiple attempts
-let isConnected = false; // Track if the WebSocket is connected
+const obstacleSwitch = document.getElementById("obstacleSwitch");
+const followSwitch = document.getElementById("followSwitch");
+const patrolSwitch = document.getElementById("patrolSwitch");
+const speedJoystick = document.getElementById('speedJoystick');
+const directionJoystick = document.getElementById('directionJoystick');
 
-// Function to show the loading overlay
+const MODES = {
+  MANUAL: 1,
+  OBSTACLE: 2,
+  FOLLOW: 3,
+  PATROL: 4,
+};
+
+let websocket = null;
+let reconnecting = false;
+let isConnected = false;
+
+let currentSpeed = 0;
+let currentDirection = 0;
+const maxSpeed = 100;
+
 function showLoadingOverlay(message = "Loading, please wait...") {
   if (loadingOverlay && !isConnected) { // Only show overlay if not connected
     loadingOverlay.style.display = "flex";
@@ -12,14 +28,12 @@ function showLoadingOverlay(message = "Loading, please wait...") {
   }
 }
 
-// Function to hide the loading overlay
 function hideLoadingOverlay() {
   if (loadingOverlay) {
     loadingOverlay.style.display = "none";
   }
 }
 
-// Function to show error message
 function showError(message = "Connection error, retrying...") {
   if (errorMessage) {
     errorMessage.style.display = "block";
@@ -27,14 +41,23 @@ function showError(message = "Connection error, retrying...") {
   }
 }
 
-// Function to hide error message
 function hideError() {
   if (errorMessage) {
     errorMessage.style.display = "none";
   }
 }
 
-// Function to initialize WebSocket connection
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar) {
+    sidebar.classList.toggle("open");
+  }
+
+  if (isConnected) {
+    hideLoadingOverlay();
+  }
+}
+
 function connectWebSocket() {
   if (!reconnecting) {
     showLoadingOverlay("Connecting to Cuybot...");
@@ -43,6 +66,7 @@ function connectWebSocket() {
   websocket = new WebSocket("ws://cuybot.local:81");
 
   websocket.onopen = function () {
+    websocket.send("GET_CURRENT_MODE");
     console.log("WebSocket connected");
     hideLoadingOverlay();
     hideError();
@@ -65,44 +89,36 @@ function connectWebSocket() {
   };
 
   websocket.onmessage = function (event) {
-    const data = JSON.parse(event.data);
+    try {
+      const data = JSON.parse(event.data);
 
-    // Update battery voltage and percentage
-    const batteryVoltage = data.batteryVoltage.toFixed(2);
-    const batteryPercentage = data.batteryPercentage.toFixed(2);
+      // Handle mode updates
+      if (data?.mode !== undefined) {
+        updateSwitches(data.mode);
+      }
 
-    document.getElementById('battery-voltage').innerText = "⚡ " + batteryVoltage + "v";
-    document.getElementById('battery-percentage').innerText = "🔋 " + batteryPercentage + "%";
+      // Update battery voltage and percentage
+      if (data?.batteryVoltage && data?.batteryPercentage) {
+        const batteryVoltage = data.batteryVoltage.toFixed(2);
+        const batteryPercentage = data.batteryPercentage.toFixed(2);
+        document.getElementById('battery-voltage').innerText = "⚡ " + batteryVoltage + "v";
+        document.getElementById('battery-percentage').innerText = "🔋 " + batteryPercentage + "%";
+      }
+
+      // Handle motor control feedback from server (if necessary)
+      if (data?.speed !== undefined && data?.direction !== undefined) {
+        currentSpeed = data.speed;
+        currentDirection = data.direction;
+      }
+
+    } catch (e) {
+      console.error("Error parsing WebSocket message:", e);
+    }
   };
 }
 
-// Function to handle sidebar open/close logic (just a placeholder, modify according to your actual logic)
-function toggleSidebar() {
-  const sidebar = document.getElementById("sidebar");
-  if (sidebar) {
-    sidebar.classList.toggle("open");
-  }
-
-  // Ensure that loading overlay is not triggered just by opening the sidebar
-  if (isConnected) {
-    hideLoadingOverlay();
-  }
-}
-
-// Initial WebSocket connection
 connectWebSocket();
-
-const speedJoystick = document.getElementById('speedJoystick');
-const directionJoystick = document.getElementById('directionJoystick');
-
-let currentSpeed = 0; // Current speed for the car
-let currentDirection = 0; // Current direction
-const maxSpeed = 100; // Maximum speed value
-
-// Function to send WebSocket message
-function sendMessage() {
-  sendWebSocketMessage(`S${currentSpeed}D${currentDirection}`);
-}
+initSwitches();
 
 // Add joystick event listeners for speed joystick
 speedJoystick.addEventListener('joystickmove', (event) => {
@@ -146,13 +162,13 @@ directionJoystick.addEventListener('joystickmove', (event) => {
   sendMessage();
 });
 
-// Handle joystick release
+// Handle joystick release for speed
 speedJoystick.addEventListener('joystickup', () => {
   currentSpeed = 0; // Reset speed on release
   sendMessage(); // Send stop command
 });
 
-// Handle joystick release
+// Handle joystick release for direction
 directionJoystick.addEventListener('joystickup', () => {
   currentDirection = 0; // Reset direction on release
   sendMessage(); // Send stop command
@@ -162,8 +178,58 @@ directionJoystick.addEventListener('joystickup', () => {
 function sendWebSocketMessage(message) {
   if (websocket && websocket.readyState === WebSocket.OPEN) {
     websocket.send(message);
-    console.log("Sent message:", message);
   } else {
     console.error("WebSocket is not open. Cannot send message:", message);
   }
+}
+
+// Combine speed and direction into a single message and send
+function sendMessage() {
+  const message = `S${currentSpeed}D${currentDirection}`;
+  sendWebSocketMessage(message);
+}
+
+function updateSwitches(mode) {
+  obstacleSwitch.checked = (mode === MODES.OBSTACLE);
+  followSwitch.checked = (mode === MODES.FOLLOW);
+  patrolSwitch.checked = (mode === MODES.PATROL);
+}
+
+function debounce(func, delay) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+const debouncedHandleSwitchChange = debounce(handleSwitchChange, 300);
+
+function initSwitches() {
+  obstacleSwitch.addEventListener("change", function () {
+    debouncedHandleSwitchChange(obstacleSwitch, [followSwitch, patrolSwitch], MODES.OBSTACLE);
+  });
+
+  followSwitch.addEventListener("change", function () {
+    debouncedHandleSwitchChange(followSwitch, [obstacleSwitch, patrolSwitch], MODES.FOLLOW);
+  });
+
+  patrolSwitch.addEventListener("change", function () {
+    debouncedHandleSwitchChange(patrolSwitch, [obstacleSwitch, followSwitch], MODES.PATROL);
+  });
+}
+
+function handleSwitchChange(activeSwitch, inactiveSwitches, mode) {
+  const isActive = activeSwitch.checked;
+  const selectedMode = isActive ? mode : MODES.MANUAL;
+
+  if (isActive) {
+    inactiveSwitches.forEach(switchElement => {
+      switchElement.checked = false; // Uncheck other switches
+      switchElement.disabled = false; // Re-enable other switches
+    });
+  }
+
+  const message = `M${selectedMode}`;
+  sendWebSocketMessage(message);
 }

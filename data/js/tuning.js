@@ -1,26 +1,20 @@
-// Fetch system settings for max motor speed and motor weight
 async function fetchSystemSettings() {
   try {
     const response = await fetch('http://cuybot.local/api/getSystemData');
     const data = await response.json();
 
-    // Correctly reference the API response keys
     if (data.hasOwnProperty('motorMaxSpeed') && data.hasOwnProperty('motorWeight')) {
-      // Convert PWM (0-255) to percentage for motorMaxSpeed
       const maxSpeedPercentage = Math.round((data.motorMaxSpeed / 255) * 100);
 
-      // Convert PWM (0-255) to percentage for motorWeight
       const weightPercentage = Math.round((data.motorWeight / 255) * 100);
 
-      // Set max motor speed slider (as percentage)
       const speedSlider = document.getElementById('speedSlider');
-      speedSlider.value = maxSpeedPercentage;  // Dynamically set the value
-      document.getElementById('speedLabel').textContent = `${maxSpeedPercentage}%`;  // Display percentage
+      speedSlider.value = maxSpeedPercentage;
+      document.getElementById('speedLabel').textContent = `${maxSpeedPercentage}%`;
 
-      // Set motor weight slider (as percentage)
       const weightSlider = document.getElementById('weightSlider');
-      weightSlider.value = weightPercentage;  // Dynamically set the value
-      document.getElementById('weightLabel').textContent = `${weightPercentage}%`;  // Display percentage
+      weightSlider.value = weightPercentage;
+      document.getElementById('weightLabel').textContent = `${weightPercentage}%`;
     } else {
       console.error('motorMaxSpeed or motorWeight not found in API response');
     }
@@ -29,7 +23,6 @@ async function fetchSystemSettings() {
   }
 }
 
-// Function to update the motor speed (send PWM value)
 async function updateMotorSpeed(pwmValue) {
   try {
     const response = await fetch('http://cuybot.local/api/setMotorMaxSpeed', {
@@ -46,7 +39,6 @@ async function updateMotorSpeed(pwmValue) {
   }
 }
 
-// Function to update the motor weight (send PWM value)
 async function updateMotorWeight(pwmValue) {
   try {
     const response = await fetch('http://cuybot.local/api/setMotorWeight', {
@@ -63,28 +55,22 @@ async function updateMotorWeight(pwmValue) {
   }
 }
 
-// Submit button event listener to send the updated settings to the backend
 document.getElementById('submitButton').addEventListener('click', async function () {
   const speedSlider = document.getElementById('speedSlider');
   const weightSlider = document.getElementById('weightSlider');
 
-  // Convert the slider values (percentage) to PWM (0-255)
   const maxSpeedPWM = Math.round((speedSlider.value / 100) * 255);
   const motorWeightPWM = Math.round((weightSlider.value / 100) * 255);
 
   try {
-    // Send the new motorMaxSpeed and motorWeight to the backend and handle both responses
     await Promise.all([updateMotorSpeed(maxSpeedPWM), updateMotorWeight(motorWeightPWM)]);
-    // If both updates succeed, show the success notification
     showNotification('Your tuning is saved!', 'success');
   } catch (error) {
-    // If any of the updates fail, show the failure notification
     console.error(error);
     showNotification('Your tuning is not saved', 'error');
   }
 });
 
-// Function to display notifications
 function showNotification(message, type) {
   const notification = document.getElementById('notification');
   notification.textContent = message;
@@ -96,10 +82,8 @@ function showNotification(message, type) {
 }
 
 window.addEventListener('load', function () {
-  // Fetch system settings on page load
   fetchSystemSettings();
 
-  // Add event listeners for sliders to show their values
   document.getElementById('speedSlider').addEventListener('input', function () {
     document.getElementById('speedLabel').textContent = this.value + '%';
   });

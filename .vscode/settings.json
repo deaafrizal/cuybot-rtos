@@ -1,0 +1,32 @@
+{
+  "files.associations": {
+    "*.embeddedhtml": "html",
+    "*.ino": "cpp",
+    "*.h": "cpp",
+    "string_view": "cpp",
+    "array": "cpp",
+    "deque": "cpp",
+    "string": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "vector": "cpp",
+    "initializer_list": "cpp",
+    "regex": "cpp",
+    "*.tcc": "cpp",
+    "optional": "cpp",
+    "system_error": "cpp"
+  },
+  "C_Cpp.errorSquiggles": "disabled",
+  "idf.espIdfPath": "/Users/deaafrizal/esp/v5.3.1/esp-idf",
+  "idf.pythonBinPath": "/Users/deaafrizal/.espressif/python_env/idf5.3_py3.10_env/bin/python",
+  "idf.toolsPath": "/Users/deaafrizal/.espressif",
+  "idf.customExtraPaths": "/Users/deaafrizal/.espressif/tools/xtensa-esp-elf-gdb/14.2_20240403/xtensa-esp-elf-gdb/bin:/Users/deaafrizal/.espressif/tools/riscv32-esp-elf-gdb/14.2_20240403/riscv32-esp-elf-gdb/bin:/Users/deaafrizal/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20240530/xtensa-esp-elf/bin:/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin:/Users/deaafrizal/.espressif/tools/esp32ulp-elf/2.38_20240113/esp32ulp-elf/bin:/Users/deaafrizal/.espressif/tools/cmake/3.24.0/CMake.app/Contents/bin:/Users/deaafrizal/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240318/openocd-esp32/bin:/Users/deaafrizal/.espressif/tools/ninja/1.11.1:/Users/deaafrizal/.espressif/tools/esp-rom-elfs/20240305",
+  "idf.customExtraVars": {
+    "OPENOCD_SCRIPTS": "/Users/deaafrizal/.espressif/tools/openocd-esp32/v0.12.0-esp32-20240318/openocd-esp32/share/openocd/scripts",
+    "ESP_ROM_ELF_DIR": "/Users/deaafrizal/.espressif/tools/esp-rom-elfs/20240305/"
+  },
+  "idf.gitPath": "git",
+  "idf.port": "/dev/tty.usbmodem12301",
+  "idf.adapterTargetName": "esp32c3",
+  "idf.openOcdConfigs": ["board/esp32c3-builtin.cfg"]
+}

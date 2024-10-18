@@ -15,6 +15,4 @@ private:
 
 };
 
-extern int mode;
-
 #endif
