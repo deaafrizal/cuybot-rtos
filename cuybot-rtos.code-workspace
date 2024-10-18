@@ -1,10 +1,14 @@
 {
   "folders": [
-	{
-		"name": "cuybot-rtos",
-		"path": "."
-	}
-],
+    {
+      "name": "cuybot-rtos",
+      "path": "."
+    },
+    {
+      "name": "esp32c3supermini-test",
+      "path": "../../../Documents/PlatformIO/Projects/esp32c3supermini-test"
+    }
+  ],
   "settings": {
     "files.associations": {
       "*.embeddedhtml": "html",

@@ -1,10 +1,7 @@
-#include <EEPROM_config.h>
+#include <Arduino.h>
 #include <WiFi.h>
 #include <ESPmDNS.h>
-#include <Arduino.h>
-
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
+#include <EEPROM_config.h>
 #include <WebServer/WebServerTask.h>
 #include <ModeSelection/ModeSelectionTask.h>
 #include <Motor/MotorTask.h>
@@ -13,8 +10,8 @@
 #include <IRReading/IRTask.h>
 #include <Motor/MotorControl.h>
 #include <Motor/MotorDriver.h>
-
-EEPROMConfig eepromConfig;
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #define PWM_A1 3
 #define PWM_A2 4
@@ -23,6 +20,8 @@ EEPROMConfig eepromConfig;
 
 #define SSID "cuybot"
 const char* password = "123456789";
+
+EEPROMConfig eepromConfig;
 
 int mode = 0;
 int motorSpeed = 0;
@@ -45,17 +44,19 @@ IR ir;
 IRTask irTask(ir, motorControl);
 
 Ultrasonic ultrasonic;
-UltrasonicTask ultrasonicTask(ultrasonic, motorTask);
+UltrasonicTask ultrasonicTask(ultrasonic, motorControl);
 
 ModeSelectionTask modeSelectionTask(motorTask, ultrasonicTask, irTask);
 
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(9600);
     Serial.println("Starting serial communication...");
-    delay(1000);
+    delay(500);
     
     eepromConfig.loadSettings(motorMaxSpeed, motorWeight, motorTurnFactor);
     
+    delay(200);
+
     Serial.println("Serial communication OK!");
     Serial.println("Setting up WiFi...");
     
@@ -64,7 +65,7 @@ void setup() {
     
     String ssid = String(SSID) + "_" + macAddr;
 
-    if (WiFi.softAP(ssid.c_str(), password)) {
+    if (WiFi.softAP(ssid.c_str(), password, 6)) {
         Serial.println("Wi-Fi AP started successfully");
         Serial.print("AP IP address: ");
         Serial.println(WiFi.softAPIP());
@@ -72,7 +73,7 @@ void setup() {
         Serial.println("Failed to start Wi-Fi AP");
     }
 
-    delay(1000);
+    delay(500);
     
     if (!MDNS.begin("cuybot")) {
         Serial.println("DNS Cannot be started!");
@@ -89,20 +90,17 @@ void setup() {
     pinMode(PWM_A2, OUTPUT);
     pinMode(PWM_B1, OUTPUT);
     pinMode(PWM_B2, OUTPUT);
+    
+    delay(500);
 
     Serial.println("Setting up RTOS...");
     webServerTask.startTask();
     modeSelectionTask.startTask();
     motorTask.startTask();
     Serial.println("RTOS OK!");
+    delay(1000);
 }
 
 void loop() {
     //
 }
-
-/* !Monitor The Stack Size
-    UBaseType_t highWaterMark = uxTaskGetStackHighWaterMark(self->_taskHandle); // NULL instead if no pointer
-    Serial.print("Initial free stack space (bytes): ");
-    Serial.println(highWaterMark * sizeof(StackType_t));
-*/

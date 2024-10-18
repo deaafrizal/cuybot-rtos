@@ -1,15 +1,25 @@
 #include <ModeSelection/ModeSelectionTask.h>
 #include <LedControl/LedControl.h>
 #include <Buzzer/Buzzer.h>
+#include "freertos/semphr.h"
 
 LedControl ledControl;
 Buzzer buzzer(1);
 extern int mode;
 
+// Create the semaphore
+SemaphoreHandle_t modeChangeSemaphore;
+
 ModeSelectionTask::ModeSelectionTask(MotorTask &motor, UltrasonicTask &ultrasonicTask, IRTask &irTask)
     : _motorTask(motor), _ultrasonicTask(ultrasonicTask), _irTask(irTask), _lastMode(-1){
         _taskHandle = NULL;
         buzzer.begin();
+
+        // Initialize the semaphore
+        modeChangeSemaphore = xSemaphoreCreateBinary();
+        if (modeChangeSemaphore == NULL) {
+            Serial.println("Error creating modeChangeSemaphore!");
+        }
     }
 
 ModeSelectionTask::~ModeSelectionTask() {
@@ -47,77 +57,80 @@ void suspendTaskIfRunning(TaskHandle_t taskHandle, T &task) {
     }
 }
 
+// Task function using semaphore to detect mode change
 void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
     ModeSelectionTask *self = static_cast<ModeSelectionTask*>(parameter);
 
+    // Store task handles once to reduce overhead
+    TaskHandle_t wsTaskHandle = self->_webSocketTask.getTaskHandle();
+    TaskHandle_t ultrasonicTaskHandle = self->_ultrasonicTask.getTaskHandle();
+    TaskHandle_t irTaskHandle = self->_irTask.getTaskHandle();
+
+    // Start necessary tasks initially
     self->_webSocketTask.startTask();
     self->_ultrasonicTask.startTask();
     self->_irTask.startTask();
+
+    // Suspend irrelevant tasks at startup
     self->_ultrasonicTask.suspendTask();
     self->_irTask.suspendTask();
 
     while (true) {
-        if (self->_lastMode != mode) {
+        // Wait for the semaphore to be given when mode changes
+        if (xSemaphoreTake(modeChangeSemaphore, portMAX_DELAY) == pdTRUE) {
+            buzzer.beep(100);  // Beep on mode change
+
+            // Detect mode change and act accordingly
             switch (mode) {
-                case 1: // Main Page (WebSocketTask only)
+                case 1: // WebSocketTask only
                     Serial.println("Mode 1: WebSocketTask only");
                     ledControl.setMode(1);
 
-                    // Resume WebSocketTask and suspend others
-                    resumeTaskIfSuspended(self->_webSocketTask.getTaskHandle(), self->_webSocketTask);
-                    suspendTaskIfRunning(self->_ultrasonicTask.getTaskHandle(), self->_ultrasonicTask);
-                    suspendTaskIfRunning(self->_irTask.getTaskHandle(), self->_irTask);
-
-                    buzzer.beep(100);
+                    // Enable WebSocketTask, disable others
+                    resumeTaskIfSuspended(wsTaskHandle, self->_webSocketTask);
+                    suspendTaskIfRunning(ultrasonicTaskHandle, self->_ultrasonicTask);
+                    suspendTaskIfRunning(irTaskHandle, self->_irTask);
                     break;
 
-                case 2: // Obstacle Mode (WebSocketTask + UltrasonicTask)
+                case 2: // WebSocketTask + UltrasonicTask
                     Serial.println("Mode 2: WebSocketTask + UltrasonicTask");
                     ledControl.setMode(2);
 
-                    resumeTaskIfSuspended(self->_webSocketTask.getTaskHandle(), self->_webSocketTask);
-                    resumeTaskIfSuspended(self->_ultrasonicTask.getTaskHandle(), self->_ultrasonicTask);
-                    suspendTaskIfRunning(self->_irTask.getTaskHandle(), self->_irTask);
-
-                    buzzer.beep(200);
+                    // Enable WebSocketTask and UltrasonicTask
+                    resumeTaskIfSuspended(wsTaskHandle, self->_webSocketTask);
+                    resumeTaskIfSuspended(ultrasonicTaskHandle, self->_ultrasonicTask);
+                    suspendTaskIfRunning(irTaskHandle, self->_irTask);
                     break;
 
-                case 3: // Automove Line Following Mode (IRTask only)
+                case 3: // IRTask only (Line Following)
                     Serial.println("Mode 3: IRTask only");
                     ledControl.setMode(3);
 
-                    resumeTaskIfSuspended(self->_irTask.getTaskHandle(), self->_irTask);
-                    suspendTaskIfRunning(self->_ultrasonicTask.getTaskHandle(), self->_ultrasonicTask);
-                    suspendTaskIfRunning(self->_webSocketTask.getTaskHandle(), self->_webSocketTask);
-
-                    buzzer.beep(300);
+                    // Enable IRTask, disable others
+                    resumeTaskIfSuspended(irTaskHandle, self->_irTask);
+                    suspendTaskIfRunning(ultrasonicTaskHandle, self->_ultrasonicTask);
+                    suspendTaskIfRunning(wsTaskHandle, self->_webSocketTask);
                     break;
 
-                case 4: // tune
-                    Serial.println("Mode 4: patrol mode");
+                case 4: // Patrol Mode or Tuning
+                    Serial.println("Mode 4: Patrol Mode");
                     ledControl.setMode(4);
-
-                    buzzer.beep(400);
                     break;
 
-                case 5: // Tuning Page (Stop All Tasks)
-                    Serial.println("Mode 5: Tuning Page");
-
-                    buzzer.beep(500);
-                    break;
-
-                case 6: // Other Settings (Stop All Tasks)
-                    Serial.println("Mode 6: Other Settings");
-
-                    buzzer.beep(600);
-                    break;
+                // Add more modes here...
 
                 default:
                     Serial.println("Unknown mode, no action taken.");
                     break;
             }
-            self->_lastMode = mode;
+
+            self->_lastMode = mode;  // Store last mode
         }
-        vTaskDelay(pdMS_TO_TICKS(50));
     }
+}
+
+// Function to signal mode change
+void triggerModeChange(int newMode) {
+    mode = newMode;
+    xSemaphoreGive(modeChangeSemaphore);  // Signal the semaphore to handle the new mode
 }

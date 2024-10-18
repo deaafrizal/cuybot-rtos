@@ -21,22 +21,27 @@
       </button>
       <div class="title">CUYBOT</div>
       <div class="battery">
-        <div class="battery-info"><span id="battery-voltage">waiting</span></div>
-        <div class="battery-info"><span id="battery-percentage">waiting</span></div>
+        <div class="battery-info">
+          <span id="battery-voltage">waiting</span>
+        </div>
+        <div class="battery-info">
+          <span id="battery-percentage">waiting</span>
+        </div>
       </div>
     </div>
 
-    <main class="layouts">
+    <main class="layouts" id="layout">
       <virtual-joystick id="speedJoystick" data-lock="x"></virtual-joystick>
       <virtual-joystick id="directionJoystick" data-lock="y"></virtual-joystick>
     </main>
-    
+
     <div id="error-message" style="display: none">
       Koneksi terputus, silahkan reload.
     </div>
 
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
+      <!-- Switch Controls -->
       <div class="switch-container">
         <div class="switch-item">
           <label class="switch-label" for="obstacleSwitch">+Avoidance</label>
@@ -53,6 +58,7 @@
             <span class="slider"></span>
           </label>
         </div>
+
         <div class="switch-item">
           <label class="switch-label" for="patrolSwitch">Auto Patrol</label>
           <label class="switch">
@@ -64,6 +70,7 @@
 
       <div class="sidebar-separator"></div>
 
+      <!-- Sidebar Menu Buttons -->
       <div class="sidebar-menu">
         <button class="sidebar-btn" onclick="goToPage('/tuning')">
           Tuning
@@ -71,7 +78,6 @@
         <button class="sidebar-btn" onclick="goToPage('/monitoring')">
           Monitoring
         </button>
-
         <button class="sidebar-btn" onclick="goToPage('/flash')">
           Firmware
         </button>
@@ -86,6 +92,7 @@
 
       <div class="sidebar-separator"></div>
 
+      <!-- Sidebar Close Button -->
       <div class="sidebar-bottom">
         <button class="close-sidebar-btn" onclick="toggleSidebar()">✖</button>
       </div>

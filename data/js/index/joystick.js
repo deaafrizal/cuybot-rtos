@@ -1,52 +1,95 @@
 const loadingOverlay = document.getElementById("loadingOverlay") || null;
 const errorMessage = document.getElementById("error-message") || null;
 let websocket = null;
+let reconnecting = false; // Reconnection flag to prevent multiple attempts
+let isConnected = false; // Track if the WebSocket is connected
 
-document.addEventListener('contextmenu', function (event) {
-  event.preventDefault();
-});
+// Function to show the loading overlay
+function showLoadingOverlay(message = "Loading, please wait...") {
+  if (loadingOverlay && !isConnected) { // Only show overlay if not connected
+    loadingOverlay.style.display = "flex";
+    loadingOverlay.querySelector("p").innerText = message; // Update the message
+  }
+}
+
+// Function to hide the loading overlay
+function hideLoadingOverlay() {
+  if (loadingOverlay) {
+    loadingOverlay.style.display = "none";
+  }
+}
+
+// Function to show error message
+function showError(message = "Connection error, retrying...") {
+  if (errorMessage) {
+    errorMessage.style.display = "block";
+    errorMessage.innerText = message;
+  }
+}
+
+// Function to hide error message
+function hideError() {
+  if (errorMessage) {
+    errorMessage.style.display = "none";
+  }
+}
 
 // Function to initialize WebSocket connection
 function connectWebSocket() {
+  if (!reconnecting) {
+    showLoadingOverlay("Connecting to Cuybot...");
+  }
+
   websocket = new WebSocket("ws://cuybot.local:81");
 
   websocket.onopen = function () {
-    if (loadingOverlay) {
-      loadingOverlay.style.display = "none";
-    }
-    if (errorMessage) {
-      errorMessage.style.display = "none";
-    }
     console.log("WebSocket connected");
+    hideLoadingOverlay();
+    hideError();
+    reconnecting = false; // Reset reconnecting flag
+    isConnected = true; // WebSocket is now connected
   };
 
   websocket.onerror = function (error) {
-    if (errorMessage) {
-      errorMessage.style.display = "block";
-    }
     console.error("WebSocket error:", error);
+    showError("WebSocket error, retrying...");
+    isConnected = false; // Set connected status to false on error
   };
 
   websocket.onclose = function () {
-    if (errorMessage) {
-      errorMessage.style.display = "block";
-    }
     console.log("WebSocket connection closed, retrying...");
-    setTimeout(connectWebSocket, 5000);
+    showError("WebSocket connection lost. Reconnecting...");
+    reconnecting = true;
+    isConnected = false; // WebSocket is no longer connected
+    setTimeout(connectWebSocket, 5000); // Retry connection after 5 seconds
   };
 
   websocket.onmessage = function (event) {
-    var data = JSON.parse(event.data);
+    const data = JSON.parse(event.data);
 
     // Update battery voltage and percentage
-    var batteryVoltage = data.batteryVoltage.toFixed(2);
-    var batteryPercentage = data.batteryPercentage.toFixed(2);
+    const batteryVoltage = data.batteryVoltage.toFixed(2);
+    const batteryPercentage = data.batteryPercentage.toFixed(2);
 
     document.getElementById('battery-voltage').innerText = "⚡ " + batteryVoltage + "v";
     document.getElementById('battery-percentage').innerText = "🔋 " + batteryPercentage + "%";
   };
 }
 
+// Function to handle sidebar open/close logic (just a placeholder, modify according to your actual logic)
+function toggleSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar) {
+    sidebar.classList.toggle("open");
+  }
+
+  // Ensure that loading overlay is not triggered just by opening the sidebar
+  if (isConnected) {
+    hideLoadingOverlay();
+  }
+}
+
+// Initial WebSocket connection
 connectWebSocket();
 
 const speedJoystick = document.getElementById('speedJoystick');
@@ -124,10 +167,3 @@ function sendWebSocketMessage(message) {
     console.error("WebSocket is not open. Cannot send message:", message);
   }
 }
-
-// Close the WebSocket when the page is unloaded
-window.addEventListener("beforeunload", function () {
-  if (websocket.readyState === WebSocket.OPEN) {
-    websocket.close();
-  }
-});
