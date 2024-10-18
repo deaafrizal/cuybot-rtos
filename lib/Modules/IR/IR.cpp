@@ -1,7 +1,7 @@
 #include <IR/IR.h>
 #include <Arduino.h>
 
-IR::IR() : _IR_left(0), _IR_right(0) {}
+IR::IR() {}
 
 void IR::begin() {
     pinMode(_IR_Left_Pin, INPUT);

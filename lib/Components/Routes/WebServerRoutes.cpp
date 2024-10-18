@@ -2,6 +2,8 @@
 #include <Routes/WebServerRoutes.h>
 #include <Handlers/WebServerHandlers.h>
 
+extern int mode;
+
 WebServerRoutes::WebServerRoutes(AsyncWebServer* server) {
     this->server = server;
 }
@@ -17,12 +19,10 @@ void WebServerRoutes::setupRoutes() {
 
     server->on("/tuning", HTTP_GET, [](AsyncWebServerRequest *request) {
         Serial.println("Tuning Mode Activated!");
-        mode = 4;
         request->send(SPIFFS, "/html/tuning.html", "text/html");
     });
 
     server->on("/flash", HTTP_GET, [](AsyncWebServerRequest *request) {
-        mode = 5;
         Serial.println("Flash Mode Activated!");
         request->send(SPIFFS, "/html/flash.html", "text/html");
     });
@@ -30,7 +30,6 @@ void WebServerRoutes::setupRoutes() {
     server->on("/api/getSystemData", HTTP_GET, WebServerHandlers::handleGetSystemData);
     server->on("/api/setMotorMaxSpeed", HTTP_POST, WebServerHandlers::handleSetMotorMaxSpeed);
     server->on("/api/setMotorWeight", HTTP_POST, WebServerHandlers::handleSetMotorWeight);
-    server->on("/api/setMode", HTTP_POST, WebServerHandlers::handleSetMode);
 
     server->onNotFound(WebServerHandlers::handleNotFound);
 }

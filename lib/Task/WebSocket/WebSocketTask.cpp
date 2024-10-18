@@ -1,7 +1,9 @@
 #include <WebSocket/WebSocketTask.h>
+#include <ModeSelection/ModeSelectionTask.h>
 
 extern int motorSpeed;
 extern int motorDirection;
+extern int mode;
 extern bool userControllingDirection;
 
 #define BATTERY_ADC_PIN 0
@@ -11,9 +13,8 @@ WebSocketsServer WebSocketTask::webSocket = WebSocketsServer(81);
 WebSocketTask* WebSocketTask::instance = nullptr;
 BatteryMonitorTask WebSocketTask::batteryMonitorTask(BATTERY_ADC_PIN, 3.0, 4.2, VOLTAGE_DIVIDER_FACTOR);
 
-WebSocketTask::WebSocketTask() {
+WebSocketTask::WebSocketTask(ModeSelectionTask &modeSelectionTask): _modeSelectionTask(modeSelectionTask) {
     Serial.println("WS Task initialize...");
-
     taskHandle = NULL;
     activeClientCount = 0;
 }
@@ -35,7 +36,7 @@ void WebSocketTask::startTask(int stackSize) {
 }
 
 void WebSocketTask::stopTask() {
-    Serial.println("WS TASK: Stoping...");
+    Serial.println("WS TASK: Stopping...");
     if (taskHandle != NULL) {
         vTaskSuspend(taskHandle);
         webSocket.close();
@@ -67,7 +68,7 @@ TaskHandle_t WebSocketTask::getTaskHandle() {
 }
 
 void WebSocketTask::webSocketTaskFunction(void *parameter) {
-    Serial.println("WS Task: begining event...");
+    Serial.println("WS Task: beginning event...");
     WebSocketTask *self = static_cast<WebSocketTask*>(parameter);
     self->webSocket.begin();
     self->webSocket.onEvent(onWebSocketEvent);
@@ -99,7 +100,8 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
 
         case WStype_CONNECTED: {
             self->activeClientCount++;
-            Serial.print("client connected: ");
+            self->sendModeData();
+            Serial.print("Client connected: ");
             Serial.println(self->activeClientCount);
             break;
         }
@@ -108,10 +110,12 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
             if(self->activeClientCount > 0) {
                 String receivedData = String((char*)payload);
 
-                int sIndex = receivedData.indexOf('S');
-                int dIndex = receivedData.indexOf('D');
+                int sIndex = receivedData.indexOf('S'); //speed
+                int dIndex = receivedData.indexOf('D'); //direction
+                int mIndex = receivedData.indexOf('M'); //mode
                 
-                if (sIndex != -1 && dIndex != -1) {
+                // Check for motor control commands
+                if (sIndex != -1 && dIndex != -1 && dIndex > sIndex + 1) {
                     int newSpeed = receivedData.substring(sIndex + 1, dIndex).toInt();
                     int newDirection = receivedData.substring(dIndex + 1).toInt();
 
@@ -119,6 +123,11 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
                     motorDirection = newDirection;
 
                     motorDirection != 0 ? userControllingDirection = true : userControllingDirection = false; 
+                } 
+                else if (mIndex != -1) {
+                    int newMode = receivedData.substring(mIndex + 1).toInt();
+                    self->_modeSelectionTask.triggerModeChange(newMode);
+                    self->sendModeData();
                 }
             }
             break;
@@ -129,12 +138,21 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
 }
 
 void WebSocketTask::sendBatteryData() {
-    // Get battery voltage and percentage
     float batteryVoltage = batteryMonitorTask.getBatteryVoltage();
     float batteryPercentage = batteryMonitorTask.getBatteryPercentage();
     
     String jsonData = "{\"batteryVoltage\": " + String(batteryVoltage, 2) + 
-                      ", \"batteryPercentage\": " + String(batteryPercentage, 2) + "}";
+                        ", \"batteryPercentage\": " + String(batteryPercentage, 2) + "}";
+
+    if (activeClientCount > 0) {
+        webSocket.broadcastTXT(jsonData);
+    }
+}
+
+void WebSocketTask::sendModeData() {
+    String jsonData = "{\"mode\": " + String(mode) + "}";
     
-    webSocket.broadcastTXT(jsonData);
+    if (activeClientCount > 0) {
+        webSocket.broadcastTXT(jsonData);
+    }
 }

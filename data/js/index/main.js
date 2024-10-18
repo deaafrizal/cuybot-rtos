@@ -1,15 +1,14 @@
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
 
-  // Check if sidebar is currently open
   const isOpen = sidebar.classList.contains('open');
 
   if (isOpen) {
     sidebar.classList.remove('open');
-    showContent();  // Show the hidden content
+    showContent();
   } else {
     sidebar.classList.add('open');
-    hideContent();  // Hide all content except the sidebar
+    hideContent();
   }
   if (websocket && websocket.readyState === WebSocket.OPEN) {
     hideLoadingOverlay();
@@ -23,7 +22,7 @@ function hideContent() {
   for (let i = 0; i < bodyChildren.length; i++) {
     const child = bodyChildren[i];
     if (child.tagName !== 'ASIDE') {
-      child.style.display = 'none';  // Hide all elements except <aside>
+      child.style.display = 'none';
     }
   }
 }
@@ -35,16 +34,14 @@ function showContent() {
   for (let i = 0; i < bodyChildren.length; i++) {
     const child = bodyChildren[i];
     if (child.tagName !== 'ASIDE') {
-      child.style.display = '';  // Reset display to show elements again
+      child.style.display = '';
     }
   }
 }
-// Handle navigation to different pages
 function goToPage(url) {
-  window.location.href = url; // Navigate to the specified URL
+  window.location.href = url;
 }
 
-// Reboot system function (if applicable)
 function rebootSystem() {
   fetch('http://cuybot.local/api/reboot', {
     method: 'POST'
@@ -61,21 +58,18 @@ function rebootSystem() {
     });
 }
 
-// Back button functionality
 function goBack() {
-  window.history.back(); // Go back to the previous page
+  window.history.back();
 }
 
 function reloadPage() {
   window.location.reload();
 }
 
-// Disable right-click
 document.addEventListener('contextmenu', function (e) {
   e.preventDefault();
 }, false);
 
-// Disable touch-and-hold (on mobile devices)
 document.addEventListener('touchstart', function (e) {
   if (e.touches.length > 1) {
     e.preventDefault();

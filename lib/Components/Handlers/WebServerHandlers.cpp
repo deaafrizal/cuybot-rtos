@@ -55,23 +55,6 @@ void WebServerHandlers::handleSetMotorWeight(AsyncWebServerRequest *request) {
     }
 }
 
-void WebServerHandlers::handleSetMode(AsyncWebServerRequest *request) {
-    if (request->hasParam("mode", true)) {
-        int newMode = request->getParam("mode", true)->value().toInt();
-        Serial.printf("Received mode: %d\n", newMode);
-        if (newMode >= 0 && newMode <= 6) {
-            if(mode != newMode) {
-                mode = newMode;
-            }
-            request->send(200, "application/json", "{\"status\":\"success\"}");
-        } else {
-            request->send(400, "application/json", "{\"status\":\"error\",\"message\":\"Invalid value\"}");
-        }
-    } else {
-        request->send(400, "application/json", "{\"status\":\"error\",\"message\":\"Missing parameter\"}");
-    }
-}
-
 void WebServerHandlers::handleNotFound(AsyncWebServerRequest *request) {
     request->send(404, "text/html", "Page not found");
 }

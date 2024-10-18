@@ -5,6 +5,7 @@
 #include <WebServer/WebServerTask.h>
 #include <ModeSelection/ModeSelectionTask.h>
 #include <Motor/MotorTask.h>
+#include <WebSocket/WebSocketTask.h>
 #include <OTA/OTA.h>
 #include <IR/IR.h>
 #include <IRReading/IRTask.h>
@@ -23,7 +24,7 @@ const char* password = "123456789";
 
 EEPROMConfig eepromConfig;
 
-int mode = 0;
+int mode = 1;
 int motorSpeed = 0;
 int motorDirection = 0;
 uint8_t motorMaxSpeed = 60;
@@ -45,8 +46,8 @@ IRTask irTask(ir, motorControl);
 
 Ultrasonic ultrasonic;
 UltrasonicTask ultrasonicTask(ultrasonic, motorControl);
-
 ModeSelectionTask modeSelectionTask(motorTask, ultrasonicTask, irTask);
+WebSocketTask webSocketTask(modeSelectionTask);
 
 void setup() {
     Serial.begin(9600);
@@ -96,6 +97,7 @@ void setup() {
     Serial.println("Setting up RTOS...");
     webServerTask.startTask();
     modeSelectionTask.startTask();
+    webSocketTask.startTask();
     motorTask.startTask();
     Serial.println("RTOS OK!");
     delay(1000);

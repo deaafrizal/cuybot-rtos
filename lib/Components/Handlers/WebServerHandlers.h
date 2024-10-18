@@ -10,7 +10,6 @@ public:
     static void handleGetSystemData(AsyncWebServerRequest *request);
     static void handleSetMotorMaxSpeed(AsyncWebServerRequest *request);
     static void handleSetMotorWeight(AsyncWebServerRequest *request);
-    static void handleSetMode(AsyncWebServerRequest *request);
     static void handleNotFound(AsyncWebServerRequest *request);
 
 private:

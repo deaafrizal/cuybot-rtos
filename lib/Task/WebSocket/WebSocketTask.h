@@ -4,9 +4,11 @@
 #include <WebSocketsServer.h>
 #include <BatteryMonitor/BatteryMonitorTask.h>
 
+class ModeSelectionTask;
+
 class WebSocketTask {
 public:
-    WebSocketTask();
+    WebSocketTask(ModeSelectionTask &modeSelectionTask);
     ~WebSocketTask();
     
     void startTask(int stackSize = 6000);
@@ -27,6 +29,9 @@ private:
     int activeClientCount;
 
     void sendBatteryData();
+    void sendModeData();
+
+    ModeSelectionTask &_modeSelectionTask;
 };
 
 #endif
