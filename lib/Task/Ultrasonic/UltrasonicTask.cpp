@@ -1,11 +1,6 @@
 #include <Ultrasonic/UltrasonicTask.h>
 #include <Arduino.h>
-#include <TelnetStream.h>
 #include <EEPROM.h>
-
-extern int motorSpeed;
-extern int motorDirection;
-extern bool userControllingDirection;
 
 UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorControl &motorControl)
     : _ultrasonic(ultrasonic), _motorControl(motorControl), taskRunning(false), _taskHandle(nullptr) {
@@ -60,22 +55,33 @@ void UltrasonicTask::resumeTask() {
 void UltrasonicTask::distanceMeasureTask(void *parameters) {
     UltrasonicTask *self = static_cast<UltrasonicTask *>(parameters);
 
-    while (true) {
-        if (self->taskRunning) {
-            self->_motorControl.setSpeed(EEPROM.read(1), EEPROM.read(1));
-            self->_distance = self->_ultrasonic.getDistance();
+    uint32_t lastSensorCheckTime = 0;
+    uint32_t lastMotorUpdateTime = 0;
+    const uint32_t sensorCheckInterval = 50;  // Measure sensor every 30ms
+    const uint32_t motorUpdateInterval = 5;   // Update motor every 5ms
 
-            if(self->_distance >= 200) {
-                self->_motorControl.stop();
-            }else if (self->_distance > self->_minDistance && self->_distance <= self->_maxDistance) {
-                self->_motorControl.setSpeedAndDirection(EEPROM.read(1), 1);
-            }else {
-                self->_motorControl.setSpeed(EEPROM.read(1), EEPROM.read(1));
+    while (true) {
+        uint32_t currentTime = millis();
+
+        if (self->taskRunning) {
+            if (currentTime - lastSensorCheckTime >= sensorCheckInterval) {
+                self->_distance = self->_ultrasonic.getDistance();
+                lastSensorCheckTime = currentTime;
             }
 
-            TelnetStream.print("distance: ");
-            TelnetStream.println(self->_distance);
+            if (currentTime - lastMotorUpdateTime >= motorUpdateInterval) {
+                uint8_t speed = EEPROM.read(1);
+
+                if (self->_distance <= self->_maxDistance) {
+                    self->_motorControl.setSpeed(255, 0);
+                } else {
+                    self->_motorControl.setSpeed(speed, speed);
+                }
+                lastMotorUpdateTime = currentTime;
+            }
         }
-        vTaskDelay(pdMS_TO_TICKS(30));
+        
+        // Delay to allow other tasks to run (you can adjust this as needed)
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
