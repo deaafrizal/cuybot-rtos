@@ -10,7 +10,7 @@ extern int mode;
 SemaphoreHandle_t modeChangeSemaphore;
 
 ModeSelectionTask::ModeSelectionTask(MotorTask &motor, UltrasonicTask &ultrasonicTask, IRTask &irTask)
-    : _motorTask(motor), _ultrasonicTask(ultrasonicTask), _irTask(irTask), _lastMode(-1){
+    : _motorTask(motor), _ultrasonicTask(ultrasonicTask), _irTask(irTask), _lastMode(1){
         _taskHandle = NULL;
         buzzer.begin();
 

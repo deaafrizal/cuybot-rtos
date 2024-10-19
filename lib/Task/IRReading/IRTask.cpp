@@ -14,7 +14,7 @@ TaskHandle_t IRTask::getTaskHandle() {
 
 void IRTask::startTask() {
     if (_taskHandle == nullptr) {
-        xTaskCreate(irMeasureTask, "IRTask", 3048, this, 5, &_taskHandle);
+        xTaskCreate(irMeasureTask, "IRTask", 2448, this, 3, &_taskHandle);
         if (_taskHandle != nullptr) {
             Serial.println("IRTask started successfully.");
             vTaskSuspend(_taskHandle);  // Start task in suspended state

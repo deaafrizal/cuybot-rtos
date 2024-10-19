@@ -10,7 +10,7 @@ MotorTask::MotorTask(MotorDriver &rightMotor, MotorDriver &leftMotor)
 
 void MotorTask::startTask()
 {
-    xTaskCreate(runTask, "MotorControlTask", 3048, this, 6, NULL);
+    xTaskCreate(runTask, "MotorControlTask", 3248, this, 4, NULL);
 }
 
 void MotorTask::setDirection(int newDirection) {

@@ -3,22 +3,20 @@
 
 #include <EEPROM.h>
 
-class EEPROMConfig
-{
+class EEPROMConfig {
 public:
     EEPROMConfig();
     ~EEPROMConfig();
-    
-    // Methods to load and save settings
-    void loadSettings(uint8_t &motorMaxSpeed, uint8_t &motorWeight, float &motorTurnFactor);
-    void saveMotorMaxSpeed(uint8_t motorMaxSpeed);
-    void saveMotorWeight(uint8_t motorWeight);
-    void saveMotorTurnFactor(float motorTurnFactor);
+    void loadSettings();
+    void saveMotorMaxSpeed(uint8_t newMotorMaxSpeed);
+    void saveMotorWeight(uint8_t newMotorWeight);
+    void saveMotorTurnFactor(float newMotorTurnFactor);
+    void saveSignature();
 
 private:
-    const uint8_t _motorMaxSpeedAddr = 10;
-    const uint8_t _motorWeightAddr = 12;
-    const uint8_t _motorTurnFactorAddr = 14;
+    const int _motorMaxSpeedAddr = 1;
+    const int _motorWeightAddr = 2;
+    const int _motorTurnFactorAddr = 4;
 };
 
 #endif

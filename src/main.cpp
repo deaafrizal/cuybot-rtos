@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <ESPmDNS.h>
-#include <EEPROM_config.h>
 #include <WebServer/WebServerTask.h>
 #include <ModeSelection/ModeSelectionTask.h>
 #include <Motor/MotorTask.h>
@@ -13,6 +12,8 @@
 #include <Motor/MotorDriver.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <TelnetStream.h>
+#include <EEPROM.h>
 
 #define PWM_A1 3
 #define PWM_A2 4
@@ -22,15 +23,16 @@
 #define SSID "cuybot"
 const char* password = "123456789";
 
-EEPROMConfig eepromConfig;
+// EEPROMConfig eepromConfig;
 
 int mode = 1;
 int motorSpeed = 0;
 int motorDirection = 0;
-uint8_t motorMaxSpeed = 60;
-uint8_t motorWeight = 45;
-float motorTurnFactor = 0.15;
-bool userControllingDirection = false;
+
+// eeprom
+uint8_t motorMaxSpeed = 75;
+uint8_t motorWeight = 50;
+float motorTurnFactor = 0.2f;
 
 WebServerTask webServerTask;
 OTA ota("cuybot");
@@ -53,8 +55,12 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Starting serial communication...");
     delay(500);
-    
-    eepromConfig.loadSettings(motorMaxSpeed, motorWeight, motorTurnFactor);
+    EEPROM.begin(128);
+
+    if (EEPROM.read(1) <= 0 && EEPROM.read(2) <= 0) {
+        EEPROM.write(1, motorMaxSpeed);
+        EEPROM.write(2, motorWeight);
+    }
     
     delay(200);
 
@@ -85,7 +91,7 @@ void setup() {
     Serial.println("Setting up OTA service...");
     ota.begin();
     ota.startOTATask();
-    Serial.println("Setting up OTA service done!");
+    TelnetStream.println("Setting up OTA service done!");
 
     pinMode(PWM_A1, OUTPUT);
     pinMode(PWM_A2, OUTPUT);
@@ -94,13 +100,13 @@ void setup() {
     
     delay(500);
 
-    Serial.println("Setting up RTOS...");
+    TelnetStream.println("Setting up RTOS...");
     webServerTask.startTask();
     modeSelectionTask.startTask();
     webSocketTask.startTask();
     motorTask.startTask();
+    TelnetStream.println("RTOS OK!");
     Serial.println("RTOS OK!");
-    delay(1000);
 }
 
 void loop() {

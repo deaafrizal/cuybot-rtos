@@ -11,7 +11,7 @@ public:
     WebSocketTask(ModeSelectionTask &modeSelectionTask);
     ~WebSocketTask();
     
-    void startTask(int stackSize = 6000);
+    void startTask(int stackSize = 5295);
     void stopTask();
     void suspendTask();
     void resumeTask();

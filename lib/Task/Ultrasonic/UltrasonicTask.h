@@ -25,8 +25,8 @@ private:
     bool taskRunning;  // Flag to check task state
     TaskHandle_t _taskHandle;  // Handle for the FreeRTOS task
     const int _vdelayTime = 70;  // Delay between measurements (ms)
-    const float _minDistance = 1.0;  // Minimum distance for obstacle detection
-    const float _maxDistance = 24.0;  // Maximum distance for obstacle detection
+    const float _minDistance = 0.0;  // Minimum distance for obstacle detection
+    const float _maxDistance = 17.0;  // Maximum distance for obstacle detection
 };
 
 #endif // ULTRASONICTASK_H

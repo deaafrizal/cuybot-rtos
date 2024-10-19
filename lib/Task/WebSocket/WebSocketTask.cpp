@@ -4,7 +4,6 @@
 extern int motorSpeed;
 extern int motorDirection;
 extern int mode;
-extern bool userControllingDirection;
 
 #define BATTERY_ADC_PIN 0
 #define VOLTAGE_DIVIDER_FACTOR 2
@@ -30,7 +29,7 @@ void WebSocketTask::startTask(int stackSize) {
     if (taskHandle == NULL) {
         instance = this;
         batteryMonitorTask.startMonitoring();
-        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, 7, &taskHandle);
+        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, 4, &taskHandle);
         Serial.println("WebSocket task created and running.");
     }
 }
@@ -121,13 +120,13 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
 
                     motorSpeed = newSpeed;
                     motorDirection = newDirection;
-
-                    motorDirection != 0 ? userControllingDirection = true : userControllingDirection = false; 
                 } 
-                else if (mIndex != -1) {
+                else if (mIndex != -1 && mIndex < receivedData.length() - 1) {
                     int newMode = receivedData.substring(mIndex + 1).toInt();
-                    self->_modeSelectionTask.triggerModeChange(newMode);
-                    self->sendModeData();
+                    if(newMode > 0) {
+                        self->_modeSelectionTask.triggerModeChange(newMode);
+                        self->sendModeData();
+                    }
                 }
             }
             break;
