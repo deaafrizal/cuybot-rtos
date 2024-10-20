@@ -1,4 +1,5 @@
 #include <Motor/MotorDriver.h>
+#include <TelnetStream.h>
 
 MotorDriver::MotorDriver(uint8_t pinA, uint8_t pinB) : _maxPwm(255)
 {
@@ -13,6 +14,8 @@ MotorDriver::MotorDriver(uint8_t pinA, uint8_t pinB) : _maxPwm(255)
 
 void MotorDriver::forward(uint8_t pwm)
 {
+    TelnetStream.print("MMM: ");
+    TelnetStream.println(pwm);
     _pwm = constrain(pwm, 0, _maxPwm);
     // normal
     analogWrite(_pinA, _pwm);

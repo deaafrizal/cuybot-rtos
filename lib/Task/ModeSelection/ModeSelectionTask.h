@@ -7,7 +7,7 @@
 
 class ModeSelectionTask {
 public:
-    ModeSelectionTask(MotorTask &motor, UltrasonicTask &ultrasonic, IRTask &irTask);
+    ModeSelectionTask(MotorTask &motorTask, UltrasonicTask &ultrasonic, IRTask &irTask);
     ~ModeSelectionTask();
 
     void startTask(int stackSize = 5096);
@@ -15,12 +15,14 @@ public:
     static void triggerModeChange(int newMode);
 
 private:
-    static void modeSelectionTaskFunction(void *parameter);
+    TaskHandle_t _taskHandle;
+    
     MotorTask &_motorTask;
     UltrasonicTask &_ultrasonicTask;
     IRTask &_irTask;
-    TaskHandle_t _taskHandle;
+
     int _lastMode;
+    static void modeSelectionTaskFunction(void *parameter);
 };
 
 #endif

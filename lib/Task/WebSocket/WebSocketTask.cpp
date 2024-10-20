@@ -94,6 +94,7 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
             if (self->activeClientCount > 0) {
                 self->activeClientCount--;
                 Serial.printf("Active clients: %d\n", self->activeClientCount);
+                self->suspendTask();
             }
             break;
 

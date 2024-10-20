@@ -1,7 +1,7 @@
 #include <ModeSelection/ModeSelectionTask.h>
 #include <LedControl/LedControl.h>
 #include <Buzzer/Buzzer.h>
-#include "freertos/semphr.h"
+#include <freertos/semphr.h>
 
 LedControl ledControl;
 Buzzer buzzer(1);
@@ -9,12 +9,11 @@ extern int mode;
 
 SemaphoreHandle_t modeChangeSemaphore;
 
-ModeSelectionTask::ModeSelectionTask(MotorTask &motor, UltrasonicTask &ultrasonicTask, IRTask &irTask)
-    : _motorTask(motor), _ultrasonicTask(ultrasonicTask), _irTask(irTask), _lastMode(1){
+ModeSelectionTask::ModeSelectionTask(MotorTask &motorTask, UltrasonicTask &ultrasonicTask, IRTask &irTask)
+    : _motorTask(motorTask), _ultrasonicTask(ultrasonicTask), _irTask(irTask), _lastMode(1){
         _taskHandle = NULL;
         buzzer.begin();
 
-        // Initialize the semaphore
         modeChangeSemaphore = xSemaphoreCreateBinary();
         if (modeChangeSemaphore == NULL) {
             Serial.println("Error creating modeChangeSemaphore!");

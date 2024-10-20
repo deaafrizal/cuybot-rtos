@@ -1,36 +1,33 @@
-#include <EEPROM.h>
 #include <EEPROM_config.h>
 
-extern uint8_t motorMaxSpeed;
-extern uint8_t motorWeight;
-extern float motorTurnFactor;
+uint8_t EEPROMConfig::motorMaxSpeed = 75;
+uint8_t EEPROMConfig::motorWeight = 50;
+float EEPROMConfig::motorTurnFactor = 0.2;
 
-EEPROMConfig::EEPROMConfig() {
-    EEPROM.begin(_MEM_SIZE);
-}
+EEPROMConfig::EEPROMConfig() {}
 
 EEPROMConfig::~EEPROMConfig() {}
 
 void EEPROMConfig::loadSettings() {
     if (EEPROM.read(_MAGIC_MEM_ADDR) != _MAGIC_MEM_NUM) {
-        setMemInt(1, motorMaxSpeed);
-        setMemInt(2, motorWeight);
+        EEPROM.write(1, motorMaxSpeed);
+        EEPROM.write(2, motorWeight);
+        EEPROM.write(_MAGIC_MEM_ADDR, _MAGIC_MEM_NUM);
+        EEPROM.commit();
         setMemFloat(10, motorTurnFactor);
-        setMemInt(_MAGIC_MEM_ADDR, _MAGIC_MEM_NUM);
-        Serial.println("added default EEPROM.");
+        Serial.println("EEPROM set!");
     }else {
-        Serial.println("default value loaded!");
+        motorMaxSpeed = getMemInt(1);
+        motorWeight = getMemInt(2);
+        motorTurnFactor = getMemFloat(10);
+        Serial.println("EEPROM get latest data!");
     }
-    Serial.println("EEPROM setup success!");
+    Serial.println("EEPROM setup success.");
 }
 
 void EEPROMConfig::setMemInt(int addr, uint8_t newMemInt) {
     EEPROM.write(addr, newMemInt);
     EEPROM.commit();
-    Serial.print("saved to memInt: ");
-    Serial.print(newMemInt);
-    Serial.print(" addr: ");
-    Serial.println(addr);
 }
 
 void EEPROMConfig::setMemFloat(int addr, float newMemFloat) {
@@ -48,8 +45,7 @@ void EEPROMConfig::setMemFloat(int addr, float newMemFloat) {
 }
 
 uint8_t EEPROMConfig::getMemInt(int addr) {
-    _memInt = EEPROM.read(addr);
-    return _memInt;
+    return EEPROM.read(addr);
 }
 
 float EEPROMConfig::getMemFloat(int addr) {

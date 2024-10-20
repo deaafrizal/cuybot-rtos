@@ -17,7 +17,6 @@ private:
     const uint8_t _trigger_pin = TRIGGER_PIN;
     const uint8_t _echo_pin = ECHO_PIN;
     NewPing sonar;
-
 };
 
 #endif

@@ -7,7 +7,7 @@
 class MotorControl
 {
 public:
-    MotorControl(MotorDriver &rightSide, MotorDriver &leftSide, EEPROMConfig &eepromConfig);
+    MotorControl(MotorDriver &rightSide, MotorDriver &leftSide);
 
     void forward();
     void backward();
@@ -25,7 +25,7 @@ private:
     int _maxSpeed;
     int _backwardLimit;
     float _turnFactor;
-    EEPROMConfig &_eepromConfig;
+    static EEPROMConfig _eepromConfig;
 };
 
 #endif

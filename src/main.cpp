@@ -14,6 +14,7 @@
 #include <freertos/task.h>
 #include <TelnetStream.h>
 #include <EEPROM_config.h>
+#include <EEPROM.h>
 
 #define PWM_A1 3
 #define PWM_A2 4
@@ -29,25 +30,20 @@ int mode = 1;
 int motorSpeed = 0;
 int motorDirection = 0;
 
-// ::MEM VAR:: extern to eeprom config
-uint8_t motorMaxSpeed = 75;
-uint8_t motorWeight = 50;
-float motorTurnFactor = 0.2f;
-
 WebServerTask webServerTask;
 OTA ota("cuybot");
 
-MotorDriver leftMotor(PWM_B1, PWM_B2);
 MotorDriver rightMotor(PWM_A1, PWM_A2);
+MotorDriver leftMotor(PWM_B1, PWM_B2);
 
-MotorControl motorControl(rightMotor, leftMotor, eepromConfig);
-MotorTask motorTask(rightMotor, leftMotor, motorControl);
+MotorControl motorControl(rightMotor, leftMotor);
+MotorTask motorTask(rightMotor, leftMotor);
 
 IR ir;
-IRTask irTask(ir, motorControl, eepromConfig);
+IRTask irTask(ir, rightMotor, leftMotor);
 
 Ultrasonic ultrasonic;
-UltrasonicTask ultrasonicTask(ultrasonic, motorControl, eepromConfig);
+UltrasonicTask ultrasonicTask(ultrasonic, rightMotor, leftMotor);
 ModeSelectionTask modeSelectionTask(motorTask, ultrasonicTask, irTask);
 WebSocketTask webSocketTask(modeSelectionTask);
 
@@ -56,7 +52,10 @@ void setup() {
     Serial.println("Starting serial communication...");
     delay(500);
 
-    delay(200);
+    EEPROM.begin(128);
+    delay(1000);
+    
+    eepromConfig.loadSettings();
 
     Serial.println("Serial communication OK!");
     Serial.println("Setting up WiFi...");
@@ -103,6 +102,4 @@ void setup() {
     Serial.println("RTOS OK!");
 }
 
-void loop() {
-    //
-}
+void loop() {}

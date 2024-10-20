@@ -4,17 +4,11 @@ async function fetchSystemSettings() {
     const data = await response.json();
 
     if (data.hasOwnProperty('motorMaxSpeed') && data.hasOwnProperty('motorWeight')) {
-      const maxSpeedPercentage = Math.round((data.motorMaxSpeed / 255) * 100);
+      const speedSlider = document.getElementById('speedSlider').value;
+      document.getElementById('speedLabel').textContent = `${speedSlider} pwm`;
 
-      const weightPercentage = Math.round((data.motorWeight / 255) * 100);
-
-      const speedSlider = document.getElementById('speedSlider');
-      speedSlider.value = maxSpeedPercentage;
-      document.getElementById('speedLabel').textContent = `${maxSpeedPercentage}%`;
-
-      const weightSlider = document.getElementById('weightSlider');
-      weightSlider.value = weightPercentage;
-      document.getElementById('weightLabel').textContent = `${weightPercentage}%`;
+      const weightSlider = document.getElementById('weightSlider').value;
+      document.getElementById('weightLabel').textContent = `${weightSlider} pwm`;
     } else {
       console.error('motorMaxSpeed or motorWeight not found in API response');
     }
@@ -59,8 +53,8 @@ document.getElementById('submitButton').addEventListener('click', async function
   const speedSlider = document.getElementById('speedSlider');
   const weightSlider = document.getElementById('weightSlider');
 
-  const maxSpeedPWM = Math.round((speedSlider.value / 100) * 255);
-  const motorWeightPWM = Math.round((weightSlider.value / 100) * 255);
+  const maxSpeedPWM = speedSlider.value;
+  const motorWeightPWM = weightSlider.value;
 
   try {
     await Promise.all([updateMotorSpeed(maxSpeedPWM), updateMotorWeight(motorWeightPWM)]);
@@ -85,10 +79,10 @@ window.addEventListener('load', function () {
   fetchSystemSettings();
 
   document.getElementById('speedSlider').addEventListener('input', function () {
-    document.getElementById('speedLabel').textContent = this.value + '%';
+    document.getElementById('speedLabel').textContent = this.value + ' pwm';
   });
 
   document.getElementById('weightSlider').addEventListener('input', function () {
-    document.getElementById('weightLabel').textContent = this.value + '%';
+    document.getElementById('weightLabel').textContent = this.value + ' pwm';
   });
 });

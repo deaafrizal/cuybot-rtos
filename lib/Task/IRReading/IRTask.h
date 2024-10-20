@@ -3,12 +3,12 @@
 
 #include <Arduino.h>
 #include <IR/ir.h>
-#include <Motor/MotorControl.h>
+#include <Motor/MotorDriver.h>
 #include <EEPROM_config.h>
 
 class IRTask {
 public:
-    IRTask(IR &ir, MotorControl &motorControl, EEPROMConfig &eepromConfig);
+    IRTask(IR &ir, MotorDriver &rightMotor, MotorDriver &leftMotor);
     void startTask();
     void stopTask(); 
     void suspendTask();
@@ -17,13 +17,16 @@ public:
 
 private:
     IR &_ir;
-    MotorControl &_motorControl;
-    EEPROMConfig &_eepromConfig;
+    MotorDriver &_rightMotor;
+    MotorDriver &_leftMotor;
+
+    static EEPROMConfig &_eepromConfig;
     static void irMeasureTask(void *_parameters);
     TaskHandle_t _taskHandle;
-    uint8_t _motorMaxSpeed;
-    uint8_t _motorWeight;
-    const int _vdelayTime = 100;
+    
+    uint8_t motorMaxSpeed;
+    uint8_t motorWeight;
+    static const int _vdelayTime = 100;
     bool taskRunning;
 };
 

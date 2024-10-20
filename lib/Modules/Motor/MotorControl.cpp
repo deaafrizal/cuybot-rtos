@@ -1,9 +1,10 @@
 #include <Motor/MotorControl.h>
 
-MotorControl::MotorControl(MotorDriver &rightSide, MotorDriver &leftSide, EEPROMConfig &eepromConfig)
+EEPROMConfig MotorControl::_eepromConfig;
+
+MotorControl::MotorControl(MotorDriver &rightSide, MotorDriver &leftSide)
     : _rightSide(rightSide),
         _leftSide(leftSide),
-        _eepromConfig(eepromConfig),
         _currentSpeed(0),
         _maxSpeed(255),
         _backwardLimit(200)
@@ -11,6 +12,8 @@ MotorControl::MotorControl(MotorDriver &rightSide, MotorDriver &leftSide, EEPROM
             _rightSide.stop();
             _leftSide.stop();
             _turnFactor = _eepromConfig.getMemFloat(10);
+            Serial.print("TF: ");
+            Serial.println(_turnFactor);
             if (_turnFactor <= 0.0f || _turnFactor > 1.0f) {
                 _turnFactor = 0.2f;
             }
