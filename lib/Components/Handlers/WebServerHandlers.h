@@ -14,7 +14,7 @@ public:
 
 private:
     AsyncWebServer* server;
-    static EEPROMConfig eepromConfig;
+    static EEPROMConfig _eepromConfig;
 };
 
 extern int mode;

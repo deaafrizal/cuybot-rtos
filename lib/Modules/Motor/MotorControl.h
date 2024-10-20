@@ -2,11 +2,12 @@
 #define MOTORCONTROL_H
 
 #include <Motor/MotorDriver.h>
+#include <EEPROM_config.h>
 
 class MotorControl
 {
 public:
-    MotorControl(MotorDriver &rightSide, MotorDriver &leftSide);
+    MotorControl(MotorDriver &rightSide, MotorDriver &leftSide, EEPROMConfig &eepromConfig);
 
     void forward();
     void backward();
@@ -22,7 +23,9 @@ private:
     MotorDriver &_leftSide;
     int _currentSpeed;
     int _maxSpeed;
+    int _backwardLimit;
     float _turnFactor;
+    EEPROMConfig &_eepromConfig;
 };
 
 #endif

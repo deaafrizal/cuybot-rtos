@@ -7,7 +7,8 @@
 class MotorTask
 {
 public:
-    MotorTask(MotorDriver &rightMotor, MotorDriver &leftMotor);
+    MotorTask(MotorDriver &rightMotor, MotorDriver &leftMotor, MotorControl &motorControl);
+    ~MotorTask();
     void setDirection(int direction);
     void setSpeed(int speed);
     void startTask();
@@ -15,9 +16,9 @@ public:
 private:
     static void runTask(void *pvParameters);
 
-    MotorDriver _rightMotor;
-    MotorDriver _leftMotor;
-    MotorControl _motorControl;
+    MotorDriver &_rightMotor;
+    MotorDriver &_leftMotor;
+    MotorControl &_motorControl;
 };
 
 #endif

@@ -1,16 +1,20 @@
 #include <Motor/MotorControl.h>
 
-extern float motorTurnFactor;
-
-MotorControl::MotorControl(MotorDriver &rightSide, MotorDriver &leftSide)
+MotorControl::MotorControl(MotorDriver &rightSide, MotorDriver &leftSide, EEPROMConfig &eepromConfig)
     : _rightSide(rightSide),
-      _leftSide(leftSide),
-      _currentSpeed(0),
-      _maxSpeed(255),
-      _turnFactor(motorTurnFactor) {
-        _rightSide.stop();
-        _leftSide.stop();
-      }
+        _leftSide(leftSide),
+        _eepromConfig(eepromConfig),
+        _currentSpeed(0),
+        _maxSpeed(255),
+        _backwardLimit(200)
+        {
+            _rightSide.stop();
+            _leftSide.stop();
+            _turnFactor = _eepromConfig.getMemFloat(10);
+            if (_turnFactor <= 0.0f || _turnFactor > 1.0f) {
+                _turnFactor = 0.2f;
+            }
+        }
 
 void MotorControl::forward()
 {
@@ -20,29 +24,34 @@ void MotorControl::forward()
 
 void MotorControl::backward()
 {
-    _rightSide.backward(_currentSpeed * 0.85);
-    _leftSide.backward(_currentSpeed * 0.85);
+   int constrainedSpeed = constrain(_currentSpeed, 0, _backwardLimit);
+    _rightSide.backward(constrainedSpeed);
+    _leftSide.backward(constrainedSpeed);
 }
 
 void MotorControl::turnLeft(int speed)
 {
+   int constrainedSpeed = constrain(_currentSpeed, 0, _backwardLimit);
+
     if (speed > 0) {
         _rightSide.forward(_currentSpeed);
         _leftSide.forward(_currentSpeed * _turnFactor);
     } else if (speed < 0) {
-        _rightSide.backward(_currentSpeed * 0.85);
-        _leftSide.backward(_currentSpeed * _turnFactor);
+        _rightSide.backward(constrainedSpeed);
+        _leftSide.backward(constrainedSpeed * _turnFactor);
     }
 }
 
 void MotorControl::turnRight(int speed)
 {
+    int constrainedSpeed = constrain(_currentSpeed, 0, _backwardLimit);
+
     if (speed > 0) {
         _rightSide.forward(_currentSpeed * _turnFactor);
         _leftSide.forward(_currentSpeed);
     } else if (speed < 0) {
-        _rightSide.backward(_currentSpeed * _turnFactor);
-        _leftSide.backward(_currentSpeed * 0.85);
+        _rightSide.backward(constrainedSpeed * _turnFactor);
+        _leftSide.backward(constrainedSpeed);
     }
 }
 
@@ -53,43 +62,38 @@ void MotorControl::stop()
 }
 
 void MotorControl::setSpeed(int leftSpeed, int rightSpeed) {
-    _leftSide.forward(constrain(leftSpeed, 0, _maxSpeed));
-    _rightSide.forward(constrain(rightSpeed, 0, _maxSpeed));
+    int constrainedLeft = constrain(leftSpeed, 0, _maxSpeed);
+    int constrainedRight = constrain(rightSpeed, 0, _maxSpeed);
+
+    _leftSide.forward(constrainedLeft);
+    _rightSide.forward(constrainedRight);
 }
 
 void MotorControl::setSpeedAndDirection(int speed, int direction)
 {
-    int pwmValue = map(abs(speed), 0, 100, 0, _maxSpeed);
+    _currentSpeed = map(abs(speed), 0, 100, 0, _maxSpeed);
 
-    if (speed > 0) {
-        switch (direction)
-        {
+    if (speed > 0) {  // Forward
+        switch (direction) {
         case 0:
-            _currentSpeed = pwmValue;
             forward();
             break;
         case -1:
-            _currentSpeed = pwmValue;
             turnLeft(speed);
             break;
         case 1:
-            _currentSpeed = pwmValue;
             turnRight(speed);
             break;
         }
-    } else if (speed < 0) {
-        switch (direction)
-        {
+    } else if (speed < 0) {  // Backward
+        switch (direction) {
         case 0:
-            _currentSpeed = pwmValue;
             backward();
             break;
-        case -1: 
-            _currentSpeed = pwmValue;
+        case -1:
             turnLeft(speed);
             break;
         case 1:
-            _currentSpeed = pwmValue;
             turnRight(speed);
             break;
         }

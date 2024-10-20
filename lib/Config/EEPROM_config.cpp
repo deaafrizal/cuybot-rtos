@@ -1,73 +1,64 @@
 #include <EEPROM.h>
 #include <EEPROM_config.h>
 
-#define EEPROM_SIGNATURE 0x42  // A unique signature to indicate valid EEPROM data
-
 extern uint8_t motorMaxSpeed;
 extern uint8_t motorWeight;
 extern float motorTurnFactor;
 
-const int _motorMaxSpeedAddr = 1;     // Address 1 for motor max speed (uint8_t)
-const int _motorWeightAddr = 2;       // Address 2 for motor weight (uint8_t)
-const int _motorTurnFactorAddr = 4;   // Address 4 for motorTurnFactor (float requires 4 bytes)
-
 EEPROMConfig::EEPROMConfig() {
-    EEPROM.begin(512);  // Initialize EEPROM with 512 bytes
+    EEPROM.begin(_MEM_SIZE);
 }
 
 EEPROMConfig::~EEPROMConfig() {}
 
 void EEPROMConfig::loadSettings() {
-    // Check if EEPROM contains the correct signature
-    uint8_t signature = EEPROM.read(0);  // Signature stored at address 0
-
-    if (signature == EEPROM_SIGNATURE) {
-        // Load values from EEPROM
-        EEPROM.get(_motorMaxSpeedAddr, motorMaxSpeed);
-        EEPROM.get(_motorWeightAddr, motorWeight);
-        EEPROM.get(_motorTurnFactorAddr, motorTurnFactor);
-
-        // Debugging: Print loaded values from EEPROM
-        Serial.printf("Loaded from EEPROM - Max Speed: %d, Weight: %d, Turn Factor: %.2f\n", motorMaxSpeed, motorWeight, motorTurnFactor);
-    } else {
-        // EEPROM is uninitialized, don't set any default values here
-        Serial.println("EEPROM is uninitialized. Waiting for user to set values.");
+    if (EEPROM.read(_MAGIC_MEM_ADDR) != _MAGIC_MEM_NUM) {
+        setMemInt(1, motorMaxSpeed);
+        setMemInt(2, motorWeight);
+        setMemFloat(10, motorTurnFactor);
+        setMemInt(_MAGIC_MEM_ADDR, _MAGIC_MEM_NUM);
+        Serial.println("added default EEPROM.");
+    }else {
+        Serial.println("default value loaded!");
     }
+    Serial.println("EEPROM setup success!");
 }
 
-void EEPROMConfig::saveMotorMaxSpeed(uint8_t newMotorMaxSpeed) {
-    EEPROM.put(_motorMaxSpeedAddr, newMotorMaxSpeed);
-    EEPROM.commit();  // Ensure the changes are saved
-
-    // Debugging: Verify by reading the value back and printing
-    uint8_t readBack;
-    EEPROM.get(_motorMaxSpeedAddr, readBack);
-    Serial.printf("Motor Max Speed Saved: %d, Read Back: %d\n", newMotorMaxSpeed, readBack);
-}
-
-void EEPROMConfig::saveMotorWeight(uint8_t newMotorWeight) {
-    EEPROM.put(_motorWeightAddr, newMotorWeight);
-    EEPROM.commit();  // Ensure the changes are saved
-
-    // Debugging: Verify by reading the value back and printing
-    uint8_t readBack;
-    EEPROM.get(_motorWeightAddr, readBack);
-    Serial.printf("Motor Weight Saved: %d, Read Back: %d\n", newMotorWeight, readBack);
-}
-
-void EEPROMConfig::saveMotorTurnFactor(float newMotorTurnFactor) {
-    EEPROM.put(_motorTurnFactorAddr, newMotorTurnFactor);  // Save float value
-    EEPROM.commit();  // Ensure the changes are saved
-
-    // Debugging: Verify by reading the value back and printing
-    float readBack;
-    EEPROM.get(_motorTurnFactorAddr, readBack);
-    Serial.printf("Motor Turn Factor Saved: %.2f, Read Back: %.2f\n", newMotorTurnFactor, readBack);
-}
-
-// Function to save the signature after all values are set for the first time
-void EEPROMConfig::saveSignature() {
-    EEPROM.write(0, EEPROM_SIGNATURE);  // Write the signature after settings are saved
+void EEPROMConfig::setMemInt(int addr, uint8_t newMemInt) {
+    EEPROM.write(addr, newMemInt);
     EEPROM.commit();
-    Serial.println("Signature saved to EEPROM.");
+    Serial.print("saved to memInt: ");
+    Serial.print(newMemInt);
+    Serial.print(" addr: ");
+    Serial.println(addr);
+}
+
+void EEPROMConfig::setMemFloat(int addr, float newMemFloat) {
+    byte* bytePointer = (byte*)&newMemFloat;
+
+    for (int i = 0; i < sizeof(float); i++) {
+        EEPROM.write(addr + i, bytePointer[i]);
+    }
+
+    EEPROM.commit();
+    Serial.print("saved to memFloat: ");
+    Serial.print(newMemFloat);
+    Serial.print(" addr: ");
+    Serial.println(addr);
+}
+
+uint8_t EEPROMConfig::getMemInt(int addr) {
+    _memInt = EEPROM.read(addr);
+    return _memInt;
+}
+
+float EEPROMConfig::getMemFloat(int addr) {
+    float value = 0.0;
+    byte* bytePointer = (byte*)&value;
+
+    for (int i = 0; i < sizeof(float); i++) {
+        bytePointer[i] = EEPROM.read(addr + i);
+    }
+
+    return value;
 }

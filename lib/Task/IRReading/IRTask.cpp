@@ -1,11 +1,13 @@
 #include <IRReading/IRTask.h> 
 
-extern uint8_t motorMaxSpeed;
-extern uint8_t motorWeight;
+#define MAX_PWM_SPEED 255
+#define MIN_PWM_SPEED 0
 
-IRTask::IRTask(IR &ir, MotorControl &motorControl) : _ir(ir), _motorControl(motorControl) {
+IRTask::IRTask(IR &ir, MotorControl &motorControl, EEPROMConfig &eepromConfig) : _ir(ir), _motorControl(motorControl), _eepromConfig(eepromConfig) {
     _taskHandle = nullptr;
     _motorControl.stop();
+    _motorMaxSpeed = _eepromConfig.getMemInt(1);
+    _motorWeight = _eepromConfig.getMemInt(2);
 }
 
 TaskHandle_t IRTask::getTaskHandle() {
@@ -17,7 +19,7 @@ void IRTask::startTask() {
         xTaskCreate(irMeasureTask, "IRTask", 2448, this, 3, &_taskHandle);
         if (_taskHandle != nullptr) {
             Serial.println("IRTask started successfully.");
-            vTaskSuspend(_taskHandle);  // Start task in suspended state
+            vTaskSuspend(_taskHandle);
             Serial.println("IRTask initially suspended.");
         } else {
             Serial.println("Failed to start IRTask.");
@@ -44,7 +46,7 @@ void IRTask::suspendTask() {
 
 void IRTask::resumeTask() {
     if (_taskHandle != nullptr) {
-        _motorControl.setSpeed(motorMaxSpeed, motorMaxSpeed);  // Set initial motor speed
+        _motorControl.setSpeed(_motorMaxSpeed, _motorMaxSpeed);
         vTaskResume(_taskHandle);
         Serial.println("IR Task resumed.");
     }
@@ -54,39 +56,33 @@ void IRTask::irMeasureTask(void *_parameters) {
     IRTask *self = static_cast<IRTask *>(_parameters);
 
     self->_ir.begin();
-    int maxPWMSpeed = 255;
-    int minSpeed = 0;
-    
-    while (true) {  // Keep the task running indefinitely
-        int baselineSpeed = motorMaxSpeed;
 
+    while (true) {
         int irLeft = self->_ir.getIRLeft();
         int irRight = self->_ir.getIRRight();
 
         self->_ir.printLog();
 
-        int leftMotorSpeed = baselineSpeed;
-        int rightMotorSpeed = baselineSpeed;
+        int leftMotorSpeed = self->_motorMaxSpeed;
+        int rightMotorSpeed = self->_motorMaxSpeed;
 
-        // Adjust motor speeds based on IR sensor readings
         if (irLeft == LOW && irRight == HIGH) {
-            leftMotorSpeed = baselineSpeed - motorWeight;
-            rightMotorSpeed = baselineSpeed + motorWeight;
+            leftMotorSpeed = self->_motorMaxSpeed - self->_motorWeight;
+            rightMotorSpeed = self->_motorMaxSpeed + self->_motorWeight;
         } else if (irLeft == HIGH && irRight == LOW) {
-            leftMotorSpeed = baselineSpeed + motorWeight;
-            rightMotorSpeed = baselineSpeed - motorWeight;
+            leftMotorSpeed = self->_motorMaxSpeed + self->_motorWeight;
+            rightMotorSpeed = self->_motorMaxSpeed - self->_motorWeight;
         }else if (irLeft == LOW && irRight == LOW) {
             self->_motorControl.stop();
         }
 
-        // Constrain motor speeds
-        leftMotorSpeed = constrain(leftMotorSpeed, minSpeed, maxPWMSpeed);
-        rightMotorSpeed = constrain(rightMotorSpeed, minSpeed, maxPWMSpeed);
+        leftMotorSpeed = constrain(leftMotorSpeed, MIN_PWM_SPEED, MAX_PWM_SPEED);
+        rightMotorSpeed = constrain(rightMotorSpeed, MIN_PWM_SPEED, MAX_PWM_SPEED);
 
-        // Set motor speeds
         self->_motorControl.setSpeed(leftMotorSpeed, rightMotorSpeed);
 
-        vTaskDelay(pdMS_TO_TICKS(10));  // Adjust delay as needed
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
     self->_motorControl.stop();
+    vTaskSuspend(nullptr);
 }

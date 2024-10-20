@@ -3,15 +3,20 @@
 extern int motorSpeed;
 extern int motorDirection;
 
-MotorTask::MotorTask(MotorDriver &rightMotor, MotorDriver &leftMotor)
-    : _rightMotor(rightMotor), _leftMotor(leftMotor), _motorControl(_rightMotor, _leftMotor)
+MotorTask::MotorTask(MotorDriver &rightMotor, MotorDriver &leftMotor, MotorControl &motorControl)
+    : _rightMotor(rightMotor), _leftMotor(leftMotor), _motorControl(motorControl)
 {
+}
+
+MotorTask::~MotorTask() {
+    //
 }
 
 void MotorTask::startTask()
 {
     xTaskCreate(runTask, "MotorControlTask", 3248, this, 4, NULL);
 }
+
 
 void MotorTask::setDirection(int newDirection) {
     motorDirection = newDirection;
@@ -23,7 +28,7 @@ void MotorTask::setSpeed(int newSpeed) {
 
 void MotorTask::runTask(void *pvParameters)
 {
-    MotorTask *motorTask = static_cast<MotorTask *>(pvParameters);
+    MotorTask *self = static_cast<MotorTask *>(pvParameters);
     
     int currentSpeed = 0;
     
@@ -38,11 +43,11 @@ void MotorTask::runTask(void *pvParameters)
         }
 
         if (currentSpeed == 0) {
-            motorTask->_motorControl.stop();
+            self->_motorControl.stop();
         } else {
-            motorTask->_motorControl.setSpeedAndDirection(currentSpeed, motorDirection);
+            self->_motorControl.setSpeedAndDirection(currentSpeed, motorDirection);
         }
 
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
 }

@@ -13,7 +13,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <TelnetStream.h>
-#include <EEPROM.h>
+#include <EEPROM_config.h>
 
 #define PWM_A1 3
 #define PWM_A2 4
@@ -23,13 +23,13 @@
 #define SSID "cuybot"
 const char* password = "123456789";
 
-// EEPROMConfig eepromConfig;
+EEPROMConfig eepromConfig;
 
 int mode = 1;
 int motorSpeed = 0;
 int motorDirection = 0;
 
-// eeprom
+// ::MEM VAR:: extern to eeprom config
 uint8_t motorMaxSpeed = 75;
 uint8_t motorWeight = 50;
 float motorTurnFactor = 0.2f;
@@ -40,14 +40,14 @@ OTA ota("cuybot");
 MotorDriver leftMotor(PWM_B1, PWM_B2);
 MotorDriver rightMotor(PWM_A1, PWM_A2);
 
-MotorControl motorControl(rightMotor, leftMotor);
-MotorTask motorTask(rightMotor, leftMotor);
+MotorControl motorControl(rightMotor, leftMotor, eepromConfig);
+MotorTask motorTask(rightMotor, leftMotor, motorControl);
 
 IR ir;
-IRTask irTask(ir, motorControl);
+IRTask irTask(ir, motorControl, eepromConfig);
 
 Ultrasonic ultrasonic;
-UltrasonicTask ultrasonicTask(ultrasonic, motorControl);
+UltrasonicTask ultrasonicTask(ultrasonic, motorControl, eepromConfig);
 ModeSelectionTask modeSelectionTask(motorTask, ultrasonicTask, irTask);
 WebSocketTask webSocketTask(modeSelectionTask);
 
@@ -55,13 +55,7 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Starting serial communication...");
     delay(500);
-    EEPROM.begin(128);
 
-    if (EEPROM.read(1) <= 0 && EEPROM.read(2) <= 0) {
-        EEPROM.write(1, motorMaxSpeed);
-        EEPROM.write(2, motorWeight);
-    }
-    
     delay(200);
 
     Serial.println("Serial communication OK!");

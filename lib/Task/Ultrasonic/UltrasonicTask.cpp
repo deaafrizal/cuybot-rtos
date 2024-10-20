@@ -1,25 +1,33 @@
 #include <Ultrasonic/UltrasonicTask.h>
 #include <Arduino.h>
-#include <EEPROM.h>
 
-UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorControl &motorControl)
-    : _ultrasonic(ultrasonic), _motorControl(motorControl), taskRunning(false), _taskHandle(nullptr) {
-    _ultrasonic.begin();  // Initialize the ultrasonic sensor
+UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorControl &motorControl, EEPROMConfig &eepromConfig)
+    : _ultrasonic(ultrasonic), _motorControl(motorControl), taskRunning(false), _taskHandle(nullptr), _eepromConfig(eepromConfig) {
+    _ultrasonic.begin();
+}
+
+
+UltrasonicTask::~UltrasonicTask() {
+    if (_taskHandle != nullptr) {
+        vTaskDelete(_taskHandle);
+        _taskHandle = nullptr;
+    }
 }
 
 void UltrasonicTask::startTask() {
     if (_taskHandle == nullptr) {
-        taskRunning = true;  // Ensure taskRunning is true at start
+        taskRunning = true;
         xTaskCreate(distanceMeasureTask, "UltrasonicTask", 3648, this, 2, &_taskHandle);
         if (_taskHandle != nullptr) {
             Serial.println("UltrasonicTask started successfully.");
-            vTaskSuspend(_taskHandle);  // Start task in suspended state
+            vTaskSuspend(_taskHandle);
             Serial.println("UltrasonicTask initially suspended.");
         } else {
             Serial.println("Failed to start UltrasonicTask.");
         }
     }
 }
+
 
 void UltrasonicTask::stopTask() {
     if (_taskHandle != nullptr) {
@@ -57,8 +65,8 @@ void UltrasonicTask::distanceMeasureTask(void *parameters) {
 
     uint32_t lastSensorCheckTime = 0;
     uint32_t lastMotorUpdateTime = 0;
-    const uint32_t sensorCheckInterval = 50;  // Measure sensor every 30ms
-    const uint32_t motorUpdateInterval = 5;   // Update motor every 5ms
+    const uint32_t sensorCheckInterval = 50;
+    const uint32_t motorUpdateInterval = 5;
 
     while (true) {
         uint32_t currentTime = millis();
@@ -70,7 +78,7 @@ void UltrasonicTask::distanceMeasureTask(void *parameters) {
             }
 
             if (currentTime - lastMotorUpdateTime >= motorUpdateInterval) {
-                uint8_t speed = EEPROM.read(1);
+                uint8_t speed = self->_eepromConfig.getMemInt(1);
 
                 if (self->_distance <= self->_maxDistance) {
                     self->_motorControl.setSpeed(255, 0);
@@ -81,7 +89,6 @@ void UltrasonicTask::distanceMeasureTask(void *parameters) {
             }
         }
         
-        // Delay to allow other tasks to run (you can adjust this as needed)
-        vTaskDelay(pdMS_TO_TICKS(1));
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
 }
