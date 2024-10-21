@@ -14,6 +14,13 @@
 #include <freertos/task.h>
 #include <EEPROM_config.h>
 #include <EEPROM.h>
+#include <StackMonitor/StackMonitorTask.h>
+
+TaskHandle_t webSocketTaskHandle = NULL;
+const uint32_t webSocketStackSize = 4096;
+
+TaskHandle_t webServerTaskHandle = NULL;
+const uint32_t webServerStackSize = 2048;
 
 #define PWM_A1 3
 #define PWM_A2 4
@@ -44,7 +51,10 @@ IRTask irTask(ir, rightMotor, leftMotor);
 Ultrasonic ultrasonic;
 UltrasonicTask ultrasonicTask(ultrasonic, rightMotor, leftMotor);
 ModeSelectionTask modeSelectionTask(motorTask, ultrasonicTask, irTask);
-WebSocketTask webSocketTask(modeSelectionTask);
+WebSocketTask webSocketTask;
+
+StackMonitorTask webSocketTaskMonitoring(webSocketTaskHandle, webSocketStackSize, "webSocketTask", &webSocketTask);
+StackMonitorTask webServerTaskMonitoring(webServerTaskHandle, webServerStackSize, "webServerTask", &webSocketTask);
 
 void setup() {
     Serial.begin(9600);
@@ -90,11 +100,19 @@ void setup() {
     
     delay(500);
 
-    webServerTask.startTask();
+    Serial.println("RTOS initialize...");
+    webServerTask.startTask(webServerTaskHandle, webServerStackSize);
+    webSocketTask.startTask(webSocketTaskHandle, webSocketStackSize);
+    
     modeSelectionTask.startTask();
-    webSocketTask.startTask();
     motorTask.startTask();
-    Serial.println("RTOS OK!");
+    
+    delay(500);
+    
+    Serial.println("RTOS Start Monitoring...");
+    webSocketTaskMonitoring.startMonitoring();
+    webServerTaskMonitoring.startMonitoring();
+    Serial.println("RTOS OK");
 }
 
 void loop() {}

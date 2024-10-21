@@ -4,23 +4,28 @@
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <WebSocket/WebSocketTask.h>
 
 class StackMonitorTask {
 public:
-    StackMonitorTask(TaskHandle_t getTaskHandle, uint32_t stackSize);
-    
-    void startMonitoring();          // Start the FreeRTOS task for monitoring stack
-    void stopMonitoring();           // Stop the FreeRTOS task
-    float getUsedStackPercentage();  // Get the last read used stack percentage
+    StackMonitorTask(TaskHandle_t taskHandle, uint32_t stackSize, const char* taskName, WebSocketTask* webSocketTask);
+    void startMonitoring();
+    void stopMonitoring();
+    float getUsedStackPercentage();
 
 private:
-    TaskHandle_t _taskHandle;       // Handle for the task being monitored
-    TaskHandle_t _getTaskHandle;       // Handle for the task being monitored
-    uint32_t _stackSize;             // Size of the stack to monitor
-    float _usedStackPercentage;
+    TaskHandle_t _taskHandle;
+    uint32_t _stackSize;
 
-    static void monitorTask(void *pvParameters);  // FreeRTOS task to monitor stack usage
-    void readStack();                // Function to read and calculate stack usage
+    void sendStackData();
+    const char* _taskName;
+    float _usedStackPercentage = 0.0;
+    unsigned long _lastSendTime = 0;
+    static const unsigned long SEND_INTERVAL = 5000;
+
+    void readStack();
+    WebSocketTask* _webSocketTask;
+    static void monitorTask(void *pvParameters);
 };
 
 #endif

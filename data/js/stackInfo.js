@@ -1,9 +1,7 @@
-function updateStackInfo(freeStackPercentage, usedStackPercentage) {
-  const freeStackElement = document.getElementById('free-stack');
-  const usedStackElement = document.getElementById('stack-usage');
+function updateStackInfo(taskName, usedStackPercentage) {
+  const usedStackElement = document.getElementById(taskName);
 
-  if (freeStackElement && usedStackElement) {
-    freeStackElement.innerText = `${freeStackPercentage.toFixed(2)}%`;
+  if (usedStackElement) {
     usedStackElement.innerText = `${usedStackPercentage.toFixed(2)}%`;
   }
 }

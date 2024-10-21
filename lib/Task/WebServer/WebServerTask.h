@@ -9,13 +9,13 @@ public:
     WebServerTask();
     ~WebServerTask();
     
-    void startTask(int stackSize = 6276);
+    void startTask(TaskHandle_t taskHandleint, uint32_t stackSize);
     void stopTask();
 
 private:
     static void webServerTaskFunction(void *parameter);
-
-    TaskHandle_t taskHandle;
+    
+    TaskHandle_t _taskHandle;
     static AsyncWebServer server;
     static DNSServer dnsServer; 
 };
