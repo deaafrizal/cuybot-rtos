@@ -1,5 +1,5 @@
-function updateStackInfo(usedStackPercentage) {
-  const usedStackElement = document.getElementById('websocket-usage');
+function updateStackInfo(taskName, usedStackPercentage) {
+  const usedStackElement = document.getElementById(taskName);
 
   if (usedStackElement) {
     usedStackElement.innerText = `${usedStackPercentage.toFixed(2)}%`;

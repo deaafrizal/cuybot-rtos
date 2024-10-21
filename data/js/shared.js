@@ -6,19 +6,19 @@ function connectWebSocket() {
 
   websocket.onopen = function () {
     reconnecting = false;
-    console.log("WebSocket connected");
+    console.log("CuyBot Connected!");
     handleWebSocketConnection();
   };
 
   websocket.onclose = function () {
-    console.log("WebSocket connection closed, retrying...");
+    console.log("CuyBot Disconnected!");
     reconnecting = true;
     handleWebSocketDisconnection();
     setTimeout(connectWebSocket, 5000);
   };
 
   websocket.onerror = function (error) {
-    console.error("WebSocket error:", error);
+    console.log("please wait...");
     reconnecting = true;
     handleWebSocketDisconnection();
     setTimeout(connectWebSocket, 5000);
@@ -27,7 +27,6 @@ function connectWebSocket() {
   websocket.onmessage = function (event) {
     try {
       const data = JSON.parse(event.data);
-      console.log(data.freeStackPercentage);
       if (data.clientID !== undefined) {
         clientId = data.clientID;
       }
@@ -36,8 +35,8 @@ function connectWebSocket() {
         updatePlaytimeDisplay(data.playtime);
       }
 
-      if (data.usedStackPercentage !== undefined) {
-        updateStackInfo(data.usedStackPercentage);
+      if (data.usedStackPercentage !== undefined && data.taskName !== undefined) {
+        updateStackInfo(data.taskName, data.usedStackPercentage);
       }
 
       if (data.mode !== undefined) {

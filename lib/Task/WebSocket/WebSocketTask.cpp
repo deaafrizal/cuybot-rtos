@@ -1,7 +1,6 @@
 #include <map>
 #include <WebSocket/WebSocketTask.h>
 #include <ModeSelection/ModeSelectionTask.h>
-#include <StackMonitor/StackMonitorTask.h>
 
 extern int motorSpeed;
 extern int motorDirection;
@@ -12,7 +11,6 @@ extern int mode;
 #define NO_CLIENT_TIMEOUT_MS 10000
 #define PLAYTIME_UPDATE_INTERVAL_MS 1000
 #define BATTERY_UPDATE_INTERVAL_MS 5000
-#define STACK_UPDATE_INTERVAL_MS 5000
 
 WebSocketsServer WebSocketTask::webSocket = WebSocketsServer(81);
 WebSocketTask* WebSocketTask::instance = nullptr;
@@ -26,10 +24,9 @@ std::map<String, int> clientIDMap;
 
 unsigned long lastPlaytimeSent = 0;
 unsigned long lastBatterySent = 0;
-unsigned long lastStackSent = 0;
 
-WebSocketTask::WebSocketTask() : stackMonitorTask(nullptr) {
-    taskHandle = NULL;
+WebSocketTask::WebSocketTask() {
+    _taskHandle = NULL;
     activeClientCount = 0;
     noClientTimer = NULL;
     isOperationSuspended = false;
@@ -37,28 +34,29 @@ WebSocketTask::WebSocketTask() : stackMonitorTask(nullptr) {
 
 WebSocketTask::~WebSocketTask() {
     stopTask();
-    delete stackMonitorTask;
 }
 
-void WebSocketTask::startTask() {
-    if (taskHandle == NULL) {
+void WebSocketTask::startTask(TaskHandle_t taskHandle, uint32_t stackSize) {
+    if (_taskHandle == NULL) {
+        _taskHandle = taskHandle;
         instance = this;
-        stackMonitorTask = new StackMonitorTask(taskHandle, stackSize, "WebSocketTask");
+        
+        
         batteryMonitorTask.startMonitoring();
-        stackMonitorTask->startMonitoring();
-        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, 5, &taskHandle);
+
+        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, 5, &_taskHandle);
+
         noClientTimer = xTimerCreate("NoClientTimer", pdMS_TO_TICKS(NO_CLIENT_TIMEOUT_MS), pdTRUE, this, checkForActiveClients);
     }
 }
 
 void WebSocketTask::stopTask() {
-    if (taskHandle != NULL) {
-        vTaskSuspend(taskHandle);
+    if (_taskHandle != NULL) {
+        vTaskSuspend(_taskHandle);
         webSocket.close();
-        vTaskDelete(taskHandle);
+        vTaskDelete(_taskHandle);
         batteryMonitorTask.stopMonitoring();
-        stackMonitorTask->stopMonitoring();
-        taskHandle = NULL;
+        _taskHandle = NULL;
         if (noClientTimer != NULL) {
             xTimerDelete(noClientTimer, 0);
             noClientTimer = NULL;
@@ -67,33 +65,33 @@ void WebSocketTask::stopTask() {
 }
 
 void WebSocketTask::suspendTask() {
-    if (!isOperationSuspended && taskHandle != NULL && eTaskGetState(taskHandle) != eSuspended) {
-        vTaskSuspend(taskHandle);
+    if (!isOperationSuspended && _taskHandle != NULL && eTaskGetState(_taskHandle) != eSuspended) {
+        vTaskSuspend(_taskHandle);
         isOperationSuspended = true;
     }
 }
 
 void WebSocketTask::resumeTask() {
-    if (isOperationSuspended && taskHandle != NULL && eTaskGetState(taskHandle) == eSuspended) {
-        vTaskResume(taskHandle);
+    if (isOperationSuspended && _taskHandle != NULL && eTaskGetState(_taskHandle) == eSuspended) {
+        vTaskResume(_taskHandle);
         isOperationSuspended = false;
     }
 }
 
 TaskHandle_t WebSocketTask::getTaskHandle() {
-    return taskHandle;
+    return _taskHandle;
 }
 
 void WebSocketTask::webSocketTaskFunction(void *parameter) {
     WebSocketTask *self = static_cast<WebSocketTask*>(parameter);
     self->webSocket.begin();
     self->webSocket.onEvent(onWebSocketEvent);
+
     for (;;) {
         self->webSocket.loop();
         unsigned long currentMillis = millis();
         self->monitorPlaytime(currentMillis);
         self->monitorBattery(currentMillis);
-        self->monitorStack(currentMillis);
         vTaskDelay(pdMS_TO_TICKS(5));
     }
     vTaskSuspend(NULL);
@@ -111,13 +109,6 @@ void WebSocketTask::monitorBattery(unsigned long currentMillis) {
     if (currentMillis - lastBatterySent > BATTERY_UPDATE_INTERVAL_MS) {
         sendBatteryData();
         lastBatterySent = currentMillis;
-    }
-}
-
-void WebSocketTask::monitorStack(unsigned long currentMillis) {
-    if (currentMillis - lastStackSent > STACK_UPDATE_INTERVAL_MS) {
-        sendStackData();
-        lastStackSent = currentMillis;
     }
 }
 
@@ -232,21 +223,18 @@ void WebSocketTask::sendBatteryData() {
     }
 }
 
-void WebSocketTask::sendStackData() {
-    WebSocketTask *self = WebSocketTask::instance;
-    float usedStackPercentage = self->stackMonitorTask->getUsedStackPercentage();
-    String jsonData = "{\"usedStackPercentage\": " + String(usedStackPercentage) + "}";
+void WebSocketTask::sendModeData() {
+    String jsonData = "{\"mode\": " + String(mode) + "}";
+    if (!activeClients.empty()) {
+        webSocket.broadcastTXT(jsonData);
+    }
+}
+
+void WebSocketTask::sendStackDataToClient(String &jsonData) {
     for (const auto& client : activeClients) {
         int clientNum = getClientNumFromID(client);
         if (clientNum >= 0) {
             webSocket.sendTXT(clientNum, jsonData);
         }
-    }
-}
-
-void WebSocketTask::sendModeData() {
-    String jsonData = "{\"mode\": " + String(mode) + "}";
-    if (!activeClients.empty()) {
-        webSocket.broadcastTXT(jsonData);
     }
 }

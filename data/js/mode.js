@@ -114,10 +114,7 @@ function updateModeButtons(activeMode) {
 // Example WebSocket send message function
 function sendModeMessage(message) {
   if (websocket && websocket.readyState === WebSocket.OPEN) {
-    console.log("Sending mode message:", message);
     websocket.send(message);
-  } else {
-    console.error('WebSocket is not open');
   }
 }
 

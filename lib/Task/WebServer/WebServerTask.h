@@ -3,24 +3,21 @@
 
 #include <ESPAsyncWebServer.h>
 #include <DNSServer.h>
-#include <StackMonitor/StackMonitorTask.h>
 
 class WebServerTask {
 public:
     WebServerTask();
     ~WebServerTask();
     
-    void startTask(int stackSize = 6276);
+    void startTask(TaskHandle_t taskHandleint, uint32_t stackSize);
     void stopTask();
-    void monitorStack(unsigned long currentMillis); // For monitoring stack usage
 
 private:
     static void webServerTaskFunction(void *parameter);
     
-    TaskHandle_t taskHandle;
+    TaskHandle_t _taskHandle;
     static AsyncWebServer server;
     static DNSServer dnsServer; 
-    StackMonitorTask* stackMonitorTask; // Instance of StackMonitorTask
 };
 
 #endif

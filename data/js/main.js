@@ -15,7 +15,6 @@ function toggleSidebar() {
   }
 }
 
-// Hide all elements except the sidebar
 function hideContent() {
   const bodyChildren = document.body.children;
 
@@ -27,7 +26,6 @@ function hideContent() {
   }
 }
 
-// Show all elements that were hidden
 function showContent() {
   const bodyChildren = document.body.children;
 
