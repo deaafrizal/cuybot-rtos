@@ -12,7 +12,6 @@
 #include <Motor/MotorDriver.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <TelnetStream.h>
 #include <EEPROM_config.h>
 #include <EEPROM.h>
 
@@ -51,7 +50,6 @@ void setup() {
     Serial.begin(9600);
     Serial.println("Starting serial communication...");
     delay(500);
-
     EEPROM.begin(128);
     delay(1000);
     
@@ -84,7 +82,6 @@ void setup() {
     Serial.println("Setting up OTA service...");
     ota.begin();
     ota.startOTATask();
-    TelnetStream.println("Setting up OTA service done!");
 
     pinMode(PWM_A1, OUTPUT);
     pinMode(PWM_A2, OUTPUT);
@@ -93,12 +90,10 @@ void setup() {
     
     delay(500);
 
-    TelnetStream.println("Setting up RTOS...");
     webServerTask.startTask();
     modeSelectionTask.startTask();
     webSocketTask.startTask();
     motorTask.startTask();
-    TelnetStream.println("RTOS OK!");
     Serial.println("RTOS OK!");
 }
 

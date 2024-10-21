@@ -11,7 +11,7 @@ function toggleSidebar() {
     hideContent();
   }
   if (websocket && websocket.readyState === WebSocket.OPEN) {
-    hideLoadingOverlay();
+    // hideLoadingOverlay();
   }
 }
 

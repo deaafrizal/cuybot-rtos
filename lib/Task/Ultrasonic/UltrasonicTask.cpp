@@ -1,6 +1,5 @@
 #include <Ultrasonic/UltrasonicTask.h>
 #include <Arduino.h>
-#include <TelnetStream.h>
 
 UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorDriver &rightMotor, MotorDriver &leftMotor)
     : _ultrasonic(ultrasonic), _rightMotor(rightMotor), _leftMotor(leftMotor), _taskHandle(nullptr) {
@@ -77,9 +76,6 @@ void UltrasonicTask::distanceMeasureTask(void *parameters) {
         if (currentTime - lastSensorCheckTime >= sensorCheckInterval) {
             self->_distance = self->_ultrasonic.getDistance();
             lastSensorCheckTime = currentTime;
-
-            TelnetStream.print("Distance: ");
-            TelnetStream.println(self->_distance);
         }
 
         // Update motor speeds based on the sensor reading

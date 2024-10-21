@@ -1,5 +1,3 @@
-// shared.js
-
 let websocket = null;
 let reconnecting = false;
 
@@ -9,45 +7,43 @@ function connectWebSocket() {
   websocket.onopen = function () {
     reconnecting = false;
     console.log("WebSocket connected");
-    handleWebSocketConnection(); // Handle playtime start/resume
+    handleWebSocketConnection();
   };
 
   websocket.onclose = function () {
     console.log("WebSocket connection closed, retrying...");
     reconnecting = true;
-    handleWebSocketDisconnection(); // Handle playtime pause/stop
-    setTimeout(connectWebSocket, 5000); // Retry connection after 5 seconds
+    handleWebSocketDisconnection();
+    setTimeout(connectWebSocket, 5000);
   };
 
   websocket.onerror = function (error) {
     console.error("WebSocket error:", error);
     reconnecting = true;
-    handleWebSocketDisconnection(); // Handle playtime pause/stop
-    setTimeout(connectWebSocket, 5000); // Retry on error
+    handleWebSocketDisconnection();
+    setTimeout(connectWebSocket, 5000);
   };
 
   websocket.onmessage = function (event) {
     try {
       const data = JSON.parse(event.data);
-      console.log("Received data:", data);
-      // Check if the message contains the clientID
+      console.log(data.freeStackPercentage);
       if (data.clientID !== undefined) {
-        clientId = data.clientID;  // Store the client ID
-        console.log("Client ID received:", clientId);
+        clientId = data.clientID;
       }
 
-      // Handle playtime data
       if (data.playtime !== undefined) {
-        console.log(`Playtime data received: ${data.playtime} seconds`);
-        updatePlaytimeDisplay(data.playtime); // Update playtime display on UI
+        updatePlaytimeDisplay(data.playtime);
       }
 
-      // Handle mode or other data
+      if (data.freeStackPercentage !== undefined && data.usedStackPercentage !== undefined) {
+        updateStackInfo(data.freeStackPercentage, data.usedStackPercentage);
+      }
+
       if (data.mode !== undefined) {
-        updateModeButtons(data.mode); // Update the mode buttons
+        updateModeButtons(data.mode);
       }
 
-      // Handle battery data
       if (data.batteryVoltage !== undefined && data.batteryPercentage !== undefined) {
         updateBatteryDisplay(data.batteryVoltage, data.batteryPercentage);
       }
@@ -57,21 +53,18 @@ function connectWebSocket() {
   };
 }
 
-// WebSocket handling for playtime
 function handleWebSocketConnection() {
-  startPlaytimeTracking(); // Start playtime tracking when WebSocket is connected
+  startPlaytimeTracking();
 }
 
 function handleWebSocketDisconnection() {
-  stopPlaytimeTracking(); // Pause playtime tracking when WebSocket is disconnected
+  stopPlaytimeTracking();
 }
 
-// WebSocket connection management
 window.addEventListener('beforeunload', () => {
   if (websocket) {
     websocket.close();
   }
 });
 
-// Connect WebSocket on page load
 connectWebSocket();

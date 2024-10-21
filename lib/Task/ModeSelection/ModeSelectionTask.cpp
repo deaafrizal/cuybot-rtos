@@ -48,9 +48,6 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
     TaskHandle_t irTaskHandle = self->_irTask.getTaskHandle();
 
     while (true) {
-        Serial.print("Current mode: ");
-        Serial.println(mode);
-
         if (xSemaphoreTake(modeChangeSemaphore, portMAX_DELAY) == pdTRUE) {
             buzzer.beep(100);  // Beep on mode change
 

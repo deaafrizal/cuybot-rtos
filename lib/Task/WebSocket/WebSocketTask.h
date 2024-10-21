@@ -6,6 +6,9 @@
 #include <String>
 #include <WebSocketsServer.h>
 #include <BatteryMonitor/BatteryMonitorTask.h>
+#include <StackMonitor/StackMonitorTask.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include <freertos/timers.h>
 
 class ModeSelectionTask;
@@ -15,22 +18,29 @@ public:
     WebSocketTask(ModeSelectionTask &modeSelectionTask);
     ~WebSocketTask();
     
-    void startTask(int stackSize = 5295);
+    void startTask();
     void stopTask();
     void suspendTask();
     void resumeTask();
+    void sendPlaytimeData();
+    void sendBatteryData();
+    void sendModeData();
+    void sendStackData();
+
+    void monitorPlaytime(unsigned long currentMillis);
+    void monitorBattery(unsigned long currentMillis);
+    void monitorStack(unsigned long currentMillis);
+
     TaskHandle_t getTaskHandle();
 
     static void checkForActiveClients(TimerHandle_t xTimer);
 
-    void sendPlaytimeData();
-    void sendBatteryData();
-    void sendModeData();
-
 private:
+    const unsigned long stackSize = 4096;
     static WebSocketsServer webSocket;
     static WebSocketTask* instance;
     static BatteryMonitorTask batteryMonitorTask;
+    StackMonitorTask* stackMonitorTask;
 
     static void webSocketTaskFunction(void *parameter);
     static void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
@@ -42,6 +52,7 @@ private:
     std::map<String, int> clientIDMap;
 
     void updatePlaytime();
+
     int getClientNumFromID(String clientID);
 
     TaskHandle_t taskHandle;
