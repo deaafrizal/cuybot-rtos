@@ -74,9 +74,18 @@ function handleWebSocketTimeout(button) {
   resetButton(button);
 }
 
+const savedMode = sessionStorage.getItem('activeMode');
+
+if (savedMode) {
+  updateModeButtons(savedMode);
+  sendModeMessage(`M${savedMode}`);
+}
+
 // Update button styles based on active mode from WebSocket
 function updateModeButtons(activeMode) {
   const buttons = [obstacleButton, followButton, patrolButton, spinButton];
+
+  sessionStorage.setItem('activeMode', activeMode);
 
   // If manual mode is activated, deactivate all buttons
   if (activeMode === 'M1' || activeMode === '1') {
@@ -105,6 +114,7 @@ function updateModeButtons(activeMode) {
 // Example WebSocket send message function
 function sendModeMessage(message) {
   if (websocket && websocket.readyState === WebSocket.OPEN) {
+    console.log("Sending mode message:", message);
     websocket.send(message);
   } else {
     console.error('WebSocket is not open');

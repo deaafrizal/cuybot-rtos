@@ -1,8 +1,12 @@
 #ifndef WEBSOCKET_TASK_H
 #define WEBSOCKET_TASK_H
 
+#include <set>
+#include <map>
+#include <String>
 #include <WebSocketsServer.h>
 #include <BatteryMonitor/BatteryMonitorTask.h>
+#include <freertos/timers.h>
 
 class ModeSelectionTask;
 
@@ -17,19 +21,33 @@ public:
     void resumeTask();
     TaskHandle_t getTaskHandle();
 
+    static void checkForActiveClients(TimerHandle_t xTimer);
+
+    void sendPlaytimeData();
+    void sendBatteryData();
+    void sendModeData();
+
 private:
-    static BatteryMonitorTask batteryMonitorTask;
     static WebSocketsServer webSocket;
     static WebSocketTask* instance;
+    static BatteryMonitorTask batteryMonitorTask;
 
     static void webSocketTaskFunction(void *parameter);
     static void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
-    
-    TaskHandle_t taskHandle;
-    int activeClientCount;
 
-    void sendBatteryData();
-    void sendModeData();
+    std::set<String> activeClients;
+    std::map<String, unsigned long> playtimeMap;
+    std::map<String, bool> isPausedMap;
+    std::map<String, unsigned long> lastConnectionMap;
+    std::map<String, int> clientIDMap;
+
+    void updatePlaytime();
+    int getClientNumFromID(String clientID);
+
+    TaskHandle_t taskHandle;
+    bool isOperationSuspended;
+    TimerHandle_t noClientTimer;
+    int activeClientCount;
 
     ModeSelectionTask &_modeSelectionTask;
 };

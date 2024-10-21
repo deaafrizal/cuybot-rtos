@@ -1,39 +1,55 @@
-let websocket = null;  // Global WebSocket variable
-let reconnecting = false; // Track if the WebSocket is reconnecting
+// shared.js
 
-// Connect to WebSocket
+let websocket = null;
+let reconnecting = false;
+
 function connectWebSocket() {
-  websocket = new WebSocket("ws://cuybot.local:81"); // Change to your WebSocket address
+  websocket = new WebSocket("ws://cuybot.local:81");
 
   websocket.onopen = function () {
-    console.log("WebSocket connected");
     reconnecting = false;
+    console.log("WebSocket connected");
+    handleWebSocketConnection(); // Handle playtime start/resume
   };
 
   websocket.onclose = function () {
     console.log("WebSocket connection closed, retrying...");
     reconnecting = true;
+    handleWebSocketDisconnection(); // Handle playtime pause/stop
     setTimeout(connectWebSocket, 5000); // Retry connection after 5 seconds
   };
 
   websocket.onerror = function (error) {
     console.error("WebSocket error:", error);
     reconnecting = true;
+    handleWebSocketDisconnection(); // Handle playtime pause/stop
     setTimeout(connectWebSocket, 5000); // Retry on error
   };
 
   websocket.onmessage = function (event) {
     try {
       const data = JSON.parse(event.data);
-
-      // Handle the mode update
-      if (data.mode !== undefined) {
-        updateModeButtons(data.mode); // Call from mode.js to update button states
+      console.log("Received data:", data);
+      // Check if the message contains the clientID
+      if (data.clientID !== undefined) {
+        clientId = data.clientID;  // Store the client ID
+        console.log("Client ID received:", clientId);
       }
 
-      // If mode.js is waiting for WebSocket response, reset button states
-      if (typeof resetButton === "function" && activeButton) {
-        resetButton(activeButton);
+      // Handle playtime data
+      if (data.playtime !== undefined) {
+        console.log(`Playtime data received: ${data.playtime} seconds`);
+        updatePlaytimeDisplay(data.playtime); // Update playtime display on UI
+      }
+
+      // Handle mode or other data
+      if (data.mode !== undefined) {
+        updateModeButtons(data.mode); // Update the mode buttons
+      }
+
+      // Handle battery data
+      if (data.batteryVoltage !== undefined && data.batteryPercentage !== undefined) {
+        updateBatteryDisplay(data.batteryVoltage, data.batteryPercentage);
       }
     } catch (e) {
       console.error("Error parsing WebSocket message:", e);
@@ -41,12 +57,21 @@ function connectWebSocket() {
   };
 }
 
-// Disconnect WebSocket on page unload
+// WebSocket handling for playtime
+function handleWebSocketConnection() {
+  startPlaytimeTracking(); // Start playtime tracking when WebSocket is connected
+}
+
+function handleWebSocketDisconnection() {
+  stopPlaytimeTracking(); // Pause playtime tracking when WebSocket is disconnected
+}
+
+// WebSocket connection management
 window.addEventListener('beforeunload', () => {
   if (websocket) {
     websocket.close();
   }
 });
 
-// Initialize WebSocket connection
+// Connect WebSocket on page load
 connectWebSocket();
