@@ -44,7 +44,7 @@ IRTask irTask(ir, rightMotor, leftMotor);
 Ultrasonic ultrasonic;
 UltrasonicTask ultrasonicTask(ultrasonic, rightMotor, leftMotor);
 ModeSelectionTask modeSelectionTask(motorTask, ultrasonicTask, irTask);
-WebSocketTask webSocketTask(modeSelectionTask);
+WebSocketTask webSocketTask;
 
 void setup() {
     Serial.begin(9600);

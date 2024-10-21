@@ -36,8 +36,8 @@ function connectWebSocket() {
         updatePlaytimeDisplay(data.playtime);
       }
 
-      if (data.freeStackPercentage !== undefined && data.usedStackPercentage !== undefined) {
-        updateStackInfo(data.freeStackPercentage, data.usedStackPercentage);
+      if (data.usedStackPercentage !== undefined) {
+        updateStackInfo(data.usedStackPercentage);
       }
 
       if (data.mode !== undefined) {

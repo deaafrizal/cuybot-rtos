@@ -7,15 +7,14 @@
 #include <WebSocketsServer.h>
 #include <BatteryMonitor/BatteryMonitorTask.h>
 #include <StackMonitor/StackMonitorTask.h>
+#include <ModeSelection/ModeSelectionTask.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/timers.h>
 
-class ModeSelectionTask;
-
 class WebSocketTask {
 public:
-    WebSocketTask(ModeSelectionTask &modeSelectionTask);
+    WebSocketTask();
     ~WebSocketTask();
     
     void startTask();
@@ -34,12 +33,15 @@ public:
     TaskHandle_t getTaskHandle();
 
     static void checkForActiveClients(TimerHandle_t xTimer);
+    static void setModeSelectionTaskReference(ModeSelectionTask& modeSelectionTask); // Method to set the reference when needed
 
 private:
     const unsigned long stackSize = 4096;
     static WebSocketsServer webSocket;
     static WebSocketTask* instance;
     static BatteryMonitorTask batteryMonitorTask;
+    static ModeSelectionTask* modeSelectionTask; // Change to static pointer
+
     StackMonitorTask* stackMonitorTask;
 
     static void webSocketTaskFunction(void *parameter);
@@ -59,8 +61,6 @@ private:
     bool isOperationSuspended;
     TimerHandle_t noClientTimer;
     int activeClientCount;
-
-    ModeSelectionTask &_modeSelectionTask;
 };
 
 #endif
