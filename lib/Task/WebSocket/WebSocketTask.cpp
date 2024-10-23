@@ -2,28 +2,27 @@
 #include <WebSocket/WebSocketTask.h>
 #include <ModeSelection/ModeSelectionTask.h>
 
-extern int motorSpeed;
-extern int motorDirection;
-extern int mode;
-
 #define BATTERY_ADC_PIN 0
 #define VOLTAGE_DIVIDER_FACTOR 2
 #define NO_CLIENT_TIMEOUT_MS 10000
 #define PLAYTIME_UPDATE_INTERVAL_MS 1000
 #define BATTERY_UPDATE_INTERVAL_MS 5000
 
-WebSocketsServer WebSocketTask::webSocket = WebSocketsServer(81);
-WebSocketTask* WebSocketTask::instance = nullptr;
-BatteryMonitorTask WebSocketTask::batteryMonitorTask(BATTERY_ADC_PIN, 3.0, 4.2, VOLTAGE_DIVIDER_FACTOR);
-ModeSelectionTask* WebSocketTask::modeSelectionTask = nullptr;
+extern int motorSpeed;
+extern int motorDirection;
+extern int mode;
+unsigned long lastPlaytimeSent = 0;
+unsigned long lastBatterySent = 0;
 
 std::map<String, unsigned long> playtimeMap;
 std::map<String, bool> isPausedMap;
 std::map<String, unsigned long> lastConnectionMap;
 std::map<String, int> clientIDMap;
 
-unsigned long lastPlaytimeSent = 0;
-unsigned long lastBatterySent = 0;
+WebSocketsServer WebSocketTask::webSocket = WebSocketsServer(81);
+WebSocketTask* WebSocketTask::instance = nullptr;
+BatteryMonitorTask WebSocketTask::batteryMonitorTask(BATTERY_ADC_PIN, 3.0, 4.2, VOLTAGE_DIVIDER_FACTOR);
+ModeSelectionTask* WebSocketTask::modeSelectionTask = nullptr;
 
 WebSocketTask::WebSocketTask() {
     _taskHandle = NULL;
@@ -44,7 +43,7 @@ void WebSocketTask::startTask(TaskHandle_t taskHandle, uint32_t stackSize) {
         
         batteryMonitorTask.startMonitoring();
 
-        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, 5, &_taskHandle);
+        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, 10, &_taskHandle);
 
         noClientTimer = xTimerCreate("NoClientTimer", pdMS_TO_TICKS(NO_CLIENT_TIMEOUT_MS), pdTRUE, this, checkForActiveClients);
     }
@@ -95,41 +94,6 @@ void WebSocketTask::webSocketTaskFunction(void *parameter) {
         vTaskDelay(pdMS_TO_TICKS(5));
     }
     vTaskSuspend(NULL);
-}
-
-void WebSocketTask::monitorPlaytime(unsigned long currentMillis) {
-    if (currentMillis - lastPlaytimeSent > PLAYTIME_UPDATE_INTERVAL_MS) {
-        updatePlaytime();
-        sendPlaytimeData();
-        lastPlaytimeSent = currentMillis;
-    }
-}
-
-void WebSocketTask::monitorBattery(unsigned long currentMillis) {
-    if (currentMillis - lastBatterySent > BATTERY_UPDATE_INTERVAL_MS) {
-        sendBatteryData();
-        lastBatterySent = currentMillis;
-    }
-}
-
-void WebSocketTask::checkForActiveClients(TimerHandle_t xTimer) {
-    WebSocketTask *self = static_cast<WebSocketTask*>(pvTimerGetTimerID(xTimer));
-    if (self->activeClients.empty()) {
-        if (!self->isOperationSuspended) {
-            self->suspendTask();
-        }
-    }
-}
-
-void WebSocketTask::updatePlaytime() {
-    unsigned long currentMillis = millis();
-    for (const auto& client : activeClients) {
-        String clientID = client;
-        if (!isPausedMap[clientID]) {
-            playtimeMap[clientID] += currentMillis - lastConnectionMap[clientID];
-        }
-        lastConnectionMap[clientID] = currentMillis;
-    }
 }
 
 void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
@@ -191,6 +155,48 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
     }
 }
 
+int WebSocketTask::getClientNumFromID(String clientID) {
+    if (clientIDMap.find(clientID) != clientIDMap.end()) {
+        return clientIDMap[clientID];
+    }
+    return -1;
+}
+
+void WebSocketTask::monitorPlaytime(unsigned long currentMillis) {
+    if (currentMillis - lastPlaytimeSent > PLAYTIME_UPDATE_INTERVAL_MS) {
+        updatePlaytime();
+        sendPlaytimeData();
+        lastPlaytimeSent = currentMillis;
+    }
+}
+
+void WebSocketTask::monitorBattery(unsigned long currentMillis) {
+    if (currentMillis - lastBatterySent > BATTERY_UPDATE_INTERVAL_MS) {
+        sendBatteryData();
+        lastBatterySent = currentMillis;
+    }
+}
+
+void WebSocketTask::checkForActiveClients(TimerHandle_t xTimer) {
+    WebSocketTask *self = static_cast<WebSocketTask*>(pvTimerGetTimerID(xTimer));
+    if (self->activeClients.empty()) {
+        if (!self->isOperationSuspended) {
+            self->suspendTask();
+        }
+    }
+}
+
+void WebSocketTask::updatePlaytime() {
+    unsigned long currentMillis = millis();
+    for (const auto& client : activeClients) {
+        String clientID = client;
+        if (!isPausedMap[clientID]) {
+            playtimeMap[clientID] += currentMillis - lastConnectionMap[clientID];
+        }
+        lastConnectionMap[clientID] = currentMillis;
+    }
+}
+
 void WebSocketTask::sendPlaytimeData() {
     for (const auto& client : activeClients) {
         String clientID = client;
@@ -201,13 +207,6 @@ void WebSocketTask::sendPlaytimeData() {
             webSocket.sendTXT(clientNum, jsonData);
         }
     }
-}
-
-int WebSocketTask::getClientNumFromID(String clientID) {
-    if (clientIDMap.find(clientID) != clientIDMap.end()) {
-        return clientIDMap[clientID];
-    }
-    return -1;
 }
 
 void WebSocketTask::sendBatteryData() {
@@ -227,6 +226,22 @@ void WebSocketTask::sendModeData() {
     String jsonData = "{\"mode\": " + String(mode) + "}";
     if (!activeClients.empty()) {
         webSocket.broadcastTXT(jsonData);
+    }
+}
+
+void WebSocketTask::sendCurrentSpeedAndDirectionData() {
+    if (mode != 1 && motorSpeed != 0 && motorDirection != 0) {
+        for (const auto& client : activeClients) {
+            String clientID = client;
+            int currentSpeed = motorSpeed;
+            int currentDirection = motorDirection;
+            String jsonData = "{\"currentSpeed\": " + String(currentSpeed) + 
+                        ", \"currentDirection\": " + String(currentDirection) + "}";
+            int clientNum = getClientNumFromID(clientID);
+            if (clientNum >= 0) {
+             webSocket.sendTXT(clientNum, jsonData);
+            }
+        }
     }
 }
 

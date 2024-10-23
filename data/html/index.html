@@ -26,16 +26,16 @@
           <span id="ram-usage">Manual</span>
         </div>
         <div class="info-items">
-          <label>Websocket Usage</label>
-          <span id="webSocketTask">...</span>
-        </div>
-        <div class="info-items">
-          <label>WebServer Usage</label>
-          <span id="webServerTask">...</span>
-        </div>
-        <div class="info-items">
           <label>Play Time</label>
           <span id="play-time">...</span>
+        </div>
+        <div class="info-items">
+          <label>Realtime Usage</label>
+          <span id="webSocketTask">...</span>
+        </div>
+         <div class="info-items">
+          <label>Power Health</label>
+          <span id="power-health">...</span>
         </div>
         <div class="info-items">
           <label>BAT Voltage</label>
@@ -117,6 +117,7 @@
         <button class="close-sidebar-btn" onclick="toggleSidebar()">✖</button>
       </div>
     </aside>
+    <script> console.log(window.devicePixelRatio)</script>
     <script src="/js/controller.js"></script>
     <script src="/js/shared.js"></script>
     <script src="/js/playtimeInfo.js"></script>

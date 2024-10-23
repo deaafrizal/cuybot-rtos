@@ -7,10 +7,10 @@ class BatteryMonitorTask {
 public:
     BatteryMonitorTask(uint8_t adcPin, float minVoltage, float maxVoltage, float voltageDividerFactor);
     
-    void startMonitoring();          // Start the FreeRTOS task for monitoring battery
-    void stopMonitoring();           // Stop the FreeRTOS task
-    float getBatteryPercentage();    // Get the last read battery percentage
-    float getBatteryVoltage();       // Get the last read battery voltage
+    void startMonitoring();
+    void stopMonitoring();
+    float getBatteryPercentage();
+    float getBatteryVoltage();
 
 private:
     uint8_t _adcPin;
@@ -21,8 +21,8 @@ private:
     float _batteryPercentage;
     TaskHandle_t _taskHandle;
 
-    static void monitorTask(void *pvParameters);  // FreeRTOS task to monitor battery
-    void readBattery();                           // Function to read and calculate battery voltage/percentage
+    static void monitorTask(void *pvParameters);
+    void readBattery();
 };
 
 #endif

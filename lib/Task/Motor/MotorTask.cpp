@@ -17,7 +17,7 @@ MotorTask::~MotorTask() {
 
 void MotorTask::startTask()
 {
-    xTaskCreate(runTask, "MotorControlTask", 3248, this, 4, NULL);
+    xTaskCreate(runTask, "MotorControlTask", 3024, this, 5, NULL);
 }
 
 void MotorTask::runTask(void *pvParameters)

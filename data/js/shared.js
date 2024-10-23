@@ -27,6 +27,7 @@ function connectWebSocket() {
   websocket.onmessage = function (event) {
     try {
       const data = JSON.parse(event.data);
+
       if (data.clientID !== undefined) {
         clientId = data.clientID;
       }
@@ -43,8 +44,8 @@ function connectWebSocket() {
         updateModeButtons(data.mode);
       }
 
-      if (data.batteryVoltage !== undefined && data.batteryPercentage !== undefined) {
-        updateBatteryDisplay(data.batteryVoltage, data.batteryPercentage);
+      if (data.batteryVoltage !== undefined && data.batteryPercentage !== undefined && data.powerHealth !== undefined) {
+        updateBatteryDisplay(data.batteryVoltage, data.batteryPercentage, data.powerHealth);
       }
     } catch (e) {
       console.error("Error parsing WebSocket message:", e);

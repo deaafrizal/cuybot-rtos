@@ -20,18 +20,12 @@ public:
     void stopTask();
     void suspendTask();
     void resumeTask();
-    void sendPlaytimeData();
-    void sendBatteryData();
-    void sendModeData();
-
-    void monitorPlaytime(unsigned long currentMillis);
-    void monitorBattery(unsigned long currentMillis);
+    void sendStackDataToClient(String &jsonData);
 
     TaskHandle_t getTaskHandle();
 
     static void checkForActiveClients(TimerHandle_t xTimer);
-    static void setModeSelectionTaskReference(ModeSelectionTask& modeSelectionTask); // Method to set the reference when needed
-    void sendStackDataToClient(String &jsonData);
+    static void setModeSelectionTaskReference(ModeSelectionTask& modeSelectionTask);
 
 private:
     static BatteryMonitorTask batteryMonitorTask;
@@ -41,6 +35,18 @@ private:
 
     static WebSocketTask* instance;
     static WebSocketsServer webSocket;
+
+    bool isOperationSuspended;
+    int activeClientCount;
+    int getClientNumFromID(String clientID);
+    void sendPlaytimeData();
+    void updatePlaytime();
+    void sendCurrentSpeedAndDirectionData();
+    void sendBatteryData();
+    void sendModeData();
+
+    void monitorPlaytime(unsigned long currentMillis);
+    void monitorBattery(unsigned long currentMillis);
     
     std::set<String> activeClients;
     std::map<String, unsigned long> playtimeMap;
@@ -48,14 +54,8 @@ private:
     std::map<String, unsigned long> lastConnectionMap;
     std::map<String, int> clientIDMap;
 
-    void updatePlaytime();
-
-    int getClientNumFromID(String clientID);
-
     TaskHandle_t _taskHandle;
-    bool isOperationSuspended;
     TimerHandle_t noClientTimer;
-    int activeClientCount;
 };
 
 #endif

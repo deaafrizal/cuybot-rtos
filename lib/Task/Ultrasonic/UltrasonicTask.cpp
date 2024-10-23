@@ -3,6 +3,7 @@
 
 UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorDriver &rightMotor, MotorDriver &leftMotor)
     : _ultrasonic(ultrasonic), _rightMotor(rightMotor), _leftMotor(leftMotor), _taskHandle(nullptr) {
+        ultrasonic.begin();
 }
 
 UltrasonicTask::~UltrasonicTask() {
@@ -18,10 +19,10 @@ TaskHandle_t UltrasonicTask::getTaskHandle() {
 
 void UltrasonicTask::startTask() {
     if (_taskHandle == nullptr) {
-        xTaskCreate(distanceMeasureTask, "UltrasonicTask", 2048, this, 2, &_taskHandle);
+        xTaskCreate(distanceMeasureTask, "UltrasonicTask", 2748, this, 3, &_taskHandle);
         if (_taskHandle != nullptr) {
             Serial.println("UltrasonicTask started successfully.");
-            vTaskSuspend(_taskHandle);  // Start with task suspended
+            vTaskSuspend(_taskHandle);
             Serial.println("UltrasonicTask initially suspended.");
         } else {
             Serial.println("Failed to start UltrasonicTask.");
@@ -63,8 +64,8 @@ void UltrasonicTask::distanceMeasureTask(void *parameters) {
 
     uint32_t lastSensorCheckTime = 0;
     uint32_t lastMotorUpdateTime = 0;
-    const uint32_t sensorCheckInterval = 50;  // 50 ms interval for sensor check
-    const uint32_t motorUpdateInterval = 5;   // 5 ms interval for motor updates
+    const uint32_t sensorCheckInterval = 50;
+    const uint32_t motorUpdateInterval = 5;
 
     int previousLeftMotorSpeed = 0;
     int previousRightMotorSpeed = 0;
@@ -72,18 +73,15 @@ void UltrasonicTask::distanceMeasureTask(void *parameters) {
     while (true) {
         uint32_t currentTime = millis();
 
-        // Check the ultrasonic sensor at regular intervals
         if (currentTime - lastSensorCheckTime >= sensorCheckInterval) {
             self->_distance = self->_ultrasonic.getDistance();
             lastSensorCheckTime = currentTime;
         }
 
-        // Update motor speeds based on the sensor reading
         if (currentTime - lastMotorUpdateTime >= motorUpdateInterval) {
             int leftMotorSpeed = self->motorMaxSpeed;
             int rightMotorSpeed = self->motorMaxSpeed;
 
-            // If the distance is too close, reverse the right motor
             if (self->_distance <= self->_maxDistance) {
                 rightMotorSpeed = -self->motorMaxSpeed;  // Reverse the right motor
             }
@@ -111,7 +109,6 @@ void UltrasonicTask::distanceMeasureTask(void *parameters) {
             lastMotorUpdateTime = currentTime;
         }
 
-        // Task delay to avoid CPU hogging
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }

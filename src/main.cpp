@@ -17,10 +17,10 @@
 #include <StackMonitor/StackMonitorTask.h>
 
 TaskHandle_t webSocketTaskHandle = NULL;
-const uint32_t webSocketStackSize = 4096;
+const uint32_t webSocketStackSize = 5024;
 
 TaskHandle_t webServerTaskHandle = NULL;
-const uint32_t webServerStackSize = 2048;
+const uint32_t webServerStackSize = 4192;
 
 #define PWM_A1 3
 #define PWM_A2 4

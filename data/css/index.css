@@ -13,7 +13,6 @@ html {
   user-select: none; /* Standard syntax */
 }
 
-/* Body Styles */
 body {
   overflow: hidden;
   max-height: 100vh;
@@ -30,55 +29,52 @@ main {
   gap: 16px;
 }
 
-/* Layout Styles */
 .joysticks {
   position: relative;
   width: 100%;
-  height: 30vh;
+  height: 50vh;
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
   align-items: center;
-  /* border: 2px solid #333; */
   box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   touch-action: none;
-  z-index: 2; /* Joystick z-index */
+  z-index: 2;
   -webkit-touch-callout: none;
-  -moz-user-select: none; /* For Firefox */
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE 10 and IE 11 */
-  user-select: none; /* Standard syntax */
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none; 
+  user-select: none;
 }
 
 .virtual-joystick {
-  touch-action: none; /* Prevents long-press context menu */
+  touch-action: none;
 }
 
-/* Navbar */
 .navbar {
-  position: fixed; /* Stick the navbar to the bottom */
-  bottom: 0; /* Align it at the bottom */
-  left: 0; /* Align to the left */
+  position: fixed;
+  bottom: 0;
+  left: 0;
   right: 0;
   display: flex;
-  justify-content: space-between; /* Space between burger button and title */
+  justify-content: space-between;
   align-items: center;
   padding: 4px 16px;
-  background-color: #007aff; /* Cuybot Blue */
+  background-color: #007aff;
   color: #f7f7f7;
-  z-index: 5; /* Make sure it's above other elements */
+  z-index: 5;
 }
 
 .hw-info {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columns in a row */
+  grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   border-radius: 16px;
 }
 
 .hw-info h3 {
-  grid-column: span 3; /* Make the title span across the grid */
+  grid-column: span 3;
   font-size: 14px;
   margin-left: 4px;
   color: #333;
@@ -92,36 +88,34 @@ main {
   background-color: #ffffff;
   border-radius: 16px;
   padding: 2px;
-  min-height: 50px; /* Ensures square shape */
-  transition: transform 0.2s ease-in-out; /* Smooth hover effect */
+  min-height: 50px;
+  transition: transform 0.2s ease-in-out;
 }
 
 .info-items:hover {
-  transform: translateY(-5px); /* Slight pop-up effect on hover */
+  transform: translateY(-5px);
 }
 
 .info-items label {
   font-size: 10px;
-  color: #888; /* Lighter color for label */
+  color: #888;
   margin-bottom: 4px;
 }
 
 .info-items span {
-  font-size: 12px; /* Larger font size for the value */
+  font-size: 12px;
   color: #333;
   font-weight: bold;
 }
 
-/* Title Styles */
 .title {
   font-size: 24px;
   font-weight: bold;
 }
 
-/* Mode Container Styles */
 .mode-container {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Two columns */
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
   background-color: #f7f7f7;
   border-radius: 16px;
@@ -143,28 +137,25 @@ main {
   opacity: 0.5;
 }
 
-/* Loading state */
 .mode-item.loading {
-  background-color: #d3d3d3; /* Loading state background */
-  color: #999; /* Loading state text color */
+  background-color: #d3d3d3;
+  color: #999;
 }
 
-/* Active button state */
 .mode-item.active {
-  background-color: #007aff; /* Active state background */
-  color: #fff; /* Active state text color */
+  background-color: #007aff;
+  color: #fff;
 }
 
-/* SLIDER FEATURE START */
 .sliders {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 16px;
-  background-color: #f7f7f7; /* Light background */
+  background-color: #f7f7f7;
   border-radius: 16px;
   box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3);
-  width: 100%; /* Adjust width to your liking */
+  width: 100%;
 }
 
 .slider-item {
@@ -178,7 +169,7 @@ main {
 label {
   font-size: 14px;
   font-weight: 500;
-  color: #333; /* Darker text color */
+  color: #333;
 }
 
 input[type="range"] {
@@ -201,7 +192,7 @@ input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   width: 20px;
   height: 20px;
-  background: #007aff; /* Green color for the thumb */
+  background: #007aff;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -209,7 +200,7 @@ input[type="range"]::-webkit-slider-thumb {
 input[type="range"]::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  background: #007aff; /* Green color for the thumb */
+  background: #007aff;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -235,12 +226,10 @@ input[type="range"]::-moz-range-thumb {
   font-size: 14px;
   color: #007aff;
   font-weight: 500;
-  display: none; /* Initially hidden */
+  display: none;
 }
 
 
-/* SLIDER FEATURE END */
-/* Open Sidebar Button */
 .open-sidebar-btn {
   background: none;
   border: none;
@@ -249,29 +238,26 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
-/* Sidebar Styles */
 .sidebar {
   position: fixed;
-  bottom: -100vh; /* Initially hidden off the screen (below the viewport) */
-  width: 100%; /* Width of the sidebar */
-  min-height: 100%; /* Full viewport height */
-  background-color: #f0f4f8; /* Light background for sidebar */
+  bottom: -100vh;
+  width: 100%;
+  min-height: 100%;
+  background-color: #f0f4f8;
   padding: 16px;
-  transition: bottom 0.5s ease; /* Animate the bottom property */
-  z-index: 100; /* Ensure it's on top of other elements */
+  transition: bottom 0.5s ease;
+  z-index: 100;
   box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3);
-  overflow-y: auto; /* Allow vertical scrolling */
+  overflow-y: auto;
 }
 
-/* Sidebar Open Class */
 .sidebar.open {
-  bottom: 0; /* Slide in from the bottom when open */
+  bottom: 0;
   background-color: #f7f7f7;
 }
 
-/* Sidebar Button Styles */
 .sidebar-btn {
-  background-color: #007aff; /* Cuybot Blue */
+  background-color: #007aff;
   color: white;
   font-size: 16px;
   padding: 12px 8px;
@@ -282,18 +268,16 @@ input[type="range"]::-moz-range-thumb {
   text-align: center;
 }
 
-/* Sidebar Menu Styles */
 .sidebar-menu {
   margin: 16px 0;
   display: grid;
   grid-template-columns: repeat(
     auto-fill,
     minmax(100px, 1fr)
-  ); /* Responsive grid */
+  );
   gap: 12px;
 }
 
-/* Sidebar Bottom Adjustments */
 .sidebar-bottom {
   position: absolute;
   bottom: 24px;
@@ -307,30 +291,28 @@ input[type="range"]::-moz-range-thumb {
   background-color: transparent;
 }
 
-/* Sidebar Button Styles */
 .sidebar-btn {
-  background-color: #007aff; /* Cuybot Blue */
+  background-color: #007aff;
   color: white;
-  font-size: 16px; /* Slightly smaller font size for better fit */
-  padding: 12px 8px; /* Adjusted padding for a more compact button */
+  font-size: 16px;
+  padding: 12px 8px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.3s ease;
-  text-align: center; /* Center text within button */
+  text-align: center;
 }
 
 .sidebar-btn:hover {
-  background-color: #005bb5; /* Darker blue on hover */
-  transform: translateY(-2px); /* Slight hover effect */
+  background-color: #005bb5;
+  transform: translateY(-2px);
 }
 
 .sidebar-btn:active {
-  background-color: #003d80; /* Even darker when clicked */
-  transform: translateY(0); /* Reset effect on click */
+  background-color: #003d80;
+  transform: translateY(0);
 }
 
-/* Loading Overlay */
 #loadingOverlay {
   width: 50%;
   height: 100%;
@@ -347,10 +329,9 @@ input[type="range"]::-moz-range-thumb {
   color: white;
 }
 
-/* Error Message */
 #error-message {
-  color: #f20267; /* Red for error */
-  display: none; /* Initially hidden */
+  color: #f20267;
+  display: none;
   margin: 10px;
   font-size: 18px;
   text-align: center;
@@ -375,21 +356,21 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .notification.loading {
-  background-color: #f0ad4e; /* Orange for loading */
+  background-color: #f0ad4e;
 }
 
 .notification.success {
-  background-color: #5cb85c; /* Green for success */
+  background-color: #5cb85c;
 }
 
 .notification.error {
-  background-color: #d9534f; /* Red for error */
+  background-color: #d9534f;
 }
 
 .separator {
   border: none;
   height: 1px;
-  background-color: #dddeee; /* Light gray for a subtle look */
+  background-color: #dddeee;
   position: relative;
   margin: 8px 0;
 }
@@ -414,8 +395,8 @@ input[type="range"]::-moz-range-thumb {
   transform: translate(-50%, -50%) rotate(45deg);
   width: 8px;
   height: 8px;
-  border: 2px solid #ddd; /* Small diamond shape in the center */
-  background-color: #dddeee; /* White background to contrast */
+  border: 2px solid #ddd;
+  background-color: #dddeee;
   border-radius: 2px;
 }
 
@@ -428,12 +409,12 @@ input[type="range"]::-moz-range-thumb {
 
 @media (max-width: 480px) {
   .slider:before {
-    height: 22px; /* Adjust slider size for smaller screens */
+    height: 22px;
     width: 22px;
   }
 
   input:checked + .slider:before {
-    transform: translateX(22px); /* Adjust transform distance */
+    transform: translateX(22px);
   }
 
   .title {
@@ -441,7 +422,7 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .close-sidebar-btn {
-    margin-bottom: 20px; /* Adjust bottom margin if needed */
+    margin-bottom: 20px;
   }
 }
 

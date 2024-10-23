@@ -28,7 +28,7 @@ void BatteryMonitorTask::monitorTask(void *pvParameters) {
 void BatteryMonitorTask::readBattery() {
     int rawAdcValue = analogRead(_adcPin);
     
-    float stepUpOutputVoltage = (rawAdcValue / 4095.0) * 3.3 * _voltageDividerFactor;
+    float stepUpOutputVoltage = (rawAdcValue / 4095.0) * _minVoltage * _voltageDividerFactor;
     float conversionFactor = 1.14;
     float batteryVoltage = stepUpOutputVoltage / conversionFactor;
 
@@ -36,7 +36,6 @@ void BatteryMonitorTask::readBattery() {
 
     _batteryPercentage = ((batteryVoltage - _minVoltage) / (_maxVoltage - _minVoltage)) * 100.0;
     _batteryPercentage = constrain(_batteryPercentage, 0, 100);
-
 }
 
 float BatteryMonitorTask::getBatteryPercentage() {
