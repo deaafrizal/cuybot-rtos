@@ -27,7 +27,7 @@ function connectWebSocket() {
   websocket.onmessage = function (event) {
     try {
       const data = JSON.parse(event.data);
-      if (data.clientID !== undefined) {
+          if (data.clientID !== undefined) {
         clientId = data.clientID;
       }
 
@@ -43,8 +43,8 @@ function connectWebSocket() {
         updateModeButtons(data.mode);
       }
 
-      if (data.freeMemPercentage !== undefined) {
-        updateHardwareInfo(data.freeMemPercentage);
+      if (data.freeMemPercentage !== undefined && data.connectionStatus !== undefined) {
+        updateHardwareInfo(data.freeMemPercentage, data.connectionStatus);
       }
 
       if (data.batteryVoltage !== undefined && data.batteryPercentage !== undefined) {

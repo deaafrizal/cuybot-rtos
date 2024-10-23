@@ -1,8 +1,10 @@
-function updateHardwareInfo(freemem) {
-  const freeMemoryElement = document.getElementById('free-memory');
+function updateHardwareInfo(freeMem, connectionStatus) {
+  const freeMemoryElement = document.getElementById('free-memory-percentage');
+  const connectionStatusElement = document.getElementById('server-connection');
 
-  if (freeMemoryElement) {
-    freeMemoryElement.innerText = `${freemem}%`;
+  if (freeMemoryElement && connectionStatusElement) {
+    freeMemoryElement.innerText = `${freeMem}%`;
+    connectionStatusElement.innerText = `${connectionStatus}`;
   }
 }
 

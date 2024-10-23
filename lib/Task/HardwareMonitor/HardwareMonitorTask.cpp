@@ -1,9 +1,11 @@
 #include <HardwareMonitor/HardwareMonitorTask.h>
 #include <esp_heap_caps.h>
+#include <WiFi.h>
 
 HardwareMonitorTask::HardwareMonitorTask(WebSocketTask* webSocketTask) 
-    : _taskHandle(NULL), _webSocketTask(webSocketTask), _freeMemKB(0), _freeMemMB(0), _freeMemPercentage(0) {
-    }
+    : _taskHandle(NULL), _webSocketTask(webSocketTask), _freeMemKB(0), _freeMemMB(0), _freeMemPercentage(0), _isOnline(false) {
+    _connectionCheckSemaphore = xSemaphoreCreateBinary();
+}
 
 void HardwareMonitorTask::startTask() {
     if (_taskHandle == NULL) {
@@ -28,6 +30,10 @@ void HardwareMonitorTask::stopTask() {
         vTaskDelete(_taskHandle);
         _taskHandle = NULL;
     }
+    if (_connectionCheckSemaphore != NULL) {
+        vSemaphoreDelete(_connectionCheckSemaphore);
+        _connectionCheckSemaphore = NULL;
+    }
 }
 
 TaskHandle_t HardwareMonitorTask::getTaskHandle() {
@@ -37,38 +43,44 @@ TaskHandle_t HardwareMonitorTask::getTaskHandle() {
 void HardwareMonitorTask::monitorTask(void *pvParameters) {
     HardwareMonitorTask *self = static_cast<HardwareMonitorTask*>(pvParameters);
     while (true) {
-        // Gather memory data every _MONITOR_INTERVAL
         self->getFreeMem();
 
-        // Only send memory data at a separate interval (_DATA_SEND_INTERVAL)
-        self->sendFreeMemData();
+        if (xSemaphoreTake(self->_connectionCheckSemaphore, (TickType_t)0) == pdTRUE) {
+            self->checkConnectionStatus();
+        }
 
-        // Delay until the next monitoring cycle
+        self->sendHardwareData();
+
         vTaskDelay(pdMS_TO_TICKS(_MONITOR_INTERVAL));
     }
 }
 
-// Gather free memory data and calculate percentage
 void HardwareMonitorTask::getFreeMem() {
     float freeHeap = heap_caps_get_free_size(MALLOC_CAP_8BIT);
     uint32_t totalMemory = heap_caps_get_total_size(MALLOC_CAP_8BIT);
 
     _freeMemKB = freeHeap / 1024.0;
     _freeMemMB = freeHeap / (1024.0 * 1024.0);
-
     _freeMemPercentage = ((float)freeHeap / (float)totalMemory) * 100.0;
 }
 
-// Send free memory data via WebSocket at a separate interval
-void HardwareMonitorTask::sendFreeMemData() {
+void HardwareMonitorTask::checkConnectionStatus() {
+    _isOnline = WiFi.status() == WL_CONNECTED;
+}
+
+void HardwareMonitorTask::sendHardwareData() {
     unsigned long currentMillis = millis();
     if (currentMillis - _lastSendTime >= _DATA_SEND_INTERVAL) {
-        // Send the memory data as a JSON object
-        String jsonData = "{\"freeMemKB\": " + String(_freeMemKB) +
-                          ", \"freeMemMB\": " + String(_freeMemMB) +
-                          ", \"freeMemPercentage\": " + String(_freeMemPercentage, 2) + "}";
-
+    String jsonData = "{\"freeMemKB\": \"" + String(_freeMemKB) +
+                  "\", \"freeMemMB\": \"" + String(_freeMemMB) +
+                  "\", \"freeMemPercentage\": \"" + String(_freeMemPercentage, 2) +
+                  "\", \"connectionStatus\": \"" + String(_isOnline ? "Public" : "Private") + "\"}";
+        
         _webSocketTask->sendStackDataToClient(jsonData);
-        _lastSendTime = currentMillis;  // Update last send time
+        _lastSendTime = currentMillis;
     }
+}
+
+void HardwareMonitorTask::triggerConnectionCheck() {
+    xSemaphoreGive(_connectionCheckSemaphore);
 }

@@ -28,8 +28,8 @@ public:
     static void setModeSelectionTaskReference(ModeSelectionTask& modeSelectionTask);
 
 private:
-    const int stackSize = 8120;
-    const uint8_t priority = 10;
+    const uint32_t _taskStackSize = 8120;
+    const UBaseType_t _taskPriority = 10;
     bool isOperationSuspended;
 
     static BatteryMonitorTask batteryMonitorTask;

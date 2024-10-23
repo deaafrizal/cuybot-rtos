@@ -74,7 +74,6 @@ void setup() {
     if (!MDNS.begin("cuybot")) {
         Serial.println("DNS Cannot be started!");
     }
-    
 
     Serial.println("Setting up OTA service...");
     ota.begin();
@@ -85,6 +84,8 @@ void setup() {
     pinMode(PWM_B1, OUTPUT);
     pinMode(PWM_B2, OUTPUT);
     
+    delay(100);
+
     Serial.println("RTOS initialize...");
     webServerTask.startTask();
     webSocketTask.startTask();

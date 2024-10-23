@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <WebSocket/WebSocketTask.h>
+#include <freertos/semphr.h>
 
 class HardwareMonitorTask {
 public:
@@ -13,24 +14,34 @@ public:
     void resumeTask();
     void stopTask();
 
+    void triggerConnectionCheck();
+
     TaskHandle_t getTaskHandle();
 
 private:
-    const int _taskStackSize = 2048;
-    const int _taskPriority = 1;
+    const uint32_t _taskStackSize = 2048;
+    const UBaseType_t _taskPriority = 1;
+
     float _freeMemKB;
     float _freeMemMB;
     float _freeMemPercentage;
+    bool _isOnline;
+
     unsigned long _lastSendTime = 0;
-    static const unsigned long _DATA_SEND_INTERVAL = 1500;  // Send interval is now decoupled from monitoring
-    static const unsigned long _MONITOR_INTERVAL = 1000;    // Memory monitoring interval
+    static const unsigned long _DATA_SEND_INTERVAL = 1500;
+    static const unsigned long _MONITOR_INTERVAL = 1000;
 
     TaskHandle_t _taskHandle;
     WebSocketTask* _webSocketTask;
 
-    void getFreeMem();               // Collects memory data more frequently
-    void sendFreeMemData();          // Sends the most recent memory data
+    SemaphoreHandle_t _connectionCheckSemaphore;
+
+    void getFreeMem();
+    void checkConnectionStatus();
+    void sendHardwareData();
     static void monitorTask(void *pvParameters);
 };
 
 #endif
+
+

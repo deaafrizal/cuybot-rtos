@@ -1,6 +1,7 @@
 #include <map>
 #include <WebSocket/WebSocketTask.h>
 #include <ModeSelection/ModeSelectionTask.h>
+#include <freertos/semphr.h>
 
 #define BATTERY_ADC_PIN 0
 #define VOLTAGE_DIVIDER_FACTOR 2
@@ -18,6 +19,8 @@ std::map<String, unsigned long> playtimeMap;
 std::map<String, bool> isPausedMap;
 std::map<String, unsigned long> lastConnectionMap;
 std::map<String, int> clientIDMap;
+
+SemaphoreHandle_t xSemaphore;
 
 WebSocketsServer WebSocketTask::webSocket = WebSocketsServer(81);
 WebSocketTask* WebSocketTask::instance = nullptr;
@@ -38,10 +41,11 @@ WebSocketTask::~WebSocketTask() {
 void WebSocketTask::startTask() {
     if (_taskHandle == NULL) {
         instance = this;
-                
+        
+        xSemaphore = xSemaphoreCreateMutex();  // Create the semaphore
         batteryMonitorTask.startMonitoring();
 
-        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, priority, &_taskHandle);
+        xTaskCreate(webSocketTaskFunction, "WebSocketTask", _taskStackSize, this, _taskPriority, &_taskHandle);
 
         noClientTimer = xTimerCreate("NoClientTimer", pdMS_TO_TICKS(NO_CLIENT_TIMEOUT_MS), pdTRUE, this, checkForActiveClients);
     }
@@ -57,6 +61,10 @@ void WebSocketTask::stopTask() {
         if (noClientTimer != NULL) {
             xTimerDelete(noClientTimer, 0);
             noClientTimer = NULL;
+        }
+        if (xSemaphore != NULL) {
+            vSemaphoreDelete(xSemaphore);  // Delete the semaphore
+            xSemaphore = NULL;
         }
     }
 }
@@ -87,8 +95,13 @@ void WebSocketTask::webSocketTaskFunction(void *parameter) {
     for (;;) {
         self->webSocket.loop();
         unsigned long currentMillis = millis();
-        self->monitorPlaytime(currentMillis);
-        self->monitorBattery(currentMillis);
+        
+        if (xSemaphoreTake(xSemaphore, portMAX_DELAY)) {  // Take the semaphore
+            self->monitorPlaytime(currentMillis);
+            self->monitorBattery(currentMillis);
+            xSemaphoreGive(xSemaphore);  // Release the semaphore
+        }
+        
         vTaskDelay(pdMS_TO_TICKS(5));
     }
     vTaskSuspend(NULL);
@@ -97,59 +110,66 @@ void WebSocketTask::webSocketTaskFunction(void *parameter) {
 void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
     WebSocketTask *self = WebSocketTask::instance;
     String clientID = self->webSocket.remoteIP(num).toString();
-    switch (type) {
-        case WStype_DISCONNECTED: {
-            if (self->activeClientCount > 0) {
-                self->activeClientCount--;
+    
+    if (xSemaphoreTake(xSemaphore, portMAX_DELAY)) {  // Protect event handling with semaphore
+        switch (type) {
+            case WStype_DISCONNECTED: {
+                if (self->activeClientCount > 0) {
+                    self->activeClientCount--;
+                }
+                self->isPausedMap[clientID] = true;
+                auto it = self->activeClients.find(clientID);
+                if (it != self->activeClients.end()) {
+                    self->activeClients.erase(it);
+                }
+                self->clientIDMap.erase(clientID);
+                if (self->activeClients.empty() && self->noClientTimer != NULL) {
+                    xTimerStart(self->noClientTimer, 0);
+                }
+                break;
             }
-            self->isPausedMap[clientID] = true;
-            auto it = self->activeClients.find(clientID);
-            if (it != self->activeClients.end()) {
-                self->activeClients.erase(it);
+            case WStype_CONNECTED: {
+                self->activeClientCount++;
+                self->activeClients.insert(clientID);
+                self->clientIDMap[clientID] = num;
+                self->sendModeData();
+                self->isPausedMap[clientID] = false;
+                if (self->isOperationSuspended) {
+                    self->resumeTask();
+                }
+                if (self->noClientTimer != NULL) {
+                    xTimerStop(self->noClientTimer, 0);
+                }
+                break;
             }
-            self->clientIDMap.erase(clientID);
-            if (self->activeClients.empty() && self->noClientTimer != NULL) {
-                xTimerStart(self->noClientTimer, 0);
-            }
-            break;
-        }
-        case WStype_CONNECTED: {
-            self->activeClientCount++;
-            self->activeClients.insert(clientID);
-            self->clientIDMap[clientID] = num;
-            self->sendModeData();
-            self->isPausedMap[clientID] = false;
-            if (self->isOperationSuspended) {
-                self->resumeTask();
-            }
-            if (self->noClientTimer != NULL) {
-                xTimerStop(self->noClientTimer, 0);
-            }
-            break;
-        }
-        case WStype_TEXT: {
-            if (self->activeClientCount > 0) {
-                String receivedData = String((char*)payload);
-                int sIndex = receivedData.indexOf('S');
-                int dIndex = receivedData.indexOf('D');
-                int mIndex = receivedData.indexOf('M');
-                if (sIndex != -1 && dIndex != -1 && dIndex > sIndex + 1) {
-                    int newSpeed = receivedData.substring(sIndex + 1, dIndex).toInt();
-                    int newDirection = receivedData.substring(dIndex + 1).toInt();
-                    motorSpeed = newSpeed;
-                    motorDirection = newDirection;
-                } else if (mIndex != -1 && mIndex < receivedData.length() - 1) {
-                    int newMode = receivedData.substring(mIndex + 1).toInt();
-                    if (newMode > 0) {
-                        modeSelectionTask->triggerModeChange(newMode);
-                        self->sendModeData();
+            case WStype_TEXT: {
+                if (self->activeClientCount > 0 && payload != nullptr) {
+                    char* receivedData = (char*)payload;
+
+                    char* sIndex = strchr(receivedData, 'S');
+                    char* dIndex = strchr(receivedData, 'D');
+                    char* mIndex = strchr(receivedData, 'M');
+
+                    if (sIndex != nullptr && dIndex != nullptr && dIndex > sIndex + 1) {
+                        int newSpeed = atoi(sIndex + 1);
+                        int newDirection = atoi(dIndex + 1);
+                        motorSpeed = newSpeed;
+                        motorDirection = newDirection;
+                    }
+                    else if (mIndex != nullptr && mIndex < (receivedData + strlen(receivedData) - 1)) {
+                        int newMode = atoi(mIndex + 1);
+                        if (newMode > 0) {
+                            modeSelectionTask->triggerModeChange(newMode);
+                            self->sendModeData();
+                        }
                     }
                 }
+                break;
             }
-            break;
+            default:
+                break;
         }
-        default:
-            break;
+        xSemaphoreGive(xSemaphore);  // Release the semaphore after event handling
     }
 }
 

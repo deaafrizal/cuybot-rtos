@@ -18,12 +18,13 @@ function sendWebSocketMessage(message) {
 speedJoystick.addEventListener('joystickmove', (event) => {
   const force = parseFloat(event.target.dataset.force);
   const direction = event.target.dataset.direction;
-
   if (force > 0) {
     if (direction === 'n') {
       currentSpeed = Math.min(Math.floor((force / 1) * maxSpeed), maxSpeed);
+      console.log(currentSpeed);
     } else if (direction === 's') {
       currentSpeed = -Math.min(Math.floor((force / 1) * maxSpeed), maxSpeed);
+      console.log(currentSpeed);
     }
   } else {
     currentSpeed = 0;
