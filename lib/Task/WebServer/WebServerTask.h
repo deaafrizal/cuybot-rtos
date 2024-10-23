@@ -3,21 +3,27 @@
 
 #include <ESPAsyncWebServer.h>
 #include <DNSServer.h>
+#include <freertos/semphr.h>
 
 class WebServerTask {
 public:
     WebServerTask();
     ~WebServerTask();
     
-    void startTask(TaskHandle_t taskHandleint, uint32_t stackSize);
+    void startTask();
     void stopTask();
+
+    static void triggerDNSServer();
 
 private:
     static void webServerTaskFunction(void *parameter);
-    
+    uint32_t _stackSize;
     TaskHandle_t _taskHandle;
+
     static AsyncWebServer server;
-    static DNSServer dnsServer; 
+    static DNSServer dnsServer;
+
+    static SemaphoreHandle_t dnsSemaphore;
 };
 
 #endif

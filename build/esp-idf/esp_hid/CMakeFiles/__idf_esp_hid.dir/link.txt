@@ -1,0 +1,2 @@
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc libesp_hid.a CMakeFiles/__idf_esp_hid.dir/src/esp_hidd.c.obj CMakeFiles/__idf_esp_hid.dir/src/esp_hidh.c.obj CMakeFiles/__idf_esp_hid.dir/src/esp_hid_common.c.obj
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib libesp_hid.a

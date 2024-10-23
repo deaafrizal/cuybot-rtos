@@ -1,0 +1,2 @@
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc libesp_local_ctrl.a CMakeFiles/__idf_esp_local_ctrl.dir/src/esp_local_ctrl.c.obj CMakeFiles/__idf_esp_local_ctrl.dir/src/esp_local_ctrl_handler.c.obj "CMakeFiles/__idf_esp_local_ctrl.dir/proto-c/esp_local_ctrl.pb-c.c.obj" CMakeFiles/__idf_esp_local_ctrl.dir/src/esp_local_ctrl_transport_httpd.c.obj
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib libesp_local_ctrl.a

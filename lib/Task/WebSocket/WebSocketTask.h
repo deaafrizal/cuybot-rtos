@@ -16,7 +16,7 @@ public:
     WebSocketTask();
     ~WebSocketTask();
     
-    void startTask(TaskHandle_t taskHandle, uint32_t stackSize);
+    void startTask();
     void stopTask();
     void suspendTask();
     void resumeTask();
@@ -28,15 +28,18 @@ public:
     static void setModeSelectionTaskReference(ModeSelectionTask& modeSelectionTask);
 
 private:
+    const int stackSize = 8120;
+    const uint8_t priority = 10;
+    bool isOperationSuspended;
+
     static BatteryMonitorTask batteryMonitorTask;
-    static ModeSelectionTask* modeSelectionTask; // Change to static pointer
+    static ModeSelectionTask* modeSelectionTask;
     static void webSocketTaskFunction(void *parameter);
     static void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
 
     static WebSocketTask* instance;
     static WebSocketsServer webSocket;
 
-    bool isOperationSuspended;
     int activeClientCount;
     int getClientNumFromID(String clientID);
     void sendPlaytimeData();

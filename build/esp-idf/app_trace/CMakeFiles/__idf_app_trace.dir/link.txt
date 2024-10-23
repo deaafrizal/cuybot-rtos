@@ -1,0 +1,2 @@
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc libapp_trace.a CMakeFiles/__idf_app_trace.dir/app_trace.c.obj CMakeFiles/__idf_app_trace.dir/app_trace_util.c.obj CMakeFiles/__idf_app_trace.dir/host_file_io.c.obj CMakeFiles/__idf_app_trace.dir/port/port_uart.c.obj
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib libapp_trace.a

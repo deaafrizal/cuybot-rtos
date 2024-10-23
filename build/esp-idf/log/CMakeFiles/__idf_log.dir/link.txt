@@ -1,0 +1,2 @@
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc liblog.a CMakeFiles/__idf_log.dir/log.c.obj CMakeFiles/__idf_log.dir/log_buffers.c.obj CMakeFiles/__idf_log.dir/log_freertos.c.obj
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib liblog.a

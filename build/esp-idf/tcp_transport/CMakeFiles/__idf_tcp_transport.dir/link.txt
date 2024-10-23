@@ -1,0 +1,2 @@
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc libtcp_transport.a CMakeFiles/__idf_tcp_transport.dir/transport.c.obj CMakeFiles/__idf_tcp_transport.dir/transport_ssl.c.obj CMakeFiles/__idf_tcp_transport.dir/transport_internal.c.obj CMakeFiles/__idf_tcp_transport.dir/transport_socks_proxy.c.obj CMakeFiles/__idf_tcp_transport.dir/transport_ws.c.obj
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib libtcp_transport.a

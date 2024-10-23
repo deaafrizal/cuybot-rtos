@@ -4,23 +4,26 @@
 
 AsyncWebServer WebServerTask::server = AsyncWebServer(80);
 DNSServer WebServerTask::dnsServer;
+SemaphoreHandle_t WebServerTask::dnsSemaphore = NULL;
 
-WebServerTask::WebServerTask() {
+WebServerTask::WebServerTask(): _stackSize(4096) {
     Serial.println("WebServerTask initialized...");
     _taskHandle = NULL;
+    dnsSemaphore = xSemaphoreCreateBinary();
 }
 
 WebServerTask::~WebServerTask() {
     Serial.println("WebServerTask cleanup...");
     stopTask();
+    if (dnsSemaphore != NULL) {
+        vSemaphoreDelete(dnsSemaphore);
+    }
 }
 
-void WebServerTask::startTask(TaskHandle_t taskHandle, uint32_t stackSize) {
+void WebServerTask::startTask() {
     Serial.println("Starting WebServer task...");
     if (_taskHandle == NULL) {
-        _taskHandle = taskHandle;
-
-        xTaskCreate(webServerTaskFunction, "WebServerTask", stackSize, this, 6, &_taskHandle);
+        xTaskCreate(webServerTaskFunction, "WebServerTask", _stackSize, this, 6, &_taskHandle);
     }
 }
 
@@ -34,7 +37,6 @@ void WebServerTask::stopTask() {
 
 void WebServerTask::webServerTaskFunction(void *parameter) {
     WebServerTask *self = static_cast<WebServerTask*>(parameter);
-    
 
     if (!SPIFFS.begin(true)) {
         Serial.println("Failed to mount file system");
@@ -50,7 +52,12 @@ void WebServerTask::webServerTaskFunction(void *parameter) {
     Serial.println("Webserver & DNS activated!");
 
     for (;;) {
-        dnsServer.processNextRequest();
-        vTaskDelay(pdMS_TO_TICKS(100));
+        if (xSemaphoreTake(self->dnsSemaphore, portMAX_DELAY) == pdTRUE) {
+            dnsServer.processNextRequest();
+        }
     }
+}
+
+void WebServerTask::triggerDNSServer() {
+    xSemaphoreGive(dnsSemaphore);
 }

@@ -35,15 +35,13 @@ WebSocketTask::~WebSocketTask() {
     stopTask();
 }
 
-void WebSocketTask::startTask(TaskHandle_t taskHandle, uint32_t stackSize) {
+void WebSocketTask::startTask() {
     if (_taskHandle == NULL) {
-        _taskHandle = taskHandle;
         instance = this;
-        
-        
+                
         batteryMonitorTask.startMonitoring();
 
-        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, 10, &_taskHandle);
+        xTaskCreate(webSocketTaskFunction, "WebSocketTask", stackSize, this, priority, &_taskHandle);
 
         noClientTimer = xTimerCreate("NoClientTimer", pdMS_TO_TICKS(NO_CLIENT_TIMEOUT_MS), pdTRUE, this, checkForActiveClients);
     }

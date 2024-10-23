@@ -1,0 +1,2 @@
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc libpthread.a CMakeFiles/__idf_pthread.dir/pthread.c.obj CMakeFiles/__idf_pthread.dir/pthread_cond_var.c.obj CMakeFiles/__idf_pthread.dir/pthread_local_storage.c.obj CMakeFiles/__idf_pthread.dir/pthread_rwlock.c.obj CMakeFiles/__idf_pthread.dir/pthread_semaphore.c.obj
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib libpthread.a

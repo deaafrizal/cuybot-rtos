@@ -83,12 +83,10 @@ void UltrasonicTask::distanceMeasureTask(void *parameters) {
             int rightMotorSpeed = self->motorMaxSpeed;
 
             if (self->_distance <= self->_maxDistance) {
-                rightMotorSpeed = -self->motorMaxSpeed;  // Reverse the right motor
+                rightMotorSpeed = -self->motorMaxSpeed;
             }
 
-            // Only update motors if the speeds have changed
             if (leftMotorSpeed != previousLeftMotorSpeed || rightMotorSpeed != previousRightMotorSpeed) {
-                // Apply motor speed changes
                 if (leftMotorSpeed >= 0) {
                     self->_leftMotor.forward(leftMotorSpeed);
                 } else {
@@ -101,7 +99,6 @@ void UltrasonicTask::distanceMeasureTask(void *parameters) {
                     self->_rightMotor.backward(-rightMotorSpeed);
                 }
 
-                // Save current motor speeds
                 previousLeftMotorSpeed = leftMotorSpeed;
                 previousRightMotorSpeed = rightMotorSpeed;
             }

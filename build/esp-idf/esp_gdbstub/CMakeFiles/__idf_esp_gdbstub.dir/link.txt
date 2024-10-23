@@ -1,0 +1,2 @@
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ar qc libesp_gdbstub.a CMakeFiles/__idf_esp_gdbstub.dir/src/gdbstub.c.obj CMakeFiles/__idf_esp_gdbstub.dir/src/gdbstub_transport.c.obj CMakeFiles/__idf_esp_gdbstub.dir/src/packet.c.obj CMakeFiles/__idf_esp_gdbstub.dir/src/port/riscv/gdbstub_riscv.c.obj CMakeFiles/__idf_esp_gdbstub.dir/src/port/riscv/rv_decode.c.obj
+/Users/deaafrizal/.espressif/tools/riscv32-esp-elf/esp-13.2.0_20240530/riscv32-esp-elf/bin/riscv32-esp-elf-ranlib libesp_gdbstub.a
