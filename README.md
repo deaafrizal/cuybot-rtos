@@ -19,6 +19,13 @@ Basis MCU **ESP32** yang juga support web development, jadi belajar ngoding maki
 - **Beeping Notification**: Buzzer sound untuk kebutuhan notifikasi berdasarkan kondisi tertentu.
 - **etc: ongoing**
 
+### Cocok buat yang: ###
+- pengen belajar robotik, iot & web development dalam 1 waktu
+- gak mau terlalu pusing mikirin wiring dan dunia kabel yang berantakan.
+- gak punya skill buat nyolder alat dan bahan
+- gak ngerti harus pilih modul yang mana, pusing cocok atau enggak
+- pengen punya produk dengan software buatan sendiri sesuai kebutuhan
+- Dominan disisi software bukan hardware
 
 ### 🚀 Board Spesification
 - Integrated circuit protection
@@ -36,7 +43,6 @@ Basis MCU **ESP32** yang juga support web development, jadi belajar ngoding maki
 - Active Beep Sound Buzzer
 - Support Up To 4WD Motor
 - Support Parallel Serial Logging  
-
 
 ### Cuybot Firmware Flash Requirement
 - **PlatformIO**
