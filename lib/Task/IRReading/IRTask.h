@@ -27,7 +27,7 @@ private:
     uint8_t motorMaxSpeed;
     uint8_t motorWeight;
     static const int _vdelayTime = 100;
-    bool taskRunning;
+    bool _taskRunning;
 };
 
 #endif

@@ -76,7 +76,7 @@ void HardwareMonitorTask::sendHardwareData() {
                   "\", \"freeMemPercentage\": \"" + String(_freeMemPercentage, 2) +
                   "\", \"connectionStatus\": \"" + String(_isOnline ? "Public" : "Private") + "\"}";
         
-        _webSocketTask->sendStackDataToClient(jsonData);
+        _webSocketTask->sendDataToClient(jsonData);
         _lastSendTime = currentMillis;
     }
 }

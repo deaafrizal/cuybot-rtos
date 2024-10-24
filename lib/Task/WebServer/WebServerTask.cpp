@@ -6,7 +6,7 @@ AsyncWebServer WebServerTask::server = AsyncWebServer(80);
 DNSServer WebServerTask::dnsServer;
 SemaphoreHandle_t WebServerTask::dnsSemaphore = NULL;
 
-WebServerTask::WebServerTask(): _stackSize(4096) {
+WebServerTask::WebServerTask() {
     Serial.println("WebServerTask initialized...");
     _taskHandle = NULL;
     dnsSemaphore = xSemaphoreCreateBinary();

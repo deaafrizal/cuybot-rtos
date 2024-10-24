@@ -1,10 +1,10 @@
 #include <Buzzer/Buzzer.h>
 
-Buzzer::Buzzer(int pin) : _pin(pin), _state(false) {}
+Buzzer::Buzzer(int buzzerPin) : _pin(buzzerPin), _state(false) {}
 
 void Buzzer::begin() {
     pinMode(_pin, OUTPUT);
-    off();  // Ensure the buzzer is off initially
+    off();
 }
 
 void Buzzer::on() {
@@ -18,7 +18,24 @@ void Buzzer::off() {
 }
 
 void Buzzer::beep(int duration) {
-    on();  // Turn the buzzer on
-    vTaskDelay(pdMS_TO_TICKS(duration));  // Use non-blocking delay
-    off();  // Turn the buzzer off after the delay
+    on();
+    delay(duration);
+    off();
+}
+
+void Buzzer::playBatteryLowWarning() {
+    for (int i = 0; i < 3; i++) {
+        beep(100);
+        delay(200);
+    }
+}
+
+void Buzzer::playCalibrationBeep(int duration) {
+    unsigned long startMillis = millis();
+    while (millis() - startMillis < duration) {
+        on();
+        delay(250);
+        off();
+        delay(250);
+    }
 }

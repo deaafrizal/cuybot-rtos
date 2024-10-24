@@ -1,111 +1,78 @@
 #include <Ultrasonic/UltrasonicTask.h>
-#include <Arduino.h>
 
-UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorDriver &rightMotor, MotorDriver &leftMotor)
-    : _ultrasonic(ultrasonic), _rightMotor(rightMotor), _leftMotor(leftMotor), _taskHandle(nullptr) {
-        ultrasonic.begin();
-}
+extern int motorSpeed;
+extern int motorDirection; 
 
-UltrasonicTask::~UltrasonicTask() {
-    if (_taskHandle != nullptr) {
-        vTaskDelete(_taskHandle);
-        _taskHandle = nullptr;
-    }
-}
-
-TaskHandle_t UltrasonicTask::getTaskHandle() {
-    return _taskHandle;
-}
+UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorTask &motorTask)
+    : _ultrasonic(ultrasonic), _taskHandle(NULL), _taskRunning(false), _motorTask(motorTask) {}
 
 void UltrasonicTask::startTask() {
-    if (_taskHandle == nullptr) {
-        xTaskCreate(distanceMeasureTask, "UltrasonicTask", 2748, this, 3, &_taskHandle);
-        if (_taskHandle != nullptr) {
-            Serial.println("UltrasonicTask started successfully.");
-            vTaskSuspend(_taskHandle);
-            Serial.println("UltrasonicTask initially suspended.");
-        } else {
-            Serial.println("Failed to start UltrasonicTask.");
-        }
+    if (_taskHandle == NULL) {
+        _taskRunning = true; // Set the task running flag to true
+        xTaskCreate(DistanceMeasureTask, "DistanceMeasureTask", 3448, this, 4, &_taskHandle);
+        Serial.println("Ultrasonic task started.");
+    }else {
+        Serial.println("Ultrasonic task already running before this call.");
     }
 }
 
 void UltrasonicTask::stopTask() {
-    if (_taskHandle != nullptr) {
-        _rightMotor.stop();
-        _leftMotor.stop();
+    if (_taskHandle != NULL) {
+        motorSpeed = 0;
+        motorDirection = 0;
+        _taskRunning = false;
         vTaskDelete(_taskHandle);
-        _taskHandle = nullptr;
+        _taskHandle = NULL;
         Serial.println("Ultrasonic task stopped.");
+    }else {
+        Serial.println("Ultrasonic task was not running.");
     }
 }
 
-void UltrasonicTask::suspendTask() {
-    if (_taskHandle != nullptr) {
-        _rightMotor.stop();
-        _leftMotor.stop();
-        vTaskSuspend(_taskHandle);
-        Serial.println("Ultrasonic task suspended.");
-    }
-}
-
-void UltrasonicTask::resumeTask() {
-    if (_taskHandle != nullptr) {
-        motorMaxSpeed = EEPROMConfig::getMemInt(1);
-        _rightMotor.forward(motorMaxSpeed);
-        _leftMotor.forward(motorMaxSpeed);
-        vTaskResume(_taskHandle);
-        Serial.println("Ultrasonic task resumed.");
-    }
-}
-
-void UltrasonicTask::distanceMeasureTask(void *parameters) {
+void UltrasonicTask::DistanceMeasureTask(void *parameters) {
     UltrasonicTask *self = static_cast<UltrasonicTask *>(parameters);
+    static long lastDistance = 0;
+    const int threshold = 3;
+    static int stopState = 0;
 
-    uint32_t lastSensorCheckTime = 0;
-    uint32_t lastMotorUpdateTime = 0;
-    const uint32_t sensorCheckInterval = 50;
-    const uint32_t motorUpdateInterval = 5;
+    while (self->_taskRunning) {
+        long distance = self->_ultrasonic.getDistance();
 
-    int previousLeftMotorSpeed = 0;
-    int previousRightMotorSpeed = 0;
-
-    while (true) {
-        uint32_t currentTime = millis();
-
-        if (currentTime - lastSensorCheckTime >= sensorCheckInterval) {
-            self->_distance = self->_ultrasonic.getDistance();
-            lastSensorCheckTime = currentTime;
+        if (abs(distance - lastDistance) < threshold) {
+            distance = lastDistance;
+        } else {
+            lastDistance = distance;
         }
 
-        if (currentTime - lastMotorUpdateTime >= motorUpdateInterval) {
-            int leftMotorSpeed = self->motorMaxSpeed;
-            int rightMotorSpeed = self->motorMaxSpeed;
-
-            if (self->_distance <= self->_maxDistance) {
-                rightMotorSpeed = -self->motorMaxSpeed;
-            }
-
-            if (leftMotorSpeed != previousLeftMotorSpeed || rightMotorSpeed != previousRightMotorSpeed) {
-                if (leftMotorSpeed >= 0) {
-                    self->_leftMotor.forward(leftMotorSpeed);
+        switch (stopState) {
+            case 0:
+                if (distance > 0 && distance < 20) {
+                    motorSpeed = 0;
+                    motorDirection = 0;
+                    stopState = 1;
                 } else {
-                    self->_leftMotor.backward(-leftMotorSpeed);
+                    motorSpeed = 50;
+                    motorDirection = 0;
                 }
+                break;
 
-                if (rightMotorSpeed >= 0) {
-                    self->_rightMotor.forward(rightMotorSpeed);
-                } else {
-                    self->_rightMotor.backward(-rightMotorSpeed);
-                }
+            case 1:
+                motorSpeed = 0;
+                motorDirection = 0;
+                vTaskDelay(pdMS_TO_TICKS(70));
+                stopState = 2;
+                break;
 
-                previousLeftMotorSpeed = leftMotorSpeed;
-                previousRightMotorSpeed = rightMotorSpeed;
+            case 2:
+            if (distance > 40) {
+                stopState = 0;
+            } else {
+                motorSpeed = -50;
+                motorDirection = -1;
             }
-
-            lastMotorUpdateTime = currentTime;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(70));
     }
+    Serial.println("Ultrasonic task exiting.");
 }
