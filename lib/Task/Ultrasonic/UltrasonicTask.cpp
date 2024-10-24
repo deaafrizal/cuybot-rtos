@@ -36,7 +36,6 @@ void UltrasonicTask::DistanceMeasureTask(void *parameters) {
 
     while (self->_taskRunning) {
         long distance = self->_ultrasonic.getDistance();
-        Serial.println(self->speed);
         if (abs(distance - lastDistance) < threshold) {
             distance = lastDistance;
         } else {
