@@ -1,7 +1,7 @@
 <h3 align="center">CUYBOT V1 Rev.0</h3>
 
 <p align="center">
-  <img src="https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/cuybot-sw.jpg" alt="Cuybot">
+  <img src="https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/cuybot-sw.jpg" alt="Cuybot" width="450">
 </p>
 Open **cuybot-rtos**! 🚗✨ Custom **SMARTCAR BOARD** khusus buat belajar Robotika dasar, IoT & Web Development. Cocok beut buat yang pengen fullstack dari mulai develop firmware, software & troubleshoot hardware.
 
