@@ -16,6 +16,9 @@ public:
     TaskHandle_t getTaskHandle();
 
 private:
+    const uint32_t _taskStackSize = 4096;
+    const UBaseType_t _taskPriority = 6;
+    
     IR &_ir;
     MotorDriver &_rightMotor;
     MotorDriver &_leftMotor;

@@ -17,7 +17,7 @@ MotorTask::~MotorTask() {
 
 void MotorTask::startTask()
 {
-    xTaskCreate(runTask, "MotorControlTask", 3028, this, 5, NULL);
+    xTaskCreate(runTask, "MotorControlTask", _taskStackSize, this, _taskPriority, NULL);
 }
 
 void MotorTask::runTask(void *pvParameters)
@@ -27,9 +27,9 @@ void MotorTask::runTask(void *pvParameters)
     while (true)
     {
         if (self->_currentSpeed < motorSpeed) {
-            self->_currentSpeed += 25;
+            self->_currentSpeed += 15;
         } else if (self->_currentSpeed > motorSpeed) {
-            self->_currentSpeed -= 25;
+            self->_currentSpeed -= 15;
         }
 
         if (self->_currentSpeed == 0) {

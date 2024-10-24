@@ -12,14 +12,20 @@ ModeSelectionTask::ModeSelectionTask(UltrasonicTask &ultrasonicTask, IRTask &irT
     modeChangeSemaphore = xSemaphoreCreateBinary();
     if (modeChangeSemaphore == NULL) {
         Serial.println("Error creating modeChangeSemaphore!");
-    }else {
-        Serial.println("modeChangeSemaphore created!");
     }
 }
 
 void ModeSelectionTask::startTask() {
     if (_taskHandle == NULL) {
-        xTaskCreate(modeSelectionTaskFunction, "ModeSelectionTask", 4096, this, 2, &_taskHandle);
+        xTaskCreate(modeSelectionTaskFunction, "ModeSelectionTask", _taskStackSize, this, _taskPriority, &_taskHandle);
+    }
+}
+
+void ModeSelectionTask::stopTask() {
+    if (_taskHandle != NULL) {
+        vTaskDelete(_taskHandle);
+        _taskHandle = NULL;
+        Serial.println("mode selection task stopped!");
     }
 }
 
@@ -31,27 +37,27 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
             self->_buzzer.beep(100);
             switch (mode) {
                 case 1: // WebSocketTask only
-                    Serial.println("Mode 1: WebSocketTask only. No tasks resumed.");
+                    Serial.println("Mode 1: Manual Control");
                     ledControl.setMode(1);
                     self->_ultrasonicTask.stopTask();
                     break;
 
                 case 2: // WebSocketTask + UltrasonicTask
-                    Serial.println("Mode 2: WebSocketTask + UltrasonicTask");
+                    Serial.println("Mode 2: Obstacle Avoidance");
                     ledControl.setMode(2);
                     self->_ultrasonicTask.startTask();
                     break;
 
                 case 3: // IRTask only (Line Following)
-                    Serial.println("Mode 3: IRTask only (Line Following)");
+                    Serial.println("Mode 3: Line Following");
                     ledControl.setMode(3);
                     self->_ultrasonicTask.stopTask();
                     break;
 
                 case 4: // Patrol Mode or Tuning
-                    Serial.println("Mode 4: Patrol Mode");
+                    Serial.println("Mode 4: Auto Patrol");
                     ledControl.setMode(4);
-                    self->_ultrasonicTask.stopTask(); // Suspend ultrasonic task
+                    self->_ultrasonicTask.stopTask();
                     break;
 
                 default:
@@ -62,6 +68,7 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
 
             self->_lastMode = mode; 
         }
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 

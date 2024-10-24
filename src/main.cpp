@@ -23,6 +23,7 @@
 #define PWM_A2 4
 #define PWM_B1 6
 #define PWM_B2 5
+
 // Ultrasonic
 #define TRIGGER_PIN 20
 #define ECHO_PIN 21
@@ -33,7 +34,7 @@ const float VOLTAGE_MIN = 2.8;
 const float VOLTAGE_MAX = 4.2;
 // WIFI CONF
 #define SSID "cuybot"
-const char* password = "123456789";
+const char* password = "cuybot123";
 // EXTERN VAR
 int mode = 1;
 int motorSpeed = 0;
@@ -56,7 +57,7 @@ IRTask irTask(ir, rightMotor, leftMotor);
 MotorControl motorControl(rightMotor, leftMotor);
 MotorTask motorTask(rightMotor, leftMotor);
 
-UltrasonicTask ultrasonicTask(ultrasonic, motorTask);
+UltrasonicTask ultrasonicTask(ultrasonic);
 ModeSelectionTask modeSelectionTask(ultrasonicTask, irTask, buzzer);
 HardwareMonitorTask hardwareMonitorTask(&webSocketTask);
 
@@ -65,7 +66,8 @@ BatteryMonitorTask batteryMonitorTask(BATTERY_ADC_PIN, VOLTAGE_MIN, VOLTAGE_MAX,
 void setup() {
     Serial.begin(9600);
     Serial.println("Starting serial communication...");
-    delay(10);
+    WiFi.disconnect(true, true);
+    delay(500);
     
     EEPROM.begin(128);
     eepromConfig.loadSettings();
@@ -73,11 +75,15 @@ void setup() {
     buzzer.begin();
     ultrasonic.begin();
     
+    delay(1000);
     Serial.println("Setting up WiFi...");
-    String macAddr = WiFi.macAddress();
-    String ssid = String(SSID) + "-" + macAddr;
 
-    if (WiFi.softAP(ssid.c_str(), password, 6)) {
+
+    String macAddr = WiFi.macAddress();
+    String lastFourCharMacAddr = macAddr.substring(macAddr.length() - 4);
+    String ssid = String(SSID) + "-" + lastFourCharMacAddr;
+
+    if (WiFi.softAP(ssid, password, 6)) {
         Serial.println("Wi-Fi AP started successfully");
         Serial.print("AP IP address: ");
         Serial.println(WiFi.softAPIP());

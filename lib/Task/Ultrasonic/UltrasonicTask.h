@@ -3,20 +3,24 @@
 
 #include <Arduino.h>
 #include <Ultrasonic/Ultrasonic.h>
-#include <Motor/MotorTask.h>
+#include <EEPROM_config.h>
 
 class UltrasonicTask {
 public:
-    UltrasonicTask(Ultrasonic &ultrasonic, MotorTask &motorTask);
+    UltrasonicTask(Ultrasonic &ultrasonic);
     void startTask();
     void stopTask();
 
 private:
-    static void DistanceMeasureTask(void *parameters);
-    MotorTask _motorTask;
+    const uint32_t _taskStackSize = 3072;
+    const UBaseType_t _taskPriority = 5;
+    int speed;
     Ultrasonic _ultrasonic;
     TaskHandle_t _taskHandle;
+    
     bool _taskRunning;
+    static EEPROMConfig &_eepromConfig;
+    static void DistanceMeasureTask(void *parameters);
 };
 
 #endif

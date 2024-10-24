@@ -15,6 +15,8 @@ public:
 private:
     static void runTask(void *pvParameters);
 
+    const UBaseType_t _taskPriority = 8;
+    const uint32_t _taskStackSize = 4096;
     MotorDriver &_rightMotor;
     MotorDriver &_leftMotor;
     MotorControl _motorControl;

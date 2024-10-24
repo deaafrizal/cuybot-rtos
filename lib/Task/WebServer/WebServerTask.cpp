@@ -17,13 +17,14 @@ WebServerTask::~WebServerTask() {
     stopTask();
     if (dnsSemaphore != NULL) {
         vSemaphoreDelete(dnsSemaphore);
+        dnsSemaphore = NULL;
     }
 }
 
 void WebServerTask::startTask() {
     Serial.println("Starting WebServer task...");
     if (_taskHandle == NULL) {
-        xTaskCreate(webServerTaskFunction, "WebServerTask", _stackSize, this, 6, &_taskHandle);
+        xTaskCreate(webServerTaskFunction, "WebServerTask", _taskStackSize, this, _taskPriority, &_taskHandle);
     }
 }
 

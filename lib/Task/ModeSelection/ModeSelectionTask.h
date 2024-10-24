@@ -1,7 +1,6 @@
 #ifndef MODESELECTIONTASK_H
 #define MODESELECTIONTASK_H
 
-#include <Motor/MotorTask.h>
 #include <Ultrasonic/UltrasonicTask.h>
 #include <IRReading/IRTask.h>
 #include <Buzzer/Buzzer.h>
@@ -11,7 +10,6 @@
 class ModeSelectionTask {
 public:
     ModeSelectionTask(UltrasonicTask &ultrasonic, IRTask &irTask, Buzzer &buzzer);
-    ~ModeSelectionTask();
 
     void startTask();
     void stopTask();
@@ -19,7 +17,7 @@ public:
 
 private:
     TaskHandle_t _taskHandle;
-    const uint32_t _taskStackSize = 6096;
+    const uint32_t _taskStackSize = 4096;
     const UBaseType_t _taskPriority = 8;
     Buzzer& _buzzer;
     UltrasonicTask &_ultrasonicTask;

@@ -20,7 +20,7 @@ public:
 
 private:
     const uint32_t _taskStackSize = 2048;
-    const UBaseType_t _taskPriority = 1;
+    const UBaseType_t _taskPriority = 3;
 
     float _freeMemKB;
     float _freeMemMB;

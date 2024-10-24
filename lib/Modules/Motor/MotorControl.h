@@ -14,7 +14,7 @@ public:
     void turnRight(int speed);
     void turnLeft(int speed);
     void stop();
-    
+
     void setSpeed(int leftSpeed, int rightSpeed);
     void setSpeedAndDirection(int speed, int direction);
 
@@ -25,6 +25,7 @@ private:
     int _maxSpeed;
     int _backwardLimit;
     float _turnFactor;
+    float calculateTurnFactor();
     static EEPROMConfig _eepromConfig;
 };
 

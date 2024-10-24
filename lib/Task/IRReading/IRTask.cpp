@@ -15,7 +15,7 @@ TaskHandle_t IRTask::getTaskHandle() {
 
 void IRTask::startTask() {
     if (_taskHandle == NULL) {
-        xTaskCreate(irMeasureTask, "IRTask", 2448, this, 3, &_taskHandle);
+        xTaskCreate(irMeasureTask, "IRTask", _taskStackSize, this, _taskPriority, &_taskHandle);
     }else {
         _taskRunning = true; 
         Serial.println("IR task started.");

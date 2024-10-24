@@ -6,6 +6,7 @@
 #include <String>
 #include <WebSocketsServer.h>
 #include <ModeSelection/ModeSelectionTask.h>
+#include <freertos/semphr.h>
 #include <freertos/timers.h>
 
 class WebSocketTask {
@@ -25,7 +26,7 @@ public:
     static void setModeSelectionTaskReference(ModeSelectionTask& modeSelectionTask);
 
 private:
-    const uint32_t _taskStackSize = 8120;
+    const uint32_t _taskStackSize = 8192;
     const UBaseType_t _taskPriority = 10;
     bool isOperationSuspended;
 

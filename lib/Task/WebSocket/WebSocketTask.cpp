@@ -1,6 +1,4 @@
-#include <map>
 #include <WebSocket/WebSocketTask.h>
-#include <ModeSelection/ModeSelectionTask.h>
 #include <freertos/semphr.h>
 
 #define NO_CLIENT_TIMEOUT_MS 10000
@@ -56,10 +54,11 @@ void WebSocketTask::stopTask() {
             noClientTimer = NULL;
         }
         if (xSemaphore != NULL) {
-            vSemaphoreDelete(xSemaphore);  // Delete the semaphore
+            vSemaphoreDelete(xSemaphore);
             xSemaphore = NULL;
         }
     }
+    vTaskSuspend(NULL);
 }
 
 void WebSocketTask::suspendTask() {
@@ -88,22 +87,19 @@ void WebSocketTask::webSocketTaskFunction(void *parameter) {
     for (;;) {
         self->webSocket.loop();
         unsigned long currentMillis = millis();
-        
         if (xSemaphoreTake(xSemaphore, portMAX_DELAY)) {
             self->monitorPlaytime(currentMillis);
             xSemaphoreGive(xSemaphore);
         }
-        
         vTaskDelay(pdMS_TO_TICKS(5));
     }
-    vTaskSuspend(NULL);
 }
 
 void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
     WebSocketTask *self = WebSocketTask::instance;
     String clientID = self->webSocket.remoteIP(num).toString();
     
-    if (xSemaphoreTake(xSemaphore, portMAX_DELAY)) {  // Protect event handling with semaphore
+    if (xSemaphoreTake(xSemaphore, portMAX_DELAY)) {
         switch (type) {
             case WStype_DISCONNECTED: {
                 if (self->activeClientCount > 0) {
@@ -161,7 +157,7 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
             default:
                 break;
         }
-        xSemaphoreGive(xSemaphore);  // Release the semaphore after event handling
+        xSemaphoreGive(xSemaphore);
     }
 }
 
