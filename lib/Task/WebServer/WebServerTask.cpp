@@ -6,7 +6,7 @@ AsyncWebServer WebServerTask::server = AsyncWebServer(80);
 DNSServer WebServerTask::dnsServer;
 SemaphoreHandle_t WebServerTask::dnsSemaphore = NULL;
 
-WebServerTask::WebServerTask(): _stackSize(4096) {
+WebServerTask::WebServerTask() {
     Serial.println("WebServerTask initialized...");
     _taskHandle = NULL;
     dnsSemaphore = xSemaphoreCreateBinary();
@@ -17,13 +17,14 @@ WebServerTask::~WebServerTask() {
     stopTask();
     if (dnsSemaphore != NULL) {
         vSemaphoreDelete(dnsSemaphore);
+        dnsSemaphore = NULL;
     }
 }
 
 void WebServerTask::startTask() {
     Serial.println("Starting WebServer task...");
     if (_taskHandle == NULL) {
-        xTaskCreate(webServerTaskFunction, "WebServerTask", _stackSize, this, 6, &_taskHandle);
+        xTaskCreate(webServerTaskFunction, "WebServerTask", _taskStackSize, this, _taskPriority, &_taskHandle);
     }
 }
 

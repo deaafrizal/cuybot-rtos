@@ -1,22 +1,29 @@
 #include <Ultrasonic/Ultrasonic.h>
-#include <Arduino.h>
-#include <NewPing.h>
 
-#define MAX_DISTANCE 200
+#define MAX_DISTANCE 400
 
-Ultrasonic::Ultrasonic()
-    : sonar(_trigger_pin, _echo_pin, MAX_DISTANCE) {}
+Ultrasonic::Ultrasonic(int triggerPin, int echoPin) 
+    : _trigger_pin(triggerPin), _echo_pin(echoPin) {}
 
 void Ultrasonic::begin() {
-    sonar.ping();
+    pinMode(_trigger_pin, OUTPUT);
+    pinMode(_echo_pin, INPUT);
 }
 
 long Ultrasonic::getDistance() {
-    unsigned int distance = sonar.ping_cm();
+    digitalWrite(_trigger_pin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(_trigger_pin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(_trigger_pin, LOW);
 
-    if (distance == 0) {
-        return MAX_DISTANCE;
+    long duration = pulseIn(_echo_pin, HIGH, 30000);
+
+    if (duration == 0) {
+        return -1;
     }
-    
+
+    long distance = (duration * 0.034) / 2;
+
     return distance;
 }

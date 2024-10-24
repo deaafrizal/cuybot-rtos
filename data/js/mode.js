@@ -15,12 +15,18 @@ function handleButtonClick(button, modeMessage) {
   if (button.classList.contains('loading')) return;
 
   if (button === activeButton) {
+    // If the button is already active, deactivate and set to mode 1
     sendModeMessage('M1');
     setButtonLoading(button, 'Deactivating...');
+    activeButton = null; // Reset active button
   } else {
+    // If it's a different button, activate the new mode
     sendModeMessage(modeMessage);
     setButtonLoading(button, 'Activating...');
-    activeButton = button;
+    if (activeButton) {
+      resetButton(activeButton); // Reset previous active button
+    }
+    activeButton = button; // Set the new active button
   }
 }
 
@@ -61,6 +67,26 @@ function handleWebSocketTimeout(button) {
   resetButton(button);
 }
 
+function updateModeButtons(activeMode) {
+  const buttons = [obstacleButton, followButton, patrolButton, spinButton];
+
+  sessionStorage.setItem('activeMode', activeMode);
+
+  buttons.forEach(button => {
+    // Check if the button corresponds to the active mode
+    if (button.dataset.mode === `M${activeMode}`) {
+      activeButton = button;
+      button.classList.add('active');
+      button.style.backgroundColor = "#007aff"; // Set active button color
+      button.style.color = "#fff"; // Ensure text color is white
+    } else {
+      button.style.backgroundColor = ''; // Reset background color for inactive buttons
+      button.style.color = ''; // Reset text color for inactive buttons
+      button.classList.remove('active');
+    }
+  });
+}
+
 const savedMode = sessionStorage.getItem('activeMode');
 
 if (savedMode) {
@@ -68,31 +94,6 @@ if (savedMode) {
   sendModeMessage(`M${savedMode}`);
 }
 
-function updateModeButtons(activeMode) {
-  const buttons = [obstacleButton, followButton, patrolButton, spinButton];
-
-  sessionStorage.setItem('activeMode', activeMode);
-
-  if (activeMode === 'M1' || activeMode === '1') {
-    if (activeButton) {
-      resetButton(activeButton);
-    }
-    activeButton = null;
-  } else {
-    buttons.forEach(button => {
-      if (button.dataset.mode === `M${activeMode}`) { 
-        activeButton = button;
-        button.classList.add('active');
-        button.style.backgroundColor = "#007aff";
-        button.style.color = "#fff";
-      } else {
-        button.style.backgroundColor = '';
-        button.style.color = '';
-        button.classList.remove('active');
-      }
-    });
-  }
-}
 
 function sendModeMessage(message) {
   if (websocket && websocket.readyState === WebSocket.OPEN) {

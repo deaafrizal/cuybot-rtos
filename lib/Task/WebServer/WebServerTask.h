@@ -17,7 +17,8 @@ public:
 
 private:
     static void webServerTaskFunction(void *parameter);
-    uint32_t _stackSize;
+    const uint32_t _taskStackSize = 8192;
+    const UBaseType_t _taskPriority = 9;
     TaskHandle_t _taskHandle;
 
     static AsyncWebServer server;

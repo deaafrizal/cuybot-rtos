@@ -4,8 +4,7 @@
 #define MIN_PWM_SPEED 0
 
 IRTask::IRTask(IR &ir, MotorDriver &rightMotor, MotorDriver &leftMotor) 
-    : _ir(ir), _rightMotor(rightMotor), _leftMotor(leftMotor) {
-    _taskHandle = nullptr;
+    : _ir(ir), _rightMotor(rightMotor), _leftMotor(leftMotor), _taskHandle(NULL), _taskRunning(false) {
     motorMaxSpeed = EEPROMConfig::getMemInt(1);
     motorWeight = EEPROMConfig::getMemInt(2);
 }
@@ -15,22 +14,19 @@ TaskHandle_t IRTask::getTaskHandle() {
 }
 
 void IRTask::startTask() {
-    if (_taskHandle == nullptr) {
-        xTaskCreate(irMeasureTask, "IRTask", 2448, this, 3, &_taskHandle);
-        if (_taskHandle != nullptr) {
-            Serial.println("IRTask started successfully.");
-            vTaskSuspend(_taskHandle);
-            Serial.println("IRTask initially suspended.");
-        } else {
-            Serial.println("Failed to start IRTask.");
-        }
+    if (_taskHandle == NULL) {
+        xTaskCreate(irMeasureTask, "IRTask", _taskStackSize, this, _taskPriority, &_taskHandle);
+    }else {
+        _taskRunning = true; 
+        Serial.println("IR task started.");
     }
 }
 
 void IRTask::stopTask() {
-    if (_taskHandle != nullptr) {
+    if (_taskHandle != NULL) {
+        _taskRunning = false;
         vTaskDelete(_taskHandle);
-        _taskHandle = nullptr;
+        _taskHandle = NULL;
         _rightMotor.stop();
         _leftMotor.stop();
         Serial.println("IR Task stopped.");
@@ -38,7 +34,7 @@ void IRTask::stopTask() {
 }
 
 void IRTask::suspendTask() {
-    if (_taskHandle != nullptr) {
+    if (_taskHandle != NULL) {
         vTaskSuspend(_taskHandle);
         _rightMotor.stop();
         _leftMotor.stop();
@@ -47,7 +43,7 @@ void IRTask::suspendTask() {
 }
 
 void IRTask::resumeTask() {
-    if (_taskHandle != nullptr) {
+    if (_taskHandle != NULL) {
         vTaskResume(_taskHandle);
         Serial.println("IR Task resumed.");
     }
@@ -57,7 +53,7 @@ void IRTask::irMeasureTask(void *_parameters) {
     IRTask *self = static_cast<IRTask *>(_parameters);
     self->_ir.begin();
     
-    while (true) {
+    while (self->_taskRunning) {
         int irLeft = self->_ir.getIRLeft();
         int irRight = self->_ir.getIRRight();
 
@@ -90,8 +86,6 @@ void IRTask::irMeasureTask(void *_parameters) {
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 
-    // Stop motors when the task ends
-    self->_rightMotor.stop();
-    self->_leftMotor.stop();
-    vTaskSuspend(nullptr);
+    Serial.println("Ultrasonic taskrunning false.");
+    self->_taskRunning = false;
 }

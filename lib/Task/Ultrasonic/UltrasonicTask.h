@@ -1,39 +1,26 @@
-#ifndef ULTRASONICTASK_H
-#define ULTRASONICTASK_H
+#ifndef ULTRASONIC_TASK_H
+#define ULTRASONIC_TASK_H
 
+#include <Arduino.h>
 #include <Ultrasonic/Ultrasonic.h>
-#include <Motor/MotorDriver.h>
 #include <EEPROM_config.h>
 
 class UltrasonicTask {
 public:
-    UltrasonicTask(Ultrasonic &ultrasonic, MotorDriver &rightMotor, MotorDriver &leftMotor);
-    ~UltrasonicTask();
-
+    UltrasonicTask(Ultrasonic &ultrasonic);
     void startTask();
     void stopTask();
-    void suspendTask();
-    void resumeTask();
-    
-    TaskHandle_t getTaskHandle();
 
 private:
-    static void distanceMeasureTask(void *parameters);
-
-    TaskHandle_t _taskHandle; 
-    Ultrasonic &_ultrasonic;
-    MotorDriver &_rightMotor;
-    MotorDriver &_leftMotor;
+    const uint32_t _taskStackSize = 3072;
+    const UBaseType_t _taskPriority = 5;
+    int speed;
+    Ultrasonic _ultrasonic;
+    TaskHandle_t _taskHandle;
     
+    bool _taskRunning;
     static EEPROMConfig &_eepromConfig;
-
-    const int _vdelayTime = 70;
-    const float _minDistance = 0.0;
-    const float _maxDistance = 17.0;
-    
-    uint8_t motorMaxSpeed;
-    bool taskRunning;
-    float _distance;
+    static void DistanceMeasureTask(void *parameters);
 };
 
 #endif

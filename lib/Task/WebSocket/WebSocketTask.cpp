@@ -1,19 +1,13 @@
-#include <map>
 #include <WebSocket/WebSocketTask.h>
-#include <ModeSelection/ModeSelectionTask.h>
 #include <freertos/semphr.h>
 
-#define BATTERY_ADC_PIN 0
-#define VOLTAGE_DIVIDER_FACTOR 2
 #define NO_CLIENT_TIMEOUT_MS 10000
 #define PLAYTIME_UPDATE_INTERVAL_MS 1000
-#define BATTERY_UPDATE_INTERVAL_MS 5000
 
 extern int motorSpeed;
 extern int motorDirection;
 extern int mode;
 unsigned long lastPlaytimeSent = 0;
-unsigned long lastBatterySent = 0;
 
 std::map<String, unsigned long> playtimeMap;
 std::map<String, bool> isPausedMap;
@@ -24,7 +18,6 @@ SemaphoreHandle_t xSemaphore;
 
 WebSocketsServer WebSocketTask::webSocket = WebSocketsServer(81);
 WebSocketTask* WebSocketTask::instance = nullptr;
-BatteryMonitorTask WebSocketTask::batteryMonitorTask(BATTERY_ADC_PIN, 3.0, 4.2, VOLTAGE_DIVIDER_FACTOR);
 ModeSelectionTask* WebSocketTask::modeSelectionTask = nullptr;
 
 WebSocketTask::WebSocketTask() {
@@ -42,8 +35,7 @@ void WebSocketTask::startTask() {
     if (_taskHandle == NULL) {
         instance = this;
         
-        xSemaphore = xSemaphoreCreateMutex();  // Create the semaphore
-        batteryMonitorTask.startMonitoring();
+        xSemaphore = xSemaphoreCreateMutex();
 
         xTaskCreate(webSocketTaskFunction, "WebSocketTask", _taskStackSize, this, _taskPriority, &_taskHandle);
 
@@ -56,17 +48,17 @@ void WebSocketTask::stopTask() {
         vTaskSuspend(_taskHandle);
         webSocket.close();
         vTaskDelete(_taskHandle);
-        batteryMonitorTask.stopMonitoring();
         _taskHandle = NULL;
         if (noClientTimer != NULL) {
             xTimerDelete(noClientTimer, 0);
             noClientTimer = NULL;
         }
         if (xSemaphore != NULL) {
-            vSemaphoreDelete(xSemaphore);  // Delete the semaphore
+            vSemaphoreDelete(xSemaphore);
             xSemaphore = NULL;
         }
     }
+    vTaskSuspend(NULL);
 }
 
 void WebSocketTask::suspendTask() {
@@ -95,23 +87,19 @@ void WebSocketTask::webSocketTaskFunction(void *parameter) {
     for (;;) {
         self->webSocket.loop();
         unsigned long currentMillis = millis();
-        
-        if (xSemaphoreTake(xSemaphore, portMAX_DELAY)) {  // Take the semaphore
+        if (xSemaphoreTake(xSemaphore, portMAX_DELAY)) {
             self->monitorPlaytime(currentMillis);
-            self->monitorBattery(currentMillis);
-            xSemaphoreGive(xSemaphore);  // Release the semaphore
+            xSemaphoreGive(xSemaphore);
         }
-        
         vTaskDelay(pdMS_TO_TICKS(5));
     }
-    vTaskSuspend(NULL);
 }
 
 void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
     WebSocketTask *self = WebSocketTask::instance;
     String clientID = self->webSocket.remoteIP(num).toString();
     
-    if (xSemaphoreTake(xSemaphore, portMAX_DELAY)) {  // Protect event handling with semaphore
+    if (xSemaphoreTake(xSemaphore, portMAX_DELAY)) {
         switch (type) {
             case WStype_DISCONNECTED: {
                 if (self->activeClientCount > 0) {
@@ -169,7 +157,7 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
             default:
                 break;
         }
-        xSemaphoreGive(xSemaphore);  // Release the semaphore after event handling
+        xSemaphoreGive(xSemaphore);
     }
 }
 
@@ -185,13 +173,6 @@ void WebSocketTask::monitorPlaytime(unsigned long currentMillis) {
         updatePlaytime();
         sendPlaytimeData();
         lastPlaytimeSent = currentMillis;
-    }
-}
-
-void WebSocketTask::monitorBattery(unsigned long currentMillis) {
-    if (currentMillis - lastBatterySent > BATTERY_UPDATE_INTERVAL_MS) {
-        sendBatteryData();
-        lastBatterySent = currentMillis;
     }
 }
 
@@ -227,19 +208,6 @@ void WebSocketTask::sendPlaytimeData() {
     }
 }
 
-void WebSocketTask::sendBatteryData() {
-    float batteryVoltage = batteryMonitorTask.getBatteryVoltage();
-    float batteryPercentage = batteryMonitorTask.getBatteryPercentage();
-    String jsonData = "{\"batteryVoltage\": " + String(batteryVoltage, 2) + 
-                      ", \"batteryPercentage\": " + String(batteryPercentage, 2) + "}";
-    for (const auto& client : activeClients) {
-        int clientNum = getClientNumFromID(client);
-        if (clientNum >= 0) {
-            webSocket.sendTXT(clientNum, jsonData);
-        }
-    }
-}
-
 void WebSocketTask::sendModeData() {
     String jsonData = "{\"mode\": " + String(mode) + "}";
     if (!activeClients.empty()) {
@@ -247,23 +215,7 @@ void WebSocketTask::sendModeData() {
     }
 }
 
-void WebSocketTask::sendCurrentSpeedAndDirectionData() {
-    if (mode != 1 && motorSpeed != 0 && motorDirection != 0) {
-        for (const auto& client : activeClients) {
-            String clientID = client;
-            int currentSpeed = motorSpeed;
-            int currentDirection = motorDirection;
-            String jsonData = "{\"currentSpeed\": " + String(currentSpeed) + 
-                        ", \"currentDirection\": " + String(currentDirection) + "}";
-            int clientNum = getClientNumFromID(clientID);
-            if (clientNum >= 0) {
-             webSocket.sendTXT(clientNum, jsonData);
-            }
-        }
-    }
-}
-
-void WebSocketTask::sendStackDataToClient(String &jsonData) {
+void WebSocketTask::sendDataToClient(String &jsonData) {
     for (const auto& client : activeClients) {
         int clientNum = getClientNumFromID(client);
         if (clientNum >= 0) {

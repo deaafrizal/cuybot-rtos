@@ -2,7 +2,7 @@ const speedJoystick = document.getElementById('speedJoystick');
 const directionJoystick = document.getElementById('directionJoystick');
 let currentSpeed = 0;
 let currentDirection = 0;
-const maxSpeed = 100;
+const maxSpeed = 90;
 
 function sendJoystickControlMessage() {
   const message = `S${currentSpeed}D${currentDirection}`;

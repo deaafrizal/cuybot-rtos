@@ -2,6 +2,19 @@
 
 OTA::OTA(const char* hostname) : _hostname(hostname), _taskHandle(NULL) {}
 
+void OTA::startOTATask() {
+    if (_taskHandle == NULL) {
+        xTaskCreate(otaTask, "OTATask", _taskStackSize, this, _taskPriority, &_taskHandle);
+    }
+}
+
+void OTA::otaTask(void *parameter) {
+    while (true) {
+        ArduinoOTA.handle();
+        vTaskDelay(pdMS_TO_TICKS(200));
+    }
+}
+
 void OTA::begin() {
     ArduinoOTA.setHostname(_hostname);
     ArduinoOTA.onStart([]() {
@@ -39,17 +52,4 @@ void OTA::begin() {
 
     ArduinoOTA.begin();
     Serial.println("OTA service ready!");
-}
-
-void OTA::otaTask(void *parameter) {
-    while (true) {
-        ArduinoOTA.handle();
-        vTaskDelay(pdMS_TO_TICKS(200));
-    }
-}
-
-void OTA::startOTATask() {
-    if (_taskHandle == NULL) {
-        xTaskCreate(otaTask, "OTATask", 2048, this, 3, &_taskHandle);
-    }
 }

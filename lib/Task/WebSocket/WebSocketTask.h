@@ -5,10 +5,8 @@
 #include <map>
 #include <String>
 #include <WebSocketsServer.h>
-#include <BatteryMonitor/BatteryMonitorTask.h>
 #include <ModeSelection/ModeSelectionTask.h>
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
+#include <freertos/semphr.h>
 #include <freertos/timers.h>
 
 class WebSocketTask {
@@ -20,7 +18,7 @@ public:
     void stopTask();
     void suspendTask();
     void resumeTask();
-    void sendStackDataToClient(String &jsonData);
+    void sendDataToClient(String &jsonData);
 
     TaskHandle_t getTaskHandle();
 
@@ -28,11 +26,10 @@ public:
     static void setModeSelectionTaskReference(ModeSelectionTask& modeSelectionTask);
 
 private:
-    const uint32_t _taskStackSize = 8120;
+    const uint32_t _taskStackSize = 8192;
     const UBaseType_t _taskPriority = 10;
     bool isOperationSuspended;
 
-    static BatteryMonitorTask batteryMonitorTask;
     static ModeSelectionTask* modeSelectionTask;
     static void webSocketTaskFunction(void *parameter);
     static void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
@@ -44,12 +41,9 @@ private:
     int getClientNumFromID(String clientID);
     void sendPlaytimeData();
     void updatePlaytime();
-    void sendCurrentSpeedAndDirectionData();
-    void sendBatteryData();
     void sendModeData();
 
     void monitorPlaytime(unsigned long currentMillis);
-    void monitorBattery(unsigned long currentMillis);
     
     std::set<String> activeClients;
     std::map<String, unsigned long> playtimeMap;

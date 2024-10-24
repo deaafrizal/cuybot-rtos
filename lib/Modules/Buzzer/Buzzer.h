@@ -5,15 +5,18 @@
 
 class Buzzer {
 public:
-    Buzzer(int pin);         // Constructor to initialize the buzzer with the pin
-    void begin();            // Initialize the buzzer pin
-    void on();               // Turn the buzzer on
-    void off();              // Turn the buzzer off
-    void beep(int duration); // Beep for a specific duration (non-blocking)
+    Buzzer(int buzzerPin);
+
+    void begin();
+    void on();
+    void off();
+    void beep(int duration);
+    void playBatteryLowWarning();
+    void playCalibrationBeep(int duration);
 
 private:
-    int _pin;                // Pin to which the buzzer is connected
-    bool _state;             // Current state of the buzzer (on or off)
+    int _pin;
+    bool _state;
 };
 
 #endif
