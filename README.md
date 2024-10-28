@@ -51,7 +51,7 @@ Basis MCU **ESP32** yang juga support web development, jadi belajar ngoding maki
 ### 🔧Cara Install Firmware FreeRTOS untuk Cuybot Protonano V1 Rev.0
 1. Clone repositori ini:
    ```bash
-   git clone https://github.com/yourusername/cuybot-rtos.git
+   git clone https://github.com/deaafrizal/cuybot-rtos.git
 2. Tonton Youtube nya untuk cara setup lebih lengkap.
 
 ##  Gimana Cara Bikin Firmware & Software sendiri buat cuybot?
