@@ -7,6 +7,8 @@ Open **cuybot-rtos**! 🚗✨ Custom **SMARTCAR BOARD** khusus buat belajar Robo
 
 Basis MCU **ESP32** yang juga support web development, jadi belajar ngoding makin fun dengan kombinasi sisi hardware. 
 
+DOKUMENTASI Program: [Baca Di Page Ini](https://github.com/deaafrizal/cuybot-rtos/tree/main/docs)
+
 ***Lengkap tunggu di YouTube***: [YT deaafrizal](https://youtube.com/@deaafrizal)
 
 ## 🚀 Supported Software Feature:
