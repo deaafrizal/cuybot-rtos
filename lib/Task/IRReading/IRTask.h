@@ -2,7 +2,7 @@
 #define IRTASK_H
 
 #include <Arduino.h>
-#include <IR/ir.h>
+#include <IR/IR.h>
 #include <Motor/MotorDriver.h>
 #include <EEPROM_config.h>
 
