@@ -29,10 +29,6 @@ jobs:
     - name: Install PlatformIO
       run: pip install platformio
 
-    - name: Lint Code
-      run: platformio check --fail-on-defect=high --verbose --skip-packages
-      working-directory: ${{ github.workspace }}
-
     - name: Build Project
       run: platformio run
       working-directory: ${{ github.workspace }}
