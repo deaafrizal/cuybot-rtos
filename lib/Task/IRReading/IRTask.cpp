@@ -63,7 +63,6 @@ void IRTask::irMeasureTask(void *_parameters) {
         int leftMotorSpeed = self->motorMaxSpeed;
         int rightMotorSpeed = self->motorMaxSpeed;
 
-        // Adjust motor speeds based on IR sensor values
         if (irLeft == LOW && irRight == HIGH) {
             leftMotorSpeed = self->motorMaxSpeed - self->motorWeight;
             rightMotorSpeed = self->motorMaxSpeed + self->motorWeight;
@@ -74,7 +73,7 @@ void IRTask::irMeasureTask(void *_parameters) {
             self->_rightMotor.stop();
             self->_leftMotor.stop();
             vTaskDelay(pdMS_TO_TICKS(10));
-            continue;  // Skip motor control and move to the next loop iteration
+            continue;
         } else {
             leftMotorSpeed = self->motorMaxSpeed;
             rightMotorSpeed = self->motorMaxSpeed;
@@ -82,7 +81,6 @@ void IRTask::irMeasureTask(void *_parameters) {
 
         self->_rightMotor.forward(self->motorMaxSpeed);
         self->_leftMotor.forward(self->motorMaxSpeed);
-        // Delay between task executions
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 
