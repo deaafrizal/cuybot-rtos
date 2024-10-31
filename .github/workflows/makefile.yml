@@ -31,8 +31,8 @@ jobs:
 
     - name: Lint Code
       run: platformio check --fail-on-defect=high --verbose
-      working-directory: /home/runner/work/cuybot-rtos/cuybot-rtos
+      working-directory: ${{ github.workspace }}
 
     - name: Build Project
       run: platformio run
-      working-directory: /home/runner/work/cuybot-rtos/cuybot-rtos
+      working-directory: ${{ github.workspace }}
