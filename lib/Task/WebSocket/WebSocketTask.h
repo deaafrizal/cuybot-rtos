@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <set>
 #include <map>
-#include <String>
 #include <WebSocketsServer.h>
 #include <ModeSelection/ModeSelectionTask.h>
 #include <freertos/semphr.h>
