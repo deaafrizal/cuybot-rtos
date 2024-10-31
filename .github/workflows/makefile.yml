@@ -30,8 +30,9 @@ jobs:
       run: pip install platformio
 
     - name: Lint Code
-      run: platformio check --fail-on-defect=high --verbose --project-dir=lib
+      run: platformio check --fail-on-defect=high --verbose
       working-directory: /home/runner/work/cuybot-rtos/cuybot-rtos
 
     - name: Build Project
       run: platformio run
+      working-directory: /home/runner/work/cuybot-rtos/cuybot-rtos
