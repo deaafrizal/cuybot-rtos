@@ -2,7 +2,7 @@ name: PlatformIO CI
 
 on:
   push:
-    branches: [ "staging" ]
+    branches: [ "dev" ]
   pull_request:
     branches: [ "dev" ]
 
