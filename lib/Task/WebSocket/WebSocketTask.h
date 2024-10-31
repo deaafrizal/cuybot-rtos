@@ -1,6 +1,7 @@
 #ifndef WEBSOCKET_TASK_H
 #define WEBSOCKET_TASK_H
 
+#include <Arduino.h>
 #include <set>
 #include <map>
 #include <String>
