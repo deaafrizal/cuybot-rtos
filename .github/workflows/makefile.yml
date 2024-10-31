@@ -30,7 +30,7 @@ jobs:
       run: pip install platformio
 
     - name: Lint Code
-      run: platformio check --fail-on-defect=high
+      run: platformio check --fail-on-defect=high --verbose
 
     - name: Build Project
       run: platformio run
