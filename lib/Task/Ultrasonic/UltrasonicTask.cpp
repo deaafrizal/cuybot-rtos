@@ -15,6 +15,10 @@ void UltrasonicTask::startTask() {
     }
 }
 
+bool UltrasonicTask::getIsRunning() {
+    return _taskRunning;
+}
+
 void UltrasonicTask::stopTask() {
     if (_taskHandle != NULL) {
         speed = 0;

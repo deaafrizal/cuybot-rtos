@@ -6,7 +6,7 @@
 #include <Motor/MotorTask.h>
 #include <WebSocket/WebSocketTask.h>
 #include <OTA/OTA.h>
-#include <IR/IR.h>
+#include <IR/IR.h>   
 #include <IRReading/IRTask.h>
 #include <Motor/MotorControl.h>
 #include <Motor/MotorDriver.h>
@@ -27,6 +27,9 @@
 // Ultrasonic
 #define TRIGGER_PIN 20
 #define ECHO_PIN 21
+// IR Line Follow
+#define IR_LEFT 10
+#define IR_RIGHT 7
 // BAT CALC
 #define BATTERY_ADC_PIN 0
 #define VOLTAGE_DIVIDER_FACTOR 2
@@ -43,7 +46,7 @@ int motorDirection = 0;
 EEPROMConfig eepromConfig;
 Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
 Buzzer buzzer(1);
-IR ir;
+IR ir(IR_LEFT, IR_RIGHT);
 
 WebServerTask webServerTask;
 WebSocketTask webSocketTask;
@@ -74,10 +77,10 @@ void setup() {
     
     buzzer.begin();
     ultrasonic.begin();
+    ir.begin();
     
     delay(1000);
     Serial.println("Setting up WiFi...");
-
 
     String macAddr = WiFi.macAddress();
     String lastFourCharMacAddr = macAddr.substring(macAddr.length() - 4);
@@ -113,4 +116,6 @@ void setup() {
     Serial.println("open in browser http://cuybot.local");
 }
 
-void loop() {}
+void loop() {
+
+}
