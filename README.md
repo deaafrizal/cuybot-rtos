@@ -1,7 +1,9 @@
 <h3 align="center">CUYBOT V1 Rev.0</h3>
 
 <p align="center">
-  <img src="https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/cuybot-sw.jpg" alt="Cuybot" width="450">
+  <img src="https://github.com/lahnan/cuybot-rtos/blob/main/assets/iPhone-14-Pro-394x852.png" alt="Cuybot" width="450">
+  <img src="https://github.com/lahnan/cuybot-rtos/blob/main/assets/iPad-Air-5-821x1180.png" alt="Cuybot" width="450">
+  <img src="https://github.com/lahnan/cuybot-rtos/blob/main/assets/Macbook-Air-1558x974.png" alt="Cuybot" width="450">
 </p>
 Open **cuybot-rtos**! 🚗✨ Custom **SMARTCAR BOARD** khusus buat belajar Robotika dasar, IoT & Web Development. Cocok beut buat yang pengen fullstack dari mulai develop firmware, software & troubleshoot hardware.
 
