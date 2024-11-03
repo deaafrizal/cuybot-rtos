@@ -77,7 +77,7 @@ function updateModeButtons(activeMode) {
     if (button.dataset.mode === `M${activeMode}`) {
       activeButton = button;
       button.classList.add('active');
-      button.style.backgroundColor = "#007aff"; // Set active button color
+      button.style.backgroundColor = "#75db1d"; // Set active button color
       button.style.color = "#fff"; // Ensure text color is white
     } else {
       button.style.backgroundColor = ''; // Reset background color for inactive buttons

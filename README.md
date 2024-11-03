@@ -19,7 +19,7 @@ DOKUMENTASI Program: [Baca Di Page Ini](https://github.com/deaafrizal/cuybot-rto
 - **PWM Control**: Kontrol motor via PWM, akselerasi dan deselerasi jadi lebih smooth.
 - **Costum Mode**: Switch antar mode dengan kombinasi berbagai sensor sesuai logic dan kebutuhan.
 - **Beeping Notification**: Buzzer sound untuk kebutuhan notifikasi berdasarkan kondisi tertentu.
-- **etc: ongoing**
+- **Responsive Web Control**: Website untuk mengontrol yang sudah responsif
 
 ### Cocok buat yang: ###
 - pengen belajar robotik, iot & web development dalam 1 waktu
@@ -53,7 +53,7 @@ DOKUMENTASI Program: [Baca Di Page Ini](https://github.com/deaafrizal/cuybot-rto
 ### 🔧Cara Install Firmware FreeRTOS untuk Cuybot Protonano V1 Rev.0
 1. Clone repositori ini:
    ```bash
-   git clone https://github.com/deaafrizal/cuybot-rtos.git
+   git clone https://github.com/lahnan/cuybot-rtos.git
 2. Tonton Youtube nya untuk cara setup lebih lengkap.
 
 ##  Gimana Cara Bikin Firmware & Software sendiri buat cuybot?
