@@ -11,8 +11,7 @@ public:
     IRTask(IR &ir, MotorDriver &rightMotor, MotorDriver &leftMotor);
     void startTask();
     void stopTask(); 
-    void suspendTask();
-    void resumeTask();
+    bool getIsRunning();
     TaskHandle_t getTaskHandle();
 
 private:

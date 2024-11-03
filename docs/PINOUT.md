@@ -11,7 +11,7 @@
 | `PWM_Left_2D`   | GPIO6        | PWM motor kiri (direksi 2)          |
 | `IR_Right`      | GPIO7        | Sensor IR kanan                     |
 | `STBY`          | GPIO8        | Pin Standby Motor                   |
-| `LedState2`     | GPIO2        | Indikator Mode LED Kombinasi 2      |
+| `LedState2`     | GPIO9        | Indikator Mode LED Kombinasi 2      |
 | `IR_Left`       | GPIO10       | Sensor IR kiri                      |
 | `Trig`          | GPIO20       | Trigger sensor ultrasonik           |
 | `Echo`          | GPIO21       | Echo sensor ultrasonik              |
@@ -23,7 +23,7 @@
 - LedState1 LOW  +  LedState2 LOW     = MODE 1 ON
 - LedState1 LOW  +  LedState2 HIGH    = MODE 2 ON
 - LedState1 HIGH +  LedState2 LOW     = MODE 3 ON
-- LedState1 HIGH +  LedState2 HIGH     = MODE 4 ON
+- LedState1 HIGH +  LedState2 HIGH    = MODE 4 ON
 
 ---
 
