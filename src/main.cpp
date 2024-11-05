@@ -110,6 +110,13 @@ void setup() {
     modeSelectionTask.startTask();
     motorTask.startTask();
     hardwareMonitorTask.startTask();
+
+    delay(1000);
+    Serial.println(".");
+    delay(1000);
+    Serial.println("..");
+    delay(1000);
+    Serial.println("...");
     batteryMonitorTask.startMonitoring();
     
     Serial.println("RTOS OK");
