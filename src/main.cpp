@@ -51,11 +51,6 @@ const float VOLTAGE_MAX = 4.2;
 #define SSID "cuybot"
 const char* password = "cuybot123";
 
-// EXTERN VAR
-int mode = 1;
-int motorSpeed = 0;
-int motorDirection = 0;
-
 EEPROMConfig eepromConfig;
 Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
 Buzzer buzzer(BUZZER_PIN);
@@ -82,12 +77,19 @@ HardwareMonitorTask hardwareMonitorTask(&webSocketTask);
 
 BatteryMonitorTask batteryMonitorTask(BATTERY_ADC_PIN, VOLTAGE_MIN, VOLTAGE_MAX, VOLTAGE_DIVIDER_FACTOR, buzzer, &webSocketTask);
 
+// EXTERN VAR
+int mode = 1;
+int motorSpeed = 0;
+int motorDirection = 0;
+
+bool clientConnected = false;
+void onClientConnected(WiFiEvent_t event);
+
 void setup() {
     Serial.begin(9600);
     Serial.println("Setting up WiFi...");
     
-    delay(500);
-    // WiFi.disconnect(true, true);
+    delay(2000);
     String macAddr = WiFi.macAddress();
     String lastFourCharMacAddr = macAddr.substring(macAddr.length() - 4);
     String ssid = String(SSID) + "-" + lastFourCharMacAddr;
@@ -100,16 +102,23 @@ void setup() {
         Serial.println("Failed to start Wi-Fi AP");
     }
 
+    WiFi.onEvent(onClientConnected, ARDUINO_EVENT_WIFI_AP_STACONNECTED);
+
+    Serial.println("Waiting client connecting to cuybot wifi...");
+    while (!clientConnected) {
+        delay(1000);
+        Serial.print(".");
+    }
+    Serial.println("\nClient connected. Initializing cuybot setup...");
+
     if (!MDNS.begin("cuybot")) {
         Serial.println("DNS Cannot be started!");
     }
 
-    delay(3000);
     Serial.println("Setting up OTA service...");
     ota.begin();
     ota.startOTATask();
     
-    delay(500);
     EEPROM.begin(128);
     buzzer.begin();
     ultrasonic.begin();
@@ -118,20 +127,15 @@ void setup() {
     leftMotor.begin();
     rightMotor.begin();
 
-    delay(300);
     Serial.println("Memory initializing...");
     eepromConfig.loadSettings();
 
-    delay(300);
     Serial.println("RTOS initializing...");
     webServerTask.startTask();
     webSocketTask.startTask();
     modeSelectionTask.startTask();
     motorTask.startTask();
     hardwareMonitorTask.startTask();
-
-    delay(400);
-    Serial.println("...");
     batteryMonitorTask.startMonitoring();
     
     Serial.println("RTOS OK");
@@ -139,3 +143,8 @@ void setup() {
 }
 
 void loop() {}
+
+void onClientConnected(WiFiEvent_t event) {
+    Serial.println("Client connected to Wi-Fi.");
+    clientConnected = true;
+}
