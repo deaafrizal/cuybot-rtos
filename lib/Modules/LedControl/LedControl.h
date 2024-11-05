@@ -2,7 +2,7 @@
 #define LEDCONROL_H
 
 #define LED_STATE_1 2
-#define LED_STATE_2 9
+#define LED_STATE_2 8
 
 class LedControl
 {
