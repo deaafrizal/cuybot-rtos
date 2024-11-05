@@ -1,12 +1,17 @@
 #include <LedControl/LedControl.h>
 #include <Arduino.h>
 
-LedControl::LedControl(int pin_A, int pin_B) : _pin_A(pin_A), _pin_B(pin_B) {
-    pinMode(_pin_A, OUTPUT);
-    pinMode(_pin_B, OUTPUT);
-}
+LedControl::LedControl(int pin_A, int pin_B) : _pin_A(pin_A), _pin_B(pin_B) {}
 
 LedControl::~LedControl() {}
+
+void LedControl::begin() {
+    pinMode(_pin_A, INPUT_PULLUP);
+    pinMode(_pin_B, INPUT_PULLUP);
+    
+    digitalWrite(_pin_A, HIGH);
+    digitalWrite(_pin_B, HIGH);
+}
 
 void LedControl::turnOn(int led) {
     digitalWrite(led, HIGH);

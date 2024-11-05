@@ -1,13 +1,11 @@
 #include <ModeSelection/ModeSelectionTask.h>
-#include <LedControl/LedControl.h>
 
-LedControl ledControl;
 extern int mode;
 
 SemaphoreHandle_t modeChangeSemaphore;
 
-ModeSelectionTask::ModeSelectionTask(UltrasonicTask &ultrasonicTask, IRTask &irTask, Buzzer &buzzer)
-    : _ultrasonicTask(ultrasonicTask), _irTask(irTask), _buzzer(buzzer), _lastMode(1) {
+ModeSelectionTask::ModeSelectionTask(UltrasonicTask &ultrasonicTask, IRTask &irTask, Buzzer &buzzer, LedControl &ledControl)
+    : _ultrasonicTask(ultrasonicTask), _irTask(irTask), _buzzer(buzzer), _ledControl(ledControl), _lastMode(1) {
     _taskHandle = NULL;
     modeChangeSemaphore = xSemaphoreCreateBinary();
     if (modeChangeSemaphore == NULL) {
@@ -38,7 +36,7 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
             switch (mode) {
                 case 1: // WebSocketTask only
                     Serial.println("Mode 1: Manual Control");
-                    ledControl.setMode(1);
+                    self->_ledControl.setMode(1);
                     if (self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.stopTask();
                     }
@@ -49,7 +47,7 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
 
                 case 2: // WebSocketTask + UltrasonicTask
                     Serial.println("Mode 2: Obstacle Avoidance");
-                    ledControl.setMode(2);
+                    self->_ledControl.setMode(2);
                     if (!self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.startTask();
                     }
@@ -60,7 +58,7 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
 
                 case 3: // IRTask only (Line Following)
                     Serial.println("Mode 3: Line Following");
-                    ledControl.setMode(3);
+                    self->_ledControl.setMode(3);
                     if (self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.stopTask();
                     }
@@ -71,7 +69,7 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
 
                 case 4: // Patrol Mode or Tuning
                     Serial.println("Mode 4: Auto Patrol");
-                    ledControl.setMode(4);
+                    self->_ledControl.setMode(4);
                     if (self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.stopTask();
                     }
@@ -93,7 +91,7 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
 
             self->_lastMode = mode; 
         }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 

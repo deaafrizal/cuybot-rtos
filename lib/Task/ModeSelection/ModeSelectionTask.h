@@ -5,11 +5,12 @@
 #include <IRReading/IRTask.h>
 #include <Buzzer/Buzzer.h>
 #include <freertos/semphr.h>
+#include <LedControl/LedControl.h>
 
 
 class ModeSelectionTask {
 public:
-    ModeSelectionTask(UltrasonicTask &ultrasonic, IRTask &irTask, Buzzer &buzzer);
+    ModeSelectionTask(UltrasonicTask &ultrasonic, IRTask &irTask, Buzzer &buzzer, LedControl &ledControl);
 
     void startTask();
     void stopTask();
@@ -22,6 +23,7 @@ private:
     Buzzer& _buzzer;
     UltrasonicTask &_ultrasonicTask;
     IRTask &_irTask;
+    LedControl &_ledControl;
 
     int _lastMode;
     static void modeSelectionTaskFunction(void *parameter);

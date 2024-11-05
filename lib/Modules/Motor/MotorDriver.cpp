@@ -1,14 +1,12 @@
 #include <Motor/MotorDriver.h>
 
-MotorDriver::MotorDriver(uint8_t pinA, uint8_t pinB) : _maxPwm(255)
+MotorDriver::MotorDriver(uint8_t pinA, uint8_t pinB) : _pinA(pinA), _pinB(pinB), _maxPwm(255){}
+
+void MotorDriver::begin()
 {
-    _pinA = pinA;
-    _pinB = pinB;
-    
-    digitalWrite(_pwm_standby_pin, HIGH);
-    
     pinMode(_pinA, OUTPUT);
     pinMode(_pinB, OUTPUT);
+    stop();
 }
 
 void MotorDriver::forward(uint8_t pwm)
