@@ -6,8 +6,8 @@ extern int mode;
 
 SemaphoreHandle_t modeChangeSemaphore;
 
-ModeSelectionTask::ModeSelectionTask(UltrasonicTask &ultrasonicTask, IRTask &irTask, Buzzer &buzzer, SpinningTask &spinningTask)
-    : _ultrasonicTask(ultrasonicTask), _irTask(irTask), _buzzer(buzzer), _lastMode(1), _spinningTask(spinningTask) {
+ModeSelectionTask::ModeSelectionTask(UltrasonicTask &ultrasonicTask, IRTask &irTask, Buzzer &buzzer, SpinningTask &spinningTask, AutoPatrolTask &autoPatrolTask)
+    : _ultrasonicTask(ultrasonicTask), _irTask(irTask), _buzzer(buzzer), _lastMode(1), _spinningTask(spinningTask), _autoPatrolTask(autoPatrolTask) {
     _taskHandle = NULL;
     modeChangeSemaphore = xSemaphoreCreateBinary();
     if (modeChangeSemaphore == NULL) {
@@ -48,6 +48,9 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (self->_spinningTask.getIsRunning()) {
                         self->_spinningTask.stopTask();
                     }
+                    if (self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.stopTask();
+                    }
                     break;
 
                 case 2: // UltrasonicTask
@@ -61,6 +64,9 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     }
                     if (self->_spinningTask.getIsRunning()) {
                         self->_spinningTask.stopTask();
+                    }
+                    if (self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.stopTask();
                     }
                     break;
 
@@ -77,11 +83,17 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (self->_spinningTask.getIsRunning()) {
                         self->_spinningTask.stopTask();
                     }
+                    if (self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.stopTask();
+                    }
                     break;
 
                 case 4: // Patrol Mode
                     Serial.println("Mode 4: Auto Patrol");
                     ledControl.setMode(4);
+                    if (!self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.startTask();
+                    }
                     if (self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.stopTask();
                     }
@@ -105,6 +117,9 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (self->_irTask.getIsRunning()) {
                         self->_irTask.stopTask();
                     }
+                    if (self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.stopTask();
+                    }
                     break;
 
                 default:
@@ -117,6 +132,9 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     }
                     if (self->_spinningTask.getIsRunning()) {
                         self->_spinningTask.stopTask();
+                    }
+                    if (self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.stopTask();
                     }
                     break;
             }
