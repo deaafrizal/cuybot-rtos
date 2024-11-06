@@ -18,6 +18,7 @@
 #include <Buzzer/Buzzer.h>
 #include <BatteryMonitor/BatteryMonitorTask.h>
 #include <Spinning/SpinningTask.h>
+#include <AutoPatrol/AutoPatrolTask.h>
 
 // MOTOR PIN
 #define PWM_A1 3
@@ -61,13 +62,15 @@ MotorDriver rightMotor(PWM_A1, PWM_A2);
 MotorDriver leftMotor(PWM_B1, PWM_B2);
 
 MotorControl motorControl(rightMotor, leftMotor);
-MotorTask motorTask(rightMotor, leftMotor);
-SpinningTask spinningTask(motorControl);
 
+MotorTask motorTask(rightMotor, leftMotor);
+
+SpinningTask spinningTask(motorControl);
+AutoPatrolTask autoPatrolTask(motorControl);
 IRTask irTask(ir, motorControl);
 
 UltrasonicTask ultrasonicTask(ultrasonic);
-ModeSelectionTask modeSelectionTask(ultrasonicTask, irTask, buzzer, spinningTask);
+ModeSelectionTask modeSelectionTask(ultrasonicTask, irTask, buzzer, spinningTask, autoPatrolTask);
 HardwareMonitorTask hardwareMonitorTask(&webSocketTask);
 
 BatteryMonitorTask batteryMonitorTask(BATTERY_ADC_PIN, VOLTAGE_MIN, VOLTAGE_MAX, VOLTAGE_DIVIDER_FACTOR, buzzer, &webSocketTask);
