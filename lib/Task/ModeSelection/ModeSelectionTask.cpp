@@ -115,6 +115,9 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (self->_irTask.getIsRunning()) {
                         self->_irTask.stopTask();
                     }
+                    if (self->_spinningTask.getIsRunning()) {
+                        self->_spinningTask.stopTask();
+                    }
                     break;
             }
 
