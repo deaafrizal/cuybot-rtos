@@ -1,14 +1,7 @@
 #include <IRReading/IRTask.h>
 
-extern int motorSpeed;
-extern int motorDirection; 
-
-IRTask::IRTask(IR &ir, MotorDriver &rightMotor, MotorDriver &leftMotor) 
-    : _ir(ir), _rightMotor(rightMotor), _leftMotor(leftMotor), _taskHandle(NULL), _taskRunning(false) {
-    // motorMaxSpeed = EEPROMConfig::getMemInt(1);
-    // motorWeight = EEPROMConfig::getMemInt(2);
-    // motorSpeed = motorMaxSpeed;
-}
+IRTask::IRTask(IR &ir, MotorControl &motorControl) 
+    : _ir(ir), _motorControl(motorControl), _taskHandle(NULL), _taskRunning(false) {}
 
 void IRTask::startTask() {
     if (_taskHandle == NULL) {
@@ -19,7 +12,6 @@ void IRTask::startTask() {
 
 void IRTask::stopTask() {
     if (_taskHandle != NULL) {
-        motorSpeed = 0;
         _taskRunning = false;
         vTaskDelete(_taskHandle);
         _taskHandle = NULL;
@@ -31,54 +23,37 @@ bool IRTask::getIsRunning() {
     return _taskRunning;
 }
 
-
 void IRTask::irMeasureTask(void *_parameters) {
     IRTask *self = static_cast<IRTask *>(_parameters);
+
+    // setting value nya jika di perlukan, sesuaikan dengan kondisi track.
+    // range kecepatan (0-100%). value di convert ke pwm pada function setSpeed motorControl.cpp
+    const int normalSpeed = 65; // speed = 65%
+    const int slowSpeed = 20; //speed = 20%, 
+    int baseSpeed = normalSpeed;
 
     while (self->_taskRunning) {
         int irLeft = self->_ir.getLeftSignal();
         int irRight = self->_ir.getRightSignal();
 
-        motorSpeed = 100;
-
-        if (irLeft == LOW && irRight == HIGH) {
-           motorDirection = 0;
-        } else if(irLeft == HIGH && irRight == LOW) {
-            motorDirection = 1;
-        } else if(irLeft == HIGH && irRight == HIGH) {
-            motorDirection = -1;
-        }else {
-            motorSpeed = 0;
-            motorDirection = 0;
+        if (irLeft == LOW && irRight == LOW) { // garis di IR kanan
+            self->_motorControl.setSpeed(normalSpeed, normalSpeed);
+            baseSpeed = normalSpeed;
+        } 
+        else if (irLeft == HIGH && irRight == LOW) { // belok kanan
+            self->_motorControl.setSpeed(normalSpeed, slowSpeed);
+            baseSpeed = slowSpeed;
+        } 
+        else if (irLeft == LOW && irRight == HIGH) { // garis di IR kiri
+            self->_motorControl.setSpeed(slowSpeed, normalSpeed); // belok kiri
+            baseSpeed = slowSpeed;
+        } 
+        else {
+            self->_motorControl.stop();
         }
 
-        // self->motorMaxSpeed = EEPROMConfig::getMemInt(1);
-        // self->motorWeight = EEPROMConfig::getMemInt(2);
-
-        // int leftMotorSpeed = self->motorMaxSpeed;
-        // int rightMotorSpeed = self->motorMaxSpeed;
-
-        // if (irLeft == LOW && irRight == HIGH) {
-        //     leftMotorSpeed = self->motorMaxSpeed - self->motorWeight;
-        //     rightMotorSpeed = self->motorMaxSpeed + self->motorWeight;
-        // } else if (irLeft == HIGH && irRight == LOW) {
-        //     leftMotorSpeed = self->motorMaxSpeed + self->motorWeight;
-        //     rightMotorSpeed = self->motorMaxSpeed - self->motorWeight;
-        // } else if (irLeft == LOW && irRight == LOW) {
-        //     self->_rightMotor.stop();
-        //     self->_leftMotor.stop();
-        //     vTaskDelay(pdMS_TO_TICKS(10));
-        //     continue;
-        // } else {
-        //     leftMotorSpeed = self->motorMaxSpeed;
-        //     rightMotorSpeed = self->motorMaxSpeed;
-        // }
-        // self->_rightMotor.forward(self->motorMaxSpeed);
-        // self->_leftMotor.forward(self->motorMaxSpeed);
-       
-
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(self->_vdelayTime));
     }
 
-    Serial.println("IR taskrunning false.");
+    Serial.println("IR task stopped.");
 }

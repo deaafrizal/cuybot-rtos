@@ -3,32 +3,30 @@
 
 #include <Arduino.h>
 #include <IR/IR.h>
-#include <Motor/MotorDriver.h>
-#include <EEPROM_config.h>
+#include <Motor/MotorControl.h>
 
 class IRTask {
 public:
-    IRTask(IR &ir, MotorDriver &rightMotor, MotorDriver &leftMotor);
+    IRTask(IR &ir, MotorControl &motorControl);
     void startTask();
     void stopTask(); 
     bool getIsRunning();
     TaskHandle_t getTaskHandle();
 
 private:
+    IR &_ir;
+    MotorControl &_motorControl;
+    TaskHandle_t _taskHandle;
+
     const uint32_t _taskStackSize = 4096;
     const UBaseType_t _taskPriority = 6;
-    
-    IR &_ir;
-    MotorDriver &_rightMotor;
-    MotorDriver &_leftMotor;
 
     static EEPROMConfig &_eepromConfig;
     static void irMeasureTask(void *_parameters);
-    TaskHandle_t _taskHandle;
     
     uint8_t motorMaxSpeed;
     uint8_t motorWeight;
-    static const int _vdelayTime = 100;
+    float _vdelayTime = 20.0;
     bool _taskRunning;
 };
 

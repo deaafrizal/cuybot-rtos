@@ -27,16 +27,12 @@ function connectWebSocket() {
   websocket.onmessage = function (event) {
     try {
       const data = JSON.parse(event.data);
-          if (data.clientID !== undefined) {
+      if (data.clientID !== undefined) {
         clientId = data.clientID;
       }
 
       if (data.playtime !== undefined) {
         updatePlaytimeDisplay(data.playtime);
-      }
-
-      if (data.usedStackPercentage !== undefined && data.taskName !== undefined) {
-        updateStackInfo(data.taskName, data.usedStackPercentage);
       }
 
       if (data.mode !== undefined) {

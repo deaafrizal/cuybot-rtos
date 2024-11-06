@@ -15,18 +15,16 @@ function handleButtonClick(button, modeMessage) {
   if (button.classList.contains('loading')) return;
 
   if (button === activeButton) {
-    // If the button is already active, deactivate and set to mode 1
     sendModeMessage('M1');
     setButtonLoading(button, 'Deactivating...');
-    activeButton = null; // Reset active button
+    activeButton = null;
   } else {
-    // If it's a different button, activate the new mode
     sendModeMessage(modeMessage);
     setButtonLoading(button, 'Activating...');
     if (activeButton) {
-      resetButton(activeButton); // Reset previous active button
+      resetButton(activeButton);
     }
-    activeButton = button; // Set the new active button
+    activeButton = button;
   }
 }
 
@@ -73,15 +71,14 @@ function updateModeButtons(activeMode) {
   sessionStorage.setItem('activeMode', activeMode);
 
   buttons.forEach(button => {
-    // Check if the button corresponds to the active mode
     if (button.dataset.mode === `M${activeMode}`) {
       activeButton = button;
       button.classList.add('active');
-      button.style.backgroundColor = "#007aff"; // Set active button color
-      button.style.color = "#fff"; // Ensure text color is white
+      button.style.backgroundColor = "#007aff";
+      button.style.color = "#fff";
     } else {
-      button.style.backgroundColor = ''; // Reset background color for inactive buttons
-      button.style.color = ''; // Reset text color for inactive buttons
+      button.style.backgroundColor = '';
+      button.style.color = '';
       button.classList.remove('active');
     }
   });
