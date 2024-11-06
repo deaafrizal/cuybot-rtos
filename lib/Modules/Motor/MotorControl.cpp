@@ -6,8 +6,8 @@ MotorControl::MotorControl(MotorDriver &rightSide, MotorDriver &leftSide)
     : _rightSide(rightSide),
         _leftSide(leftSide),
         _currentSpeed(0),
-        _maxSpeed(255),
-        _backwardLimit(180)
+        _maxSpeed(235),
+        _backwardLimit(100)
         {
             _rightSide.stop();
             _leftSide.stop();
