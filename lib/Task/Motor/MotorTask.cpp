@@ -38,6 +38,6 @@ void MotorTask::runTask(void *pvParameters)
             self->_motorControl.setSpeedAndDirection(self->_currentSpeed, motorDirection);
         }
 
-        vTaskDelay(pdMS_TO_TICKS(5));
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }

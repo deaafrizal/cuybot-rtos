@@ -18,6 +18,26 @@
 
 ---
 
+# PINOUT CUYBOT Rev.1 (REFERENSI PIN PROGRAMMABLE)
+
+| **Label**       | **GPIO Pin** | **Deskripsi**                        |
+|-----------------|--------------|--------------------------------------|
+| `Bat_Voltage`   | GPIO0        | Monitoring tegangan baterai         |
+| `IR_LEFT`       | GPIO1        | Sensor IR sisi kiri                 |
+| `LedState1`     | GPIO2        | Indikator Mode LED Kombinasi 1      |
+| `IR_MIDDLE`     | GPIO3        | Sensor IR tengah untuk acuan PID    |
+| `IR_RIGHT`      | GPIO4        | Sensor IR sisi kanan                |
+| `Buzzer`        | GPIO5        | Kontrol beep buzzer                 |
+| `PWM_Left_1D`   | GPIO6        | PWM motor kiri (direksi 1)          |
+| `PWM_Left_2D`   | GPIO7        | PWM motor kiri (direksi 2)          |
+| `LedState2`     | GPIO8        | Indikator Mode LED Kombinasi 2      |
+| `PWM_Right_1D`  | GPIO9        | PWM motor kanan (direksi 1)         |
+| `PWM_Right_2D`  | GPIO10       | PWM motor kanan (direksi 2)         |
+| `Trig`          | GPIO20       | Trigger sensor ultrasonik           |
+| `Echo`          | GPIO21       | Echo sensor ultrasonik              |
+
+---
+
 ### Logic State 4 Indikator Mode LED
 
 - LedState1 LOW  +  LedState2 LOW     = MODE 1 ON
@@ -27,7 +47,7 @@
 
 ---
 
-### Contoh Penggunaan Kode
+### Contoh Penggunaan Kode Untuk Rev.0
 
 contoh kode arduino sederhana buat ngontrol buzzer, dinamo motor & infrared di cuybot v1:
 

@@ -28,8 +28,8 @@ private:
     float _batteryVoltage;
     float _batteryPercentage;
     unsigned long _lastSendTime = 0;
-    static const unsigned long _DATA_SEND_INTERVAL = 1500;
-    static const unsigned long _MONITOR_INTERVAL = 1000;
+    static const unsigned long _DATA_SEND_INTERVAL = 4500;
+    static const unsigned long _MONITOR_INTERVAL = 4000;
     
     static void monitorTask(void *pvParameters);
 
