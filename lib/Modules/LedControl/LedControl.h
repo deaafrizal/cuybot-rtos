@@ -1,7 +1,5 @@
-#ifndef LEDCONROL_H
-#define LEDCONROL_H
-
-
+#ifndef LEDCONTROL_H
+#define LEDCONTROL_H
 
 class LedControl
 {
@@ -12,7 +10,7 @@ public:
     void begin();
     void turnOn(int led);
     void turnOff(int led);
-    void setMode(int mode);  // Dynamic LED Interaction
+    void setMode(int mode);
 
 private:
     const int _pin_A;

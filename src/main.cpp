@@ -18,6 +18,8 @@
 #include <Buzzer/Buzzer.h>
 #include <BatteryMonitor/BatteryMonitorTask.h>
 #include <LedControl/LedControl.h>
+#include <Spinning/SpinningTask.h>
+#include <AutoPatrol/AutoPatrolTask.h>
 
 // MOTOR PIN
 #define PWM_A1_PIN 9
@@ -44,7 +46,7 @@
 // BAT CALC
 #define BATTERY_ADC_PIN 0
 #define VOLTAGE_DIVIDER_FACTOR 2
-const float VOLTAGE_MIN = 2.8;
+const float VOLTAGE_MIN = 2.5;
 const float VOLTAGE_MAX = 4.2;
 
 // WIFI CONF
@@ -69,10 +71,12 @@ MotorDriver leftMotor(PWM_B1_PIN, PWM_B2_PIN);
 MotorControl motorControl(rightMotor, leftMotor);
 MotorTask motorTask(rightMotor, leftMotor);
 
+SpinningTask spinningTask(motorControl);
+AutoPatrolTask autoPatrolTask(motorControl);
 IRTask irTask(ir, motorControl);
 
 UltrasonicTask ultrasonicTask(ultrasonic);
-ModeSelectionTask modeSelectionTask(ultrasonicTask, irTask, buzzer, ledControl);
+ModeSelectionTask modeSelectionTask(ultrasonicTask, irTask, buzzer, ledControl, spinningTask, autoPatrolTask);
 HardwareMonitorTask hardwareMonitorTask(&webSocketTask);
 
 BatteryMonitorTask batteryMonitorTask(BATTERY_ADC_PIN, VOLTAGE_MIN, VOLTAGE_MAX, VOLTAGE_DIVIDER_FACTOR, buzzer, &webSocketTask);
