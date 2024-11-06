@@ -22,8 +22,8 @@
 // MOTOR PIN
 #define PWM_A1_PIN 9
 #define PWM_A2_PIN 10
-#define PWM_B1_PIN 6
-#define PWM_B2_PIN 7
+#define PWM_B1_PIN 7
+#define PWM_B2_PIN 6
 
 // 4x microLED
 #define LED_STATE_1_PIN 2
@@ -38,7 +38,7 @@
 
 // IR Line Follow
 #define IR_LEFT_PIN 1
-#define IR_MIDDLE_PIM 3
+#define IR_MIDDLE_PIN 3
 #define IR_RIGHT_PIN 4
 
 // BAT CALC
@@ -56,7 +56,7 @@ Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
 Buzzer buzzer(BUZZER_PIN);
 LedControl ledControl(LED_STATE_1_PIN, LED_STATE_2_PIN);
 
-IR ir(IR_LEFT_PIN, IR_RIGHT_PIN);
+IR ir(IR_LEFT_PIN, IR_MIDDLE_PIN, IR_RIGHT_PIN);
 
 WebServerTask webServerTask;
 WebSocketTask webSocketTask;
@@ -66,10 +66,10 @@ OTA ota("cuybot");
 MotorDriver rightMotor(PWM_A1_PIN, PWM_A2_PIN);
 MotorDriver leftMotor(PWM_B1_PIN, PWM_B2_PIN);
 
-IRTask irTask(ir, rightMotor, leftMotor);
-
 MotorControl motorControl(rightMotor, leftMotor);
 MotorTask motorTask(rightMotor, leftMotor);
+
+IRTask irTask(ir, motorControl);
 
 UltrasonicTask ultrasonicTask(ultrasonic);
 ModeSelectionTask modeSelectionTask(ultrasonicTask, irTask, buzzer, ledControl);
@@ -94,6 +94,8 @@ void setup() {
     String lastFourCharMacAddr = macAddr.substring(macAddr.length() - 4);
     String ssid = String(SSID) + "-" + lastFourCharMacAddr;
 
+    WiFi.mode(WIFI_AP);
+    WiFi.setTxPower(WIFI_POWER_8_5dBm);
     if (WiFi.softAP(ssid, password)) {
         Serial.println("Wi-Fi AP started successfully");
         Serial.print("AP IP address: ");
@@ -115,11 +117,9 @@ void setup() {
         Serial.println("DNS Cannot be started!");
     }
 
-    Serial.println("Setting up OTA service...");
-    ota.begin();
-    ota.startOTATask();
-    
+    Serial.println("initializing services...");
     EEPROM.begin(128);
+    ota.begin();
     buzzer.begin();
     ultrasonic.begin();
     ir.begin();
@@ -127,10 +127,11 @@ void setup() {
     leftMotor.begin();
     rightMotor.begin();
 
-    Serial.println("Memory initializing...");
+    Serial.println("load data from memory...");
     eepromConfig.loadSettings();
 
-    Serial.println("RTOS initializing...");
+    Serial.println("RTOS starting task...");
+    ota.startOTATask();
     webServerTask.startTask();
     webSocketTask.startTask();
     modeSelectionTask.startTask();
