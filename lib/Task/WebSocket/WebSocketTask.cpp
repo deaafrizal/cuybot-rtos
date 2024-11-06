@@ -91,7 +91,7 @@ void WebSocketTask::webSocketTaskFunction(void *parameter) {
             self->monitorPlaytime(currentMillis);
             xSemaphoreGive(xSemaphore);
         }
-        vTaskDelay(pdMS_TO_TICKS(5));
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
 

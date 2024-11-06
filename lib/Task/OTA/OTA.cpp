@@ -32,7 +32,7 @@ void OTA::begin() {
     });
 
     ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-        Serial.printf("Progress: %u%%\r", (progress * 100) / total);
+        Serial.printf("Cuybot Updating: %u%%\r", (progress * 100) / total);
     });
 
     ArduinoOTA.onError([](ota_error_t error) {
