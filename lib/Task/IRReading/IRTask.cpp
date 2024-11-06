@@ -12,7 +12,6 @@ void IRTask::startTask() {
 
 void IRTask::stopTask() {
     if (_taskHandle != NULL) {
-        motorSpeed = 0;
         _taskRunning = false;
         vTaskDelete(_taskHandle);
         _taskHandle = NULL;

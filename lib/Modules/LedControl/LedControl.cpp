@@ -6,11 +6,8 @@ LedControl::LedControl(int pin_A, int pin_B) : _pin_A(pin_A), _pin_B(pin_B) {}
 LedControl::~LedControl() {}
 
 void LedControl::begin() {
-    pinMode(_pin_A, INPUT_PULLUP);
-    pinMode(_pin_B, INPUT_PULLUP);
-    
-    digitalWrite(_pin_A, HIGH);
-    digitalWrite(_pin_B, HIGH);
+    pinMode(_pin_A, OUTPUT);
+    pinMode(_pin_B, OUTPUT);
 }
 
 void LedControl::turnOn(int led) {
@@ -42,7 +39,7 @@ void LedControl::setMode(int mode) {
             break;
         default:
             Serial.println("Invalid mode");
-            applyLedState(LOW, LOW);  // Default to Mode 1
+            applyLedState(HIGH, HIGH);  // Default to Mode 4
             break;
     }
 }

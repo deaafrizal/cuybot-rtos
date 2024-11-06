@@ -26,11 +26,11 @@
 | `IR_LEFT`       | GPIO1        | Sensor IR sisi kiri                 |
 | `LedState1`     | GPIO2        | Indikator Mode LED Kombinasi 1      |
 | `IR_MIDDLE`     | GPIO3        | Sensor IR tengah untuk acuan PID    |
-| `IR_RIGHT`      | GPIO4        | Sensor IR sisi kiri                 |
+| `IR_RIGHT`      | GPIO4        | Sensor IR sisi kanan                |
 | `Buzzer`        | GPIO5        | Kontrol beep buzzer                 |
 | `PWM_Left_1D`   | GPIO6        | PWM motor kiri (direksi 1)          |
 | `PWM_Left_2D`   | GPIO7        | PWM motor kiri (direksi 2)          |
-| `LedState2`     | GPIO8        | Indikator Mode LED Kombinasi 1      |
+| `LedState2`     | GPIO8        | Indikator Mode LED Kombinasi 2      |
 | `PWM_Right_1D`  | GPIO9        | PWM motor kanan (direksi 1)         |
 | `PWM_Right_2D`  | GPIO10       | PWM motor kanan (direksi 2)         |
 | `Trig`          | GPIO20       | Trigger sensor ultrasonik           |
