@@ -1,7 +1,7 @@
 #include <IR/IR.h>
 #include <Arduino.h>
 
-IR::IR(int leftPin, int rightPin): _left_pin(leftPin), _right_pin(rightPin) {}
+IR::IR(int leftPin, int middlePin, int rightPin): _left_pin(leftPin), _middle_pin(middlePin), _right_pin(rightPin) {}
 
 void IR::begin() {
     pinMode(_left_pin, INPUT);
@@ -14,4 +14,8 @@ int IR::getLeftSignal() {
 
 int IR::getRightSignal() {
     return digitalRead(_right_pin);
+}
+
+int IR::getMiddleSignal() {
+    return digitalRead(_middle_pin);
 }
