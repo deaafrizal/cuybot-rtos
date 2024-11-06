@@ -2,9 +2,9 @@ name: PlatformIO CI
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "dev", "rev-0", "rev-1", "main" ]
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "dev", "rev-0", "rev-1", "main" ]
 
 jobs:
   build:
