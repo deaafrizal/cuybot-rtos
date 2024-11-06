@@ -56,6 +56,7 @@ void WebServerTask::webServerTaskFunction(void *parameter) {
         if (xSemaphoreTake(self->dnsSemaphore, portMAX_DELAY) == pdTRUE) {
             dnsServer.processNextRequest();
         }
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
 

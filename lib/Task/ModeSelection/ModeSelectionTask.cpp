@@ -93,7 +93,7 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
 
             self->_lastMode = mode; 
         }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 

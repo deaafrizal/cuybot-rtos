@@ -27,14 +27,17 @@
 // Ultrasonic
 #define TRIGGER_PIN 20
 #define ECHO_PIN 21
+
 // IR Line Follow
 #define IR_LEFT 10
 #define IR_RIGHT 7
+
 // BAT CALC
 #define BATTERY_ADC_PIN 0
 #define VOLTAGE_DIVIDER_FACTOR 2
 const float VOLTAGE_MIN = 2.8;
 const float VOLTAGE_MAX = 4.2;
+
 // WIFI CONF
 #define SSID "cuybot"
 const char* password = "cuybot123";
@@ -55,10 +58,11 @@ OTA ota("cuybot");
 
 MotorDriver rightMotor(PWM_A1, PWM_A2);
 MotorDriver leftMotor(PWM_B1, PWM_B2);
-IRTask irTask(ir, rightMotor, leftMotor);
 
 MotorControl motorControl(rightMotor, leftMotor);
 MotorTask motorTask(rightMotor, leftMotor);
+
+IRTask irTask(ir, motorControl);
 
 UltrasonicTask ultrasonicTask(ultrasonic);
 ModeSelectionTask modeSelectionTask(ultrasonicTask, irTask, buzzer);

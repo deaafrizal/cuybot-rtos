@@ -69,11 +69,34 @@ void MotorControl::stop()
 }
 
 void MotorControl::setSpeed(int leftSpeed, int rightSpeed) {
-    int constrainedLeft = constrain(leftSpeed, 0, _maxSpeed);
-    int constrainedRight = constrain(rightSpeed, 0, _maxSpeed);
+    int pwmLeft = map(leftSpeed, -100, 100, -255, 255);
+    int pwmRight = map(rightSpeed, -100, 100, -255, 255);
 
-    _leftSide.forward(constrainedLeft);
-    _rightSide.forward(constrainedRight);
+    const int minPWMThreshold = 20;
+
+    if (abs(pwmLeft) < minPWMThreshold && pwmLeft != 0) {
+        pwmLeft = (pwmLeft > 0) ? minPWMThreshold : -minPWMThreshold;
+    }
+
+    if (abs(pwmRight) < minPWMThreshold && pwmRight != 0) {
+        pwmRight = (pwmRight > 0) ? minPWMThreshold : -minPWMThreshold;
+    }
+
+    if (pwmLeft < 0) {
+        _leftSide.backward(abs(pwmLeft));
+    } else if (pwmLeft > 0) {
+        _leftSide.forward(pwmLeft);
+    } else {
+        _leftSide.stop();
+    }
+
+    if (pwmRight < 0) {
+        _rightSide.backward(abs(pwmRight));
+    } else if (pwmRight > 0) {
+        _rightSide.forward(pwmRight);
+    } else {
+        _rightSide.stop();
+    }
 }
 
 void MotorControl::setSpeedAndDirection(int speed, int direction)
