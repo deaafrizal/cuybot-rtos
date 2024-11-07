@@ -7,12 +7,19 @@
 class AutoPatrolTask {
 public:
     AutoPatrolTask(MotorControl &motorControl);
-    
+
     void startTask();
     void stopTask();
     bool getIsRunning();
 
 private:
+    enum class State {
+        MOVE_FORWARD,
+        PAUSE_BEFORE_SPIN,
+        SPIN,
+        PAUSE_BEFORE_MOVE
+    };
+
     static void patrolTask(void *pvParameters);
 
     MotorControl &_motorControl;
@@ -21,7 +28,10 @@ private:
     int _forwardSpeed;
     int _spinDuration;
     int _forwardDuration;
+    int _pauseDuration;
     bool _taskRunning;
+    State _state;
+    unsigned long _lastStateChangeMillis;
 };
 
 #endif
