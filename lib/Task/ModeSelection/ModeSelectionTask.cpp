@@ -43,6 +43,12 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (self->_irTask.getIsRunning()) {
                         self->_irTask.stopTask();
                     }
+                    if (self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.stopTask();
+                    }
+                    if (self->_spinningTask.getIsRunning()) {
+                        self->_spinningTask.stopTask();
+                    }
                     break;
 
                 case 2: // WebSocketTask + UltrasonicTask
@@ -53,6 +59,12 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     }
                     if (self->_irTask.getIsRunning()) {
                         self->_irTask.stopTask();
+                    }
+                    if (self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.stopTask();
+                    }
+                    if (self->_spinningTask.getIsRunning()) {
+                        self->_spinningTask.stopTask();
                     }
                     break;
 
@@ -65,16 +77,45 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (!self->_irTask.getIsRunning()) {
                         self->_irTask.startTask();
                     }
+                    if (self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.stopTask();
+                    }
+                    if (self->_spinningTask.getIsRunning()) {
+                        self->_spinningTask.stopTask();
+                    }
                     break;
 
-                case 4: // Patrol Mode or Tuning
+                case 4: // Patrol Mode
                     Serial.println("Mode 4: Auto Patrol");
                     self->_ledControl.setMode(mode);
+                    if (!self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.startTask();
+                    }
                     if (self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.stopTask();
                     }
                     if (self->_irTask.getIsRunning()) {
                         self->_irTask.stopTask();
+                    }
+                    if (self->_spinningTask.getIsRunning()) {
+                        self->_spinningTask.stopTask();
+                    }
+                    break;
+
+                case 5: // Spinning Mode
+                    Serial.println("Mode 5: Spinning");
+                    self->_ledControl.setMode(4);
+                    if (!self->_spinningTask.getIsRunning()) {
+                        self->_spinningTask.startTask();
+                    }
+                    if (self->_ultrasonicTask.getIsRunning()) {
+                        self->_ultrasonicTask.stopTask();
+                    }
+                    if (self->_irTask.getIsRunning()) {
+                        self->_irTask.stopTask();
+                    }
+                    if (self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.stopTask();
                     }
                     break;
 
@@ -86,6 +127,12 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     }
                     if (self->_irTask.getIsRunning()) {
                         self->_irTask.stopTask();
+                    }
+                    if (self->_autoPatrolTask.getIsRunning()) {
+                        self->_autoPatrolTask.stopTask();
+                    }
+                    if (self->_spinningTask.getIsRunning()) {
+                        self->_spinningTask.stopTask();
                     }
                     break;
             }
