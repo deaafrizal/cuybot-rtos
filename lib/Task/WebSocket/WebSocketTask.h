@@ -6,12 +6,13 @@
 #include <map>
 #include <WebSocketsServer.h>
 #include <ModeSelection/ModeSelectionTask.h>
+#include <Motor/MotorControl.h>
 #include <freertos/semphr.h>
 #include <freertos/timers.h>
 
 class WebSocketTask {
 public:
-    WebSocketTask();
+    WebSocketTask(MotorControl &motorControl);
     ~WebSocketTask();
     
     void startTask();
@@ -29,6 +30,7 @@ private:
     const uint32_t _taskStackSize = 8192;
     const UBaseType_t _taskPriority = 10;
     bool isOperationSuspended;
+    MotorControl &_motorControl;
 
     static ModeSelectionTask* modeSelectionTask;
     static void webSocketTaskFunction(void *parameter);

@@ -19,7 +19,7 @@ void AutoPatrolTask::stopTask() {
         _taskRunning = false;
         vTaskDelete(_taskHandle);
         _taskHandle = NULL;
-        _motorControl.stop();
+        _motorControl.setSpeed(0, 0);
         Serial.println("Auto patrol task stopped.");
     }
 }
@@ -39,7 +39,7 @@ void AutoPatrolTask::patrolTask(void *pvParameters) {
         switch (self->_state) {
             case State::MOVE_FORWARD:
                 if (currentMillis - self->_lastStateChangeMillis >= self->_forwardDuration) {
-                    self->_motorControl.stop();
+                    self->_motorControl.setSpeed(0, 0);
                     self->_lastStateChangeMillis = currentMillis;
                     self->_state = State::PAUSE_BEFORE_SPIN;
                 } else {
@@ -49,7 +49,7 @@ void AutoPatrolTask::patrolTask(void *pvParameters) {
 
             case State::PAUSE_BEFORE_SPIN:
                 if (currentMillis - self->_lastStateChangeMillis >= self->_pauseDuration) {
-                    self->_motorControl.stop();
+                    self->_motorControl.setSpeed(0, 0);
                     self->_lastStateChangeMillis = currentMillis;
                     self->_state = State::SPIN;
                 }
@@ -65,7 +65,7 @@ void AutoPatrolTask::patrolTask(void *pvParameters) {
 
             case State::PAUSE_BEFORE_MOVE:
                 if (currentMillis - self->_lastStateChangeMillis >= self->_pauseDuration) {
-                    self->_motorControl.stop();
+                    self->_motorControl.setSpeed(0, 0);
                     self->_lastStateChangeMillis = currentMillis;
                     self->_state = State::MOVE_FORWARD;
                 }

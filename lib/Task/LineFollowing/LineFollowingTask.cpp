@@ -1,16 +1,16 @@
-#include <IRReading/IRTask.h>
+#include <LineFollowing/LineFollowingTask.h>
 
-IRTask::IRTask(IR &ir, MotorControl &motorControl) 
+LineFollowingTask::LineFollowingTask(IR &ir, MotorControl &motorControl) 
     : _ir(ir), _motorControl(motorControl), _taskHandle(NULL), _taskRunning(false) {}
 
-void IRTask::startTask() {
+void LineFollowingTask::startTask() {
     if (_taskHandle == NULL) {
         _taskRunning = true;
-        xTaskCreate(irMeasureTask, "IRTask", _taskStackSize, this, _taskPriority, &_taskHandle);
+        xTaskCreate(irMeasureTask, "LineFollowingTask", _taskStackSize, this, _taskPriority, &_taskHandle);
     }
 }
 
-void IRTask::stopTask() {
+void LineFollowingTask::stopTask() {
     if (_taskHandle != NULL) {
         _taskRunning = false;
         vTaskDelete(_taskHandle);
@@ -19,12 +19,12 @@ void IRTask::stopTask() {
     }
 }
 
-bool IRTask::getIsRunning() {
+bool LineFollowingTask::getIsRunning() {
     return _taskRunning;
 }
 
-void IRTask::irMeasureTask(void *_parameters) {
-    IRTask *self = static_cast<IRTask *>(_parameters);
+void LineFollowingTask::irMeasureTask(void *_parameters) {
+    LineFollowingTask *self = static_cast<LineFollowingTask *>(_parameters);
 
     // atur nilai kp, ki, kd untuk penyesuaian track line followingnya
     // nilainya bebas, mulailah dari nilai 0.0 untuk ki & kd
@@ -58,7 +58,7 @@ void IRTask::irMeasureTask(void *_parameters) {
         int error = 0;
 
         if (irLeft == HIGH && irMiddle == HIGH && irRight == HIGH) {
-            self->_motorControl.stop();
+            self->_motorControl.setSpeed(0, 0);
             continue;
         }
 
@@ -102,7 +102,7 @@ void IRTask::irMeasureTask(void *_parameters) {
         leftSpeed = constrain(leftSpeed, minSpeed, maxSpeed);
         rightSpeed = constrain(rightSpeed, minSpeed, maxSpeed);
 
-        self->_motorControl.setSpeed(leftSpeed, rightSpeed);
+        self->_motorControl.setSpeed(rightSpeed, leftSpeed);
 
         lastError = error;
 
