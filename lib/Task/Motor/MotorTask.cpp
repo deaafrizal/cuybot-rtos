@@ -27,17 +27,17 @@ void MotorTask::runTask(void *pvParameters)
     while (true)
     {
         if (self->_currentSpeed < motorSpeed) {
-            self->_currentSpeed += 15;
+            self->_currentSpeed += 30;
         } else if (self->_currentSpeed > motorSpeed) {
-            self->_currentSpeed -= 15;
+            self->_currentSpeed -= 30;
         }
 
-        if (self->_currentSpeed == 0) {
+        if (motorSpeed == 0) {
             self->_motorControl.stop();
         } else {
             self->_motorControl.setSpeedAndDirection(self->_currentSpeed, motorDirection);
         }
 
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }

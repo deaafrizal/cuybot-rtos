@@ -2,7 +2,7 @@
 
 uint8_t EEPROMConfig::motorMaxSpeed = 75;
 uint8_t EEPROMConfig::motorWeight = 50;
-float EEPROMConfig::motorTurnFactor = 0.15;
+float EEPROMConfig::motorTurnFactor = 0.165;
 
 EEPROMConfig::EEPROMConfig() {}
 

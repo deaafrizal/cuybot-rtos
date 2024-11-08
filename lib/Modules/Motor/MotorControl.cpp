@@ -6,22 +6,13 @@ MotorControl::MotorControl(MotorDriver &rightSide, MotorDriver &leftSide)
     : _rightSide(rightSide),
         _leftSide(leftSide),
         _currentSpeed(0),
-        _maxSpeed(255),
-        _backwardLimit(180)
+        _maxSpeed(250),
+        _backwardLimit(120)
         {
             _rightSide.stop();
             _leftSide.stop();
             _turnFactor = _eepromConfig.getMemFloat(10);
         }
-
-float MotorControl::calculateTurnFactor() {
-    float minTurnFactor = 0.0f;
-    float maxTurnFactor = 0.4f;
-
-    float speedFraction = map(abs(_currentSpeed), 0, 255, 0, 100) / 100.0f;
-
-    return minTurnFactor + (maxTurnFactor - minTurnFactor) * speedFraction;
-}
 
 void MotorControl::forward()
 {
@@ -32,14 +23,13 @@ void MotorControl::forward()
 void MotorControl::backward()
 {
    int constrainedSpeed = constrain(_currentSpeed, 0, _backwardLimit);
-    _rightSide.backward(constrainedSpeed);
+    _rightSide.backward(constrainedSpeed);djshfsdjfhsdfjh
     _leftSide.backward(constrainedSpeed);
 }
 
 void MotorControl::turnLeft(int speed)
 {
     int constrainedSpeed = constrain(_currentSpeed, 0, _backwardLimit);
-    _turnFactor = calculateTurnFactor();
     if (speed > 0) {
         _rightSide.forward(_currentSpeed);
         _leftSide.forward(_currentSpeed * _turnFactor);
@@ -52,7 +42,6 @@ void MotorControl::turnLeft(int speed)
 void MotorControl::turnRight(int speed)
 {
     int constrainedSpeed = constrain(_currentSpeed, 0, _backwardLimit);
-    _turnFactor = calculateTurnFactor();
     if (speed > 0) {
         _rightSide.forward(_currentSpeed * _turnFactor);
         _leftSide.forward(_currentSpeed);

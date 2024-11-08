@@ -25,7 +25,6 @@ private:
     int _maxSpeed;
     int _backwardLimit;
     float _turnFactor;
-    float calculateTurnFactor();
     static EEPROMConfig _eepromConfig;
 };
 
