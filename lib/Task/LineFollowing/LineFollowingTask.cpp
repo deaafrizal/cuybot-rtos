@@ -1,17 +1,18 @@
-#include <IRReading/IRTask.h>
+#include <LineFollowing/LineFollowingTask.h>
 
-IRTask::IRTask(IR &ir, MotorControl &motorControl) 
+LineFollowingTask::LineFollowingTask(IR &ir, MotorControl &motorControl) 
     : _ir(ir), _motorControl(motorControl), _taskHandle(NULL), _taskRunning(false) {}
 
-void IRTask::startTask() {
+void LineFollowingTask::startTask() {
     if (_taskHandle == NULL) {
         _taskRunning = true;
-        xTaskCreate(irMeasureTask, "IRTask", _taskStackSize, this, _taskPriority, &_taskHandle);
+        xTaskCreate(irMeasureTask, "LineFollowingTask", _taskStackSize, this, _taskPriority, &_taskHandle);
     }
 }
 
-void IRTask::stopTask() {
+void LineFollowingTask::stopTask() {
     if (_taskHandle != NULL) {
+        _motorControl.setSpeed(0, 0);
         _taskRunning = false;
         vTaskDelete(_taskHandle);
         _taskHandle = NULL;
@@ -19,12 +20,12 @@ void IRTask::stopTask() {
     }
 }
 
-bool IRTask::getIsRunning() {
+bool LineFollowingTask::getIsRunning() {
     return _taskRunning;
 }
 
-void IRTask::irMeasureTask(void *_parameters) {
-    IRTask *self = static_cast<IRTask *>(_parameters);
+void LineFollowingTask::irMeasureTask(void *_parameters) {
+    LineFollowingTask *self = static_cast<LineFollowingTask *>(_parameters);
 
     // setting value nya jika di perlukan, sesuaikan dengan kondisi track.
     // range kecepatan (0-100%). value di convert ke pwm pada function setSpeed motorControl.cpp
@@ -49,7 +50,7 @@ void IRTask::irMeasureTask(void *_parameters) {
             baseSpeed = slowSpeed;
         } 
         else {
-            self->_motorControl.stop();
+            self->_motorControl.setSpeed(0, 0);
         }
 
         vTaskDelay(pdMS_TO_TICKS(self->_vdelayTime));

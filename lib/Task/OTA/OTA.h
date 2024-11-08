@@ -8,7 +8,7 @@ class OTA {
 public:
     OTA(const char* hostname);
     void begin();
-    void startOTATask();
+    void startTask();
     static void otaTask(void *parameter);
 
 private:
