@@ -5,9 +5,9 @@
 #include <IR/IR.h>
 #include <Motor/MotorControl.h>
 
-class IRTask {
+class LineFollowingTask {
 public:
-    IRTask(IR &ir, MotorControl &motorControl);
+    LineFollowingTask(IR &ir, MotorControl &motorControl);
     void startTask();
     void stopTask(); 
     bool getIsRunning();
@@ -21,7 +21,6 @@ private:
     const uint32_t _taskStackSize = 4096;
     const UBaseType_t _taskPriority = 6;
 
-    static EEPROMConfig &_eepromConfig;
     static void irMeasureTask(void *_parameters);
     
     uint8_t motorMaxSpeed;

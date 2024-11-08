@@ -1,7 +1,7 @@
 # PINOUT CUYBOT Rev.0 (REFERENSI PIN PROGRAMMABLE)
 
-| **Label**       | **GPIO Pin** | **Deskripsi**                        |
-|-----------------|--------------|--------------------------------------|
+| **Label**       | **GPIO Pin** | **Deskripsi**                       |
+|-----------------|--------------|-------------------------------------|
 | `Bat_Voltage`   | GPIO0        | Monitoring tegangan baterai         |
 | `Buzzer`        | GPIO1        | Kontrol beep buzzer                 |
 | `LedState1`     | GPIO2        | Indikator Mode LED Kombinasi 1      |

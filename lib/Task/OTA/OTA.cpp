@@ -2,7 +2,7 @@
 
 OTA::OTA(const char* hostname) : _hostname(hostname), _taskHandle(NULL) {}
 
-void OTA::startOTATask() {
+void OTA::startTask() {
     if (_taskHandle == NULL) {
         xTaskCreate(otaTask, "OTATask", _taskStackSize, this, _taskPriority, &_taskHandle);
     }

@@ -8,4 +8,5 @@ function updatePlaytimeDisplay(playtimeSeconds) {
     playtimeElement.innerText = `${hours}h ${minutes}m ${seconds}s`;
   }
 }
+
 window.updatePlaytimeDisplay = updatePlaytimeDisplay;

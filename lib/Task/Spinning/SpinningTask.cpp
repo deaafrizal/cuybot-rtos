@@ -1,5 +1,8 @@
 #include <Spinning/SpinningTask.h>
 
+// atur sendiri kecepatan _spinSpeed (0-100).
+// default 50 atau 50% dari fullspeed
+
 SpinningTask::SpinningTask(MotorControl &motorControl) 
     : _motorControl(motorControl), _taskHandle(NULL), _spinSpeed(50), _taskRunning(false) {}
 
@@ -15,7 +18,7 @@ void SpinningTask::stopTask() {
         _taskRunning = false;
         vTaskDelete(_taskHandle);
         _taskHandle = NULL;
-        _motorControl.stop();
+        _motorControl.setSpeed(0, 0);
         Serial.println("Spinning task stopped.");
     }
 }
@@ -28,9 +31,9 @@ void SpinningTask::spinTask(void *pvParameters) {
     SpinningTask *self = static_cast<SpinningTask *>(pvParameters);
     
     while (self->_taskRunning) {
-        self->_motorControl.setSpeed(0, -self->_spinSpeed);
+        self->_motorControl.setSpeed(-self->_spinSpeed, self->_spinSpeed);
         
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 
     Serial.println("Spinning task completed.");

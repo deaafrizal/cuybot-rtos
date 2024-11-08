@@ -1,11 +1,11 @@
-const speedJoystick = document.getElementById('speedJoystick');
-const directionJoystick = document.getElementById('directionJoystick');
-let currentSpeed = 0;
-let currentDirection = 0;
+const rightMotorJoystick = document.getElementById('rightMotor');
+const leftMotorJoystick = document.getElementById('leftMotor');
+let rightMotorSpeed = 0;
+let leftMotorSpeed = 0;
 const maxSpeed = 90;
 
-function sendJoystickControlMessage() {
-  const message = `S${currentSpeed}D${currentDirection}`;
+function sendMotorControlMessage() {
+  const message = `R${rightMotorSpeed}L${leftMotorSpeed}`;
   sendWebSocketMessage(message);
 }
 
@@ -15,47 +15,45 @@ function sendWebSocketMessage(message) {
   }
 }
 
-speedJoystick.addEventListener('joystickmove', (event) => {
+rightMotorJoystick.addEventListener('joystickmove', (event) => {
   const force = parseFloat(event.target.dataset.force);
   const direction = event.target.dataset.direction;
+
   if (force > 0) {
     if (direction === 'n') {
-      currentSpeed = Math.min(Math.floor((force / 1) * maxSpeed), maxSpeed);
+      rightMotorSpeed = Math.min(Math.floor((force / 1) * maxSpeed), maxSpeed);
     } else if (direction === 's') {
-      currentSpeed = -Math.min(Math.floor((force / 1) * maxSpeed), maxSpeed);
+      rightMotorSpeed = -Math.min(Math.floor((force / 1) * maxSpeed), maxSpeed);
     }
   } else {
-    currentSpeed = 0;
+    rightMotorSpeed = 0;
   }
 
-  sendJoystickControlMessage();
+  sendMotorControlMessage();
 });
 
-directionJoystick.addEventListener('joystickmove', (event) => {
+leftMotorJoystick.addEventListener('joystickmove', (event) => {
   const force = parseFloat(event.target.dataset.force);
   const direction = event.target.dataset.direction;
-
   if (force > 0) {
     if (direction === 'n') {
-      currentDirection = 0;
-    } else if (direction === 'e') {
-      currentDirection = 1;
-    } else if (direction === 'w') {
-      currentDirection = -1;
+      leftMotorSpeed = Math.min(Math.floor((force / 1) * maxSpeed), maxSpeed);
+    } else if (direction === 's') {
+      leftMotorSpeed = -Math.min(Math.floor((force / 1) * maxSpeed), maxSpeed);
     }
   } else {
-    currentDirection = 0;
+    leftMotorSpeed = 0;
   }
 
-  sendJoystickControlMessage();
+  sendMotorControlMessage();
 });
 
-speedJoystick.addEventListener('joystickup', () => {
-  currentSpeed = 0;
-  sendJoystickControlMessage();
+rightMotorJoystick.addEventListener('joystickup', () => {
+  rightMotorSpeed = 0;
+  sendMotorControlMessage();
 });
 
-directionJoystick.addEventListener('joystickup', () => {
-  currentDirection = 0;
-  sendJoystickControlMessage();
+leftMotorJoystick.addEventListener('joystickup', () => {
+  leftMotorSpeed = 0;
+  sendMotorControlMessage();
 });

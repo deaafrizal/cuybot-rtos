@@ -20,4 +20,4 @@ private:
     bool _taskRunning;
 };
 
-#endif // SPINNINGTASK_H
+#endif
