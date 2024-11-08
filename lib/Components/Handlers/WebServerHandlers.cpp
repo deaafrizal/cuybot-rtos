@@ -19,7 +19,6 @@ void WebServerHandlers::handleGetSystemData(AsyncWebServerRequest *request) {
 void WebServerHandlers::handleSetMotorMaxSpeed(AsyncWebServerRequest *request) {
     if (request->hasParam("motorMaxSpeed", true)) {
         uint8_t newMaxSpeed = static_cast<uint8_t>(request->getParam("motorMaxSpeed", true)->value().toInt());
-        Serial.printf("Received motorMaxSpeed: %d\n", newMaxSpeed);
 
         if (newMaxSpeed <= 255) {
             EEPROMConfig::motorMaxSpeed = newMaxSpeed;
@@ -36,7 +35,6 @@ void WebServerHandlers::handleSetMotorMaxSpeed(AsyncWebServerRequest *request) {
 void WebServerHandlers::handleSetMotorWeight(AsyncWebServerRequest *request) {
     if (request->hasParam("motorWeight", true)) {
         uint8_t newMotorWeight = static_cast<uint8_t>(request->getParam("motorWeight", true)->value().toInt());
-        Serial.printf("Received motorWeight: %d\n", newMotorWeight);
 
         if (newMotorWeight <= 255) {
             EEPROMConfig::motorWeight = newMotorWeight;

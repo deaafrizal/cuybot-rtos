@@ -4,8 +4,8 @@ extern int mode;
 
 SemaphoreHandle_t modeChangeSemaphore;
 
-ModeSelectionTask::ModeSelectionTask(UltrasonicTask &ultrasonicTask, IRTask &irTask, Buzzer &buzzer, LedControl &ledControl, SpinningTask &spinningTask, AutoPatrolTask &autoPatrolTask)
-    : _ultrasonicTask(ultrasonicTask), _irTask(irTask), _buzzer(buzzer), _ledControl(ledControl), _spinningTask(spinningTask), _autoPatrolTask(autoPatrolTask),_lastMode(1) {
+ModeSelectionTask::ModeSelectionTask(UltrasonicTask &ultrasonicTask, LineFollowingTask &lineFollowingTask, Buzzer &buzzer, LedControl &ledControl, SpinningTask &spinningTask, AutoPatrolTask &autoPatrolTask)
+    : _ultrasonicTask(ultrasonicTask), _lineFollowingTask(lineFollowingTask), _buzzer(buzzer), _ledControl(ledControl), _spinningTask(spinningTask), _autoPatrolTask(autoPatrolTask),_lastMode(1) {
     _taskHandle = NULL;
     modeChangeSemaphore = xSemaphoreCreateBinary();
     if (modeChangeSemaphore == NULL) {
@@ -40,8 +40,8 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.stopTask();
                     }
-                    if (self->_irTask.getIsRunning()) {
-                        self->_irTask.stopTask();
+                    if (self->_lineFollowingTask.getIsRunning()) {
+                        self->_lineFollowingTask.stopTask();
                     }
                     if (self->_autoPatrolTask.getIsRunning()) {
                         self->_autoPatrolTask.stopTask();
@@ -57,8 +57,8 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (!self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.startTask();
                     }
-                    if (self->_irTask.getIsRunning()) {
-                        self->_irTask.stopTask();
+                    if (self->_lineFollowingTask.getIsRunning()) {
+                        self->_lineFollowingTask.stopTask();
                     }
                     if (self->_autoPatrolTask.getIsRunning()) {
                         self->_autoPatrolTask.stopTask();
@@ -68,14 +68,14 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     }
                     break;
 
-                case 3: // IRTask only (Line Following)
+                case 3: // LineFollowingTask only
                     Serial.println("Mode 3: Line Following");
                     self->_ledControl.setMode(mode);
                     if (self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.stopTask();
                     }
-                    if (!self->_irTask.getIsRunning()) {
-                        self->_irTask.startTask();
+                    if (!self->_lineFollowingTask.getIsRunning()) {
+                        self->_lineFollowingTask.startTask();
                     }
                     if (self->_autoPatrolTask.getIsRunning()) {
                         self->_autoPatrolTask.stopTask();
@@ -94,8 +94,8 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.stopTask();
                     }
-                    if (self->_irTask.getIsRunning()) {
-                        self->_irTask.stopTask();
+                    if (self->_lineFollowingTask.getIsRunning()) {
+                        self->_lineFollowingTask.stopTask();
                     }
                     if (self->_spinningTask.getIsRunning()) {
                         self->_spinningTask.stopTask();
@@ -111,8 +111,8 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.stopTask();
                     }
-                    if (self->_irTask.getIsRunning()) {
-                        self->_irTask.stopTask();
+                    if (self->_lineFollowingTask.getIsRunning()) {
+                        self->_lineFollowingTask.stopTask();
                     }
                     if (self->_autoPatrolTask.getIsRunning()) {
                         self->_autoPatrolTask.stopTask();
@@ -125,8 +125,8 @@ void ModeSelectionTask::modeSelectionTaskFunction(void *parameter) {
                     if (self->_ultrasonicTask.getIsRunning()) {
                         self->_ultrasonicTask.stopTask();
                     }
-                    if (self->_irTask.getIsRunning()) {
-                        self->_irTask.stopTask();
+                    if (self->_lineFollowingTask.getIsRunning()) {
+                        self->_lineFollowingTask.stopTask();
                     }
                     if (self->_autoPatrolTask.getIsRunning()) {
                         self->_autoPatrolTask.stopTask();

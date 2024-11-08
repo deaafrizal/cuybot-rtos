@@ -1,16 +1,12 @@
 #include <Ultrasonic/UltrasonicTask.h>
 
-extern int motorSpeed;
-extern int motorDirection; 
-
-UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic)
-    : _ultrasonic(ultrasonic), _taskHandle(NULL), _taskRunning(false), speed(0) {}
+UltrasonicTask::UltrasonicTask(Ultrasonic &ultrasonic, MotorControl &motorControl)
+    : _ultrasonic(ultrasonic), _motorControl(motorControl), _initSpeed(60), _taskHandle(NULL), _taskRunning(false) {}
 
 void UltrasonicTask::startTask() {
     if (_taskHandle == NULL) {
         _taskRunning = true;
         xTaskCreate(DistanceMeasureTask, "DistanceMeasureTask", _taskStackSize, this, _taskPriority, &_taskHandle);
-        speed = EEPROMConfig::getMemInt(1);
         Serial.println("Ultrasonic task started.");
     }
 }
@@ -21,9 +17,7 @@ bool UltrasonicTask::getIsRunning() {
 
 void UltrasonicTask::stopTask() {
     if (_taskHandle != NULL) {
-        speed = 0;
-        motorSpeed = 0;
-        motorDirection = 0;
+        _motorControl.setSpeed(0, 0);
         _taskRunning = false;
         vTaskDelete(_taskHandle);
         _taskHandle = NULL;
@@ -37,7 +31,6 @@ void UltrasonicTask::DistanceMeasureTask(void *parameters) {
     const int threshold = 3;
     static int stopState = 0;
 
-
     while (self->_taskRunning) {
         long distance = self->_ultrasonic.getDistance();
         if (abs(distance - lastDistance) < threshold) {
@@ -49,28 +42,24 @@ void UltrasonicTask::DistanceMeasureTask(void *parameters) {
         switch (stopState) {
             case 0:
                 if (distance > 0 && distance < 20) {
-                    motorSpeed = self->speed;
-                    motorDirection = 0;
+                    self->_motorControl.setSpeed(0, 0);
                     stopState = 1;
                 } else {
-                    motorSpeed = self->speed;
-                    motorDirection = 0;
+                    self->_motorControl.setSpeed(self->_initSpeed, self->_initSpeed);
                 }
                 break;
 
             case 1:
-                motorSpeed = self->speed;
-                motorDirection = 0;
                 vTaskDelay(pdMS_TO_TICKS(70));
                 stopState = 2;
                 break;
 
             case 2:
             if (distance > 40) {
+                self->_motorControl.setSpeed(self->_initSpeed, self->_initSpeed);
                 stopState = 0;
             } else {
-                motorSpeed = -self->speed;
-                motorDirection = -1;
+                self->_motorControl.setSpeed(self->_initSpeed, -self->_initSpeed);
             }
         }
 
