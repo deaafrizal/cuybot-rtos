@@ -1,14 +1,14 @@
-#ifndef IRTASK_H
-#define IRTASK_H
+#ifndef LINEFOLLOWINGTASK_H
+#define LINEFOLLOWINGTASK_H
 
 #include <Arduino.h>
 #include <IR/IR.h>
 #include <Motor/MotorControl.h>
 #include <EEPROM_config.h>
 
-class IRTask {
+class LineFollowingTask {
 public:
-    IRTask(IR &ir, MotorControl &motorControl);
+    LineFollowingTask(IR &ir, MotorControl &motorControl);
     void startTask();
     void stopTask(); 
     bool getIsRunning();

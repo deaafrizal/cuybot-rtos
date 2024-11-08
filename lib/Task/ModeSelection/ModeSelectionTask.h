@@ -2,7 +2,7 @@
 #define MODESELECTIONTASK_H
 
 #include <Ultrasonic/UltrasonicTask.h>
-#include <IRReading/IRTask.h>
+#include <LineFollowing/LineFollowingTask.h>
 #include <Buzzer/Buzzer.h>
 #include <freertos/semphr.h>
 #include <LedControl/LedControl.h>
@@ -11,7 +11,7 @@
 
 class ModeSelectionTask {
 public:
-    ModeSelectionTask(UltrasonicTask &ultrasonic, IRTask &irTask, Buzzer &buzzer, LedControl &ledControl, SpinningTask &spinningTask, AutoPatrolTask &autoPatrolTask);
+    ModeSelectionTask(UltrasonicTask &ultrasonic, LineFollowingTask &lineFollowingTask, Buzzer &buzzer, LedControl &ledControl, SpinningTask &spinningTask, AutoPatrolTask &autoPatrolTask);
 
     void startTask();
     void stopTask();
@@ -23,7 +23,7 @@ private:
     const UBaseType_t _taskPriority = 8;
     Buzzer& _buzzer;
     UltrasonicTask &_ultrasonicTask;
-    IRTask &_irTask;
+    LineFollowingTask &_lineFollowingTask;
     LedControl &_ledControl;
     SpinningTask &_spinningTask;
     AutoPatrolTask &_autoPatrolTask;

@@ -18,7 +18,7 @@ void SpinningTask::stopTask() {
         _taskRunning = false;
         vTaskDelete(_taskHandle);
         _taskHandle = NULL;
-        _motorControl.stop();
+        _motorControl.setSpeed(0, 0);
         Serial.println("Spinning task stopped.");
     }
 }
