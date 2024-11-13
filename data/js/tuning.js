@@ -1,6 +1,6 @@
 async function fetchSystemSettings() {
   try {
-    const response = await fetch('http://cuybot.local/api/getSystemData');
+    const response = await fetch('http://192.168.4.1/api/getSystemData');
     const data = await response.json();
 
     if (data.hasOwnProperty('motorMaxSpeed') && data.hasOwnProperty('motorWeight')) {
@@ -19,7 +19,7 @@ async function fetchSystemSettings() {
 
 async function updateMotorSpeed(pwmValue) {
   try {
-    const response = await fetch('http://cuybot.local/api/setMotorMaxSpeed', {
+    const response = await fetch('http://192.168.4.1/api/setMotorMaxSpeed', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: `motorMaxSpeed=${pwmValue}`
@@ -35,7 +35,7 @@ async function updateMotorSpeed(pwmValue) {
 
 async function updateMotorWeight(pwmValue) {
   try {
-    const response = await fetch('http://cuybot.local/api/setMotorWeight', {
+    const response = await fetch('http://192.168.4.1/api/setMotorWeight', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: `motorWeight=${pwmValue}`
