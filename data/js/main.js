@@ -41,7 +41,7 @@ function goToPage(url) {
 }
 
 function rebootSystem() {
-  fetch('http://cuybot.local/api/reboot', {
+  fetch('http://192.168.4.1/api/reboot', {
     method: 'POST'
   })
     .then(response => {
