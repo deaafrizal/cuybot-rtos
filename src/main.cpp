@@ -19,6 +19,8 @@
 #include <LedControl/LedControl.h>
 #include <Spinning/SpinningTask.h>
 #include <AutoPatrol/AutoPatrolTask.h>
+#define WM_MDNS
+#define CONFIG_MDNS_STRICT_MODE y //try to fix for some android
 
 // MOTOR PIN
 #define PWM_A1_PIN 9
@@ -89,14 +91,16 @@ void onClientConnected(WiFiEvent_t event);
 void setup() {
     Serial.begin(9600);
     Serial.println("Setting up WiFi...");
-    
+
     delay(2000);
+
     String macAddr = WiFi.macAddress();
     String lastFourCharMacAddr = macAddr.substring(macAddr.length() - 4);
     String ssid = String(SSID) + "-" + lastFourCharMacAddr;
 
-    WiFi.mode(WIFI_AP);
+    WiFi.mode(WIFI_AP_STA);
     WiFi.setTxPower(WIFI_POWER_8_5dBm);
+    
     if (WiFi.softAP(ssid, password)) {
         Serial.println("Wi-Fi AP started successfully");
         Serial.print("AP IP address: ");
@@ -116,7 +120,14 @@ void setup() {
 
     if (!MDNS.begin("cuybot")) {
         Serial.println("DNS Cannot be started!");
+        while(1) {
+            Serial.print(".");
+            delay(1000);
+        }
     }
+
+    MDNS.addService("http", "tcp", 80);
+    MDNS.addServiceTxt("http", "tcp", "hello", "cuybot"); //try to fix for some android
 
     Serial.println("initializing services...");
     EEPROM.begin(128);
@@ -140,7 +151,7 @@ void setup() {
     batteryMonitorTask.startMonitoring();
     
     Serial.println("RTOS OK");
-    Serial.println("open in browser http://cuybot.local");
+    Serial.println("open in browser http://cuybot.local or http://192.168.4.1");
 }
 
 void loop() {}
