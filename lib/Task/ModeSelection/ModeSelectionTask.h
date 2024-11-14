@@ -5,11 +5,13 @@
 #include <IRReading/IRTask.h>
 #include <Buzzer/Buzzer.h>
 #include <freertos/semphr.h>
-
+#include <LedControl/LedControl.h>
+#include <Spinning/SpinningTask.h>
+#include <AutoPatrol/AutoPatrolTask.h>
 
 class ModeSelectionTask {
 public:
-    ModeSelectionTask(UltrasonicTask &ultrasonic, IRTask &irTask, Buzzer &buzzer);
+    ModeSelectionTask(UltrasonicTask &ultrasonic, IRTask &irTask, Buzzer &buzzer, LedControl &ledControl, SpinningTask &spinningTask, AutoPatrolTask &autoPatrolTask);
 
     void startTask();
     void stopTask();
@@ -22,7 +24,10 @@ private:
     Buzzer& _buzzer;
     UltrasonicTask &_ultrasonicTask;
     IRTask &_irTask;
-
+    LedControl &_ledControl;
+    SpinningTask &_spinningTask;
+    AutoPatrolTask &_autoPatrolTask;
+    
     int _lastMode;
     static void modeSelectionTaskFunction(void *parameter);
 };

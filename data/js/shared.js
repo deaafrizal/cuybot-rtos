@@ -7,20 +7,17 @@ function connectWebSocket() {
   websocket.onopen = function () {
     reconnecting = false;
     console.log("CuyBot Connected!");
-    handleWebSocketConnection();
   };
 
   websocket.onclose = function () {
     console.log("CuyBot Disconnected!");
     reconnecting = true;
-    handleWebSocketDisconnection();
     setTimeout(connectWebSocket, 5000);
   };
 
   websocket.onerror = function (error) {
     console.log("please wait...");
     reconnecting = true;
-    handleWebSocketDisconnection();
     setTimeout(connectWebSocket, 5000);
   };
 
@@ -54,14 +51,6 @@ function connectWebSocket() {
       console.error("Error parsing WebSocket message:", e);
     }
   };
-}
-
-function handleWebSocketConnection() {
-  startPlaytimeTracking();
-}
-
-function handleWebSocketDisconnection() {
-  stopPlaytimeTracking();
 }
 
 window.addEventListener('beforeunload', () => {
