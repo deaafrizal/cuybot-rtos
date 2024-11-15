@@ -17,16 +17,16 @@ body {
 }
 
 .joystick-box {
-  margin: 20vw 0;
+  margin: 8vw 0;
   width: 100%;
   height: auto;
-  padding: 16px;
+  padding: 0 16px;
 }
 
 #joystick-container {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 180px;
+  height: 180px;
   margin: 0 auto;
 }
 
@@ -147,7 +147,7 @@ main {
   position: fixed;
   bottom: -100vh;
   width: 100%;
-  min-height: 30%;
+  min-height: 50%;
   background-color: #f0f4f8;
   padding: 16px;
   transition: bottom 0.5s ease;
@@ -185,8 +185,8 @@ main {
 
 .sidebar-bottom {
   position: absolute;
-  bottom: 24px;
-  left: 24px;
+  bottom: 16px;
+  left: 16px;
   cursor: pointer;
 }
 

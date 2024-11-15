@@ -13,7 +13,7 @@ const manager = nipplejs.create({
   mode: 'static',
   position: { left: '50%', top: '50%' },
   color: 'black',
-  size: 200,
+  size: 180,
 });
 
 function updateGauge(value, fillElement) {
@@ -51,7 +51,7 @@ function calculateMotorSpeeds(distance, angle) {
   let rightMotor = 0;
   let leftMotor = 0;
 
-  const edgeDeadzone = 10;
+  const edgeDeadzone = 5;
   const horizontalDeadzone = 10;
 
   if (
