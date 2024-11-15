@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CUYBOT V1</title>
-    <!-- <link rel="stylesheet" href="../css/index.css" /> -->
     <link rel="stylesheet" href="/css/index.css" />
+    <script  type="text/javascript" src="/js/nipplejs.min.js"></script>
   </head>
 
   <body>
@@ -48,7 +48,20 @@
         </div>
 
       </section>
-      <section class="mode-container">
+      <section class="joystick-box">
+        <div id="joystick-container"></div>
+      </section>
+      <section class="speed">
+        <div class="turbo-gauge">
+          <div class="turbo-fill" id="leftGaugeFill"></div>
+        </div>
+        <div class="turbo-gauge">
+          <div class="turbo-fill" id="rightGaugeFill"></div>
+        </div>
+      </section>
+    </main>
+    <aside class="sidebar" id="sidebar">
+     <section class="mode-container">
         <button id="obstacleButton" class="mode-item" data-mode="M2">
           Obstacle Avoidance
         </button>
@@ -62,76 +75,17 @@
           Spinning
         </button>
       </section>
-      <section class="joysticks">
-        <virtual-joystick id="rightMotor" data-lock="x"></virtual-joystick>
-        <virtual-joystick id="leftMotor" data-lock="x"></virtual-joystick>
-      </section>
-    </main>
-
-    <aside class="sidebar" id="sidebar">
-      <section class="sliders">
-        <div class="slider-item">
-          <label for="speedSlider"
-            >Max Motor Speed: <span id="speedLabel">checking data</span></label
-          >
-          <input type="range" id="speedSlider" min="0" max="255" value="0" />
-        </div>
-        <div class="slider-item">
-          <label for="weightSlider"
-            >Steering Balance:
-            <span id="weightLabel">checking data</span></label
-          >
-          <input type="range" id="weightSlider" min="0" max="255" value="0" />
-        </div>
-        <button id="slider-button">Save Tuning</button>
-        <div id="notification"></div>
-      </section>
-      <div class="sidebar-separator"></div>
-
-      <!-- Sidebar Menu Buttons -->
-      <div class="sidebar-menu">
-        <button class="sidebar-btn" onclick="goToPage('/tuning')">
-          Tuning
-        </button>
-        <button class="sidebar-btn" onclick="goToPage('/monitoring')">
-          Monitoring
-        </button>
-        <button class="sidebar-btn" onclick="goToPage('/flash')">
-          Firmware
-        </button>
-        <button class="sidebar-btn" onclick="goToPage('/api-docs')">
-          API Docs
-        </button>
-        <button class="sidebar-btn" onclick="reloadPage()">Reload</button>
-        <button class="sidebar-btn reboot" onclick="rebootSystem()">
-          Reboot
-        </button>
-      </div>
-
-      <div class="sidebar-separator"></div>
-
-      <!-- Sidebar Close Button -->
       <div class="sidebar-bottom">
         <button class="close-sidebar-btn" onclick="toggleSidebar()">✖</button>
       </div>
     </aside>
-    <!-- <script src="../js/controller.js"></script>
-    <script src="../js/shared.js"></script>
-    <script src="../js/playtimeInfo.js"></script>
-    <script src="../js/batteryInfo.js"></script>
-    <script src="../js/hardwareInfo.js"></script>
-    <script src="../js/joystick.js"></script>
-    <script src="../js/mode.js"></script>
-    <script src="../js/main.js"></script> -->
-    <!-- <script src="../js/connectToServer.js"></script> -->
-    <script src="/js/controller.js"></script>
     <script src="/js/shared.js"></script>
+    <script src="/js/controller.js"></script>
     <script src="/js/playtimeInfo.js"></script>
     <script src="/js/batteryInfo.js"></script>
     <script src="/js/hardwareInfo.js"></script>
-    <script src="/js/joystick.js"></script>
     <script src="/js/mode.js"></script>
     <script src="/js/main.js"></script>
-    <!-- <script src="/js/connectToServer.js"></script> -->
+   
   </body>
 </html>
