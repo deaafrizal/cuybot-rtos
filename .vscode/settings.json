@@ -28,5 +28,6 @@
   "idf.gitPath": "git",
   "idf.port": "/dev/tty.usbmodem12301",
   "idf.adapterTargetName": "esp32c3",
-  "idf.openOcdConfigs": ["board/esp32c3-builtin.cfg"]
+  "idf.openOcdConfigs": ["board/esp32c3-builtin.cfg"],
+  "liveServer.settings.port": 5501
 }
