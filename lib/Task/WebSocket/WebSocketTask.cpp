@@ -89,7 +89,7 @@ void WebSocketTask::webSocketTaskFunction(void *parameter) {
             self->monitorPlaytime(currentMillis);
             xSemaphoreGive(xSemaphore);
         }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 
@@ -131,17 +131,20 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
             case WStype_TEXT: {
                 if (self->activeClientCount > 0 && payload != nullptr) {
                     char* receivedData = (char*)payload;
-
-                    char* rIndex = strchr(receivedData, 'R');
-                    char* lIndex = strchr(receivedData, 'L');
                     char* mIndex = strchr(receivedData, 'M');
 
-                    if (rIndex != nullptr && lIndex != nullptr && lIndex > rIndex + 1) {
-                        int rightMotorSpeed = atoi(rIndex + 1);
-                        int leftMotorSpeed = atoi(lIndex + 1);
-                        self->_motorControl.setSpeed(rightMotorSpeed, leftMotorSpeed);
+                    if (strncmp(receivedData, "S", 1) == 0) {
+                        char* params = receivedData + 1;
+                        int rightMotorSpeed = 0, leftMotorSpeed = 0;
+
+                        if (sscanf(params, "%d,%d", &rightMotorSpeed, &leftMotorSpeed) == 2) {
+                            if (rightMotorSpeed >= -100 && rightMotorSpeed <= 100 &&
+                                leftMotorSpeed >= -100 && leftMotorSpeed <= 100) {
+                                self->_motorControl.setSpeed(rightMotorSpeed, leftMotorSpeed);
+                            }
+                        }
                     }
-                    else if (mIndex != nullptr && mIndex < (receivedData + strlen(receivedData) - 1)) {
+                    if (mIndex != nullptr && mIndex < (receivedData + strlen(receivedData) - 1)) {
                         int newMode = atoi(mIndex + 1);
                         if (newMode > 0) {
                             modeSelectionTask->triggerModeChange(newMode);
