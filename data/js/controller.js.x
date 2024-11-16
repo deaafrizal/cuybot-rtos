@@ -37,7 +37,7 @@ window.customElements.define('virtual-joystick', class VirtualJoystick extends H
         transition: transform 0.1s;
     }
     slot:after {
-        background-color: #007aff; /* Change to desired color */
+        background-color: #75db1d; /* Change to desired color */
         transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)));
         transition: transform .4s, background-color .2s;
     }
