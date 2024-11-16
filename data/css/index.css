@@ -17,7 +17,7 @@ body {
 }
 
 .joystick-box {
-  margin: 8vw 0;
+  margin-top: 16vw;
   width: 100%;
   height: auto;
   padding: 0 16px;

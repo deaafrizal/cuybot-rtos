@@ -27,7 +27,7 @@ private:
     
     uint8_t motorMaxSpeed;
     uint8_t motorWeight;
-    float _vdelayTime = 20.0;
+    float _vdelayTime = 5.0;
     bool _taskRunning;
 };
 
