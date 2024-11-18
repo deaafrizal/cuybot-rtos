@@ -1,236 +1,137 @@
-window.customElements.define('virtual-joystick', class VirtualJoystick extends HTMLElement {
-  static #style = `
-    :host {
-        --radius: 70px;
-        --size: calc(var(--radius) * 2);
-    }
-    :host,
-    slot {
-        position: relative;
-        display: block;
-        width: var(--size);
-        height: var(--size);
-        touch-action: none;
-    }
-    slot {
-        --x: var(--radius);
-        --y: var(--radius);
-        border-radius: 50%;
-        box-sizing: border-box;
-        transition: opacity 1s, background-color 0.2s;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        &[part*="active"] {
-           &:after {
-                    transition: transform .1s;
-                }
-        }
-    }
-    slot:after,
-    slot:before {
-        content: "";
-        display: block;
-        position: absolute;
-        box-sizing: border-box;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        transition: transform 0.1s;
-    }
-    slot:after {
-        background-color: #007aff;
-        user-select: none;
-        pointer-events: none;
-        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y)));
-        transition: transform .4s, background-color .2s;
-    }
-    slot:before {
-        transform: translate(calc(-50% + var(--radius)), calc(-50% + var(--radius)));
-    }
-    [part*="dynamic"] {
-        opacity: 0;
-    }
-    [part*="active"] {
-        opacity: 1;
-    }
-    [part*="box"]:after  {
-      transform: translate(calc(-50% + clamp(0px, var(--x), var(--size))), calc(-50% + clamp(0px, var(--y), var(--size))));
-    }
-  `;
+const joystickContainer = document.getElementById('joystick-container');
+const rightGaugeFill = document.getElementById('rightGaugeFill');
+const leftGaugeFill = document.getElementById('leftGaugeFill');
 
-  static #getDir = (degree) => {
-    const dirs = ['ne', 'n', 'nw', 'w', 'sw', 's', 'se'];
-    const acute = 45;
-    let threshold = 22.5;
-    for (let dir of dirs) {
-      if (degree >= threshold && degree < (threshold += acute)) {
-        return dir;
-      }
-    }
-    return 'e';
+function sendWebSocketMessage(message) {
+  if (websocket && websocket.readyState === WebSocket.OPEN) {
+    websocket.send(message);
+  }
+}
+
+const manager = nipplejs.create({
+  zone: joystickContainer,
+  mode: 'static',
+  position: { left: '50%', top: '50%' },
+  color: 'black',
+  size: 180,
+});
+
+function updateGauge(value, fillElement) {
+  const clampedValue = Math.max(-100, Math.min(value, 100));
+  const percentage = Math.abs(clampedValue);
+
+  fillElement.style.width = `${percentage}%`;
+
+  if (clampedValue === 0) {
+    fillElement.style.background = "#f7f7f7";
+  } else if (clampedValue > 0) {
+    fillElement.style.background = "linear-gradient(to right, #f7f7f7, #007aff)";
+  } else if (clampedValue < 0) {
+    fillElement.style.background = "linear-gradient(to right, #f7f7f7, #f20)";
+  }
+}
+
+const maxDistance = 75;
+const centerDeadzone = 25;
+const lateralDeadzone = 10;
+
+let lastLeftMotor = 0;
+let lastRightMotor = 0;
+
+function calculateMotorSpeeds(distance, angle) {
+  angle = (angle + 360) % 360;
+
+  if (distance < (centerDeadzone / 100) * maxDistance) {
+    lastLeftMotor = 0;
+    lastRightMotor = 0;
+    return { rightMotor: 0, leftMotor: 0 };
   }
 
-  static #getUniqueDir(a = '', b = '') {
-    let dir = '';
-    if (!a.includes(b[0])) dir = b[0];
-    if (b[1] && !a.includes(b[1])) dir += b[1];
-    return dir;
-  }
+  const speed = Math.min(distance, maxDistance) / maxDistance * 100;
+  let rightMotor = 0;
+  let leftMotor = 0;
 
-  #setXY(x, y) {
-    this.#element.style.setProperty('--x', `${x}px`);
-    this.#element.style.setProperty('--y', `${y}px`);
-  }
+  const edgeDeadzone = 5;
+  const horizontalDeadzone = 10;
 
-  #calcCrow({ clientX, clientY }) {
-    const { lock } = this.dataset;
-    this.#rect = this.#element.getBoundingClientRect();
-    const dx = lock === 'x' ? this.#r : clientX - this.#rect.left;
-    const dy = lock === 'y' ? this.#r : clientY - this.#rect.top;
-    const dxr = dx - this.#r;
-    const dyr = dy - this.#r;
-    const hypot = Math.hypot(dxr, dyr);
-    this.#crow = { dx, dy, dxr, dyr, hypot };
-  }
-
-  #log({
-    degree = 0,
-    force = 0,
-    radian = 0,
-    distance = 0,
-    direction = '',
-    hypot = 0,
-    capture = '',
-    release = '',
-    x = this.#rect.width + this.#rect.left,
-    y = this.#rect.top + this.#rect.top,
-  }) {
-    Object.assign(
-      this.dataset,
-      { degree, force, radian, distance, direction, hypot, capture, release, x, y }
-    );
-  }
-
-  #isInside(event) {
-    const { clientX, clientY } = event;
-    const { left: x, top: y, width: w, height: h } = this.#rect;
-    return clientX >= x && clientX <= x + w && clientY >= y && clientY <= y + h;
-  }
-
-  #r = 0;
-  #element = null;
-  #rect = null;
-  #crow = null;
-  #pointers = [];
-
-  constructor() {
-    super();
-    let output = {};
-    this.attachShadow({ mode: 'open' });
-    this.shadowRoot.innerHTML = `
-      <style>${VirtualJoystick.#style}</style>
-      <slot part="joystick"></slot>
-    `;
-    this.#element = this.shadowRoot.lastElementChild;
-
-    if (this.dataset.mode === 'semi' || this.dataset.mode === 'dynamic') {
-      this.#element.part.add('dynamic');
-      output = { x: 0, y: 0 };
+  if (
+    (angle >= 90 - horizontalDeadzone && angle <= 90 + horizontalDeadzone) ||
+    (angle >= 270 - horizontalDeadzone && angle <= 270 + horizontalDeadzone)
+  ) {
+    if (angle >= 90 - horizontalDeadzone && angle <= 90 + horizontalDeadzone) {
+      leftMotor = speed;
+      rightMotor = speed;
+    } else {
+      leftMotor = -speed;
+      rightMotor = -speed;
     }
-
-    if (this.dataset.shape) {
-      this.#element.part.add('box');
-    }
-    this.#rect = this.#element.getBoundingClientRect();
-    this.#r = this.#rect.width / 2;
-    this.#log(output);
   }
-
-  connectedCallback() {
-    document.addEventListener('pointerdown', this.#start);
-    document.addEventListener('pointermove', this.#move);
-    document.addEventListener('pointerup', this.#up);
-  }
-
-  #start = (event) => {
-    const { clientX, clientY } = event;
-    if (this.#pointers.length && this.dataset.mode !== 'fixed') return;
-
-    this.#rect = this.#element.getBoundingClientRect();
-    if (this.#isInside(event)) {
-      if (this.dataset.mode) {
-        if (this.dataset.mode !== 'fixed') {
-          this.dataset.mode === 'semi' && this.#element.part.remove('dynamic');
-          const { top, left } = this.getBoundingClientRect();
-          this.#element.style.left = `${clientX - left - this.#r}px`;
-          this.#element.style.top = `${clientY - top - this.#r}px`;
-        }
-        this.#calcCrow(event);
-        return this.#attachEvents(event);
-      }
-      this.#calcCrow(event);
-      if (this.#crow.hypot <= this.#r || this.dataset.shape) {
-        this.#attachEvents(event);
+  else if (angle >= edgeDeadzone && angle <= 180 - edgeDeadzone) {
+    if (angle > 90 - lateralDeadzone && angle < 90 + lateralDeadzone) {
+      leftMotor = speed;
+      rightMotor = speed;
+    } else {
+      const turnFactor = Math.abs((angle - 90) / 90);
+      if (angle <= 45) {
+        rightMotor = speed * (1 - turnFactor);
+        leftMotor = speed;
+      } else {
+        leftMotor = speed * (1 - turnFactor);
+        rightMotor = speed;
       }
     }
   }
+  else if (angle >= 180 + edgeDeadzone && angle <= 360 - edgeDeadzone) {
+    const turnFactor = Math.abs((angle - 270) / 90);
 
-  #attachEvents(event) {
-    this.#pointers.push(event.pointerId);
-    this.#element.part.add('active');
-    this.#bind(event);
-    this.dispatchEvent(new CustomEvent('joystickdown'));
-  }
-
-  #move = (event) => {
-    if (this.#pointers.at(-1) === event.pointerId) {
-      this.#calcCrow(event);
-      this.#bind(event);
-      this.dispatchEvent(new CustomEvent('joystickmove'));
+    if (angle > 225 && angle < 315) {
+      leftMotor = -speed;
+      rightMotor = -speed;
+    } else {
+      if (angle <= 225) {
+        leftMotor = -speed * (1 - turnFactor);
+        rightMotor = -speed;
+      } else {
+        leftMotor = -speed;
+        rightMotor = -speed * (1 - turnFactor);
+      }
     }
   }
-
-  #bind = () => {
-    const { dx, dy, dxr, dyr, hypot } = this.#crow;
-    const r = this.#r;
-    const angle = Math.atan2(dyr, dxr);
-    let degree = angle * 180 / Math.PI;
-    let x = dx;
-    let y = dy;
-    const force = hypot / r;
-
-    if (!this.dataset.shape && hypot > r) {
-      x = r * Math.cos(angle) + r;
-      y = r * Math.sin(angle) + r;
-    }
-    degree = (degree > 0 ? 360 : 0) - degree;
-    const direction = +this.dataset.threshold > force ? '' : VirtualJoystick.#getDir(degree);
-
-    this.#log({
-      hypot,
-      degree,
-      force,
-      direction,
-      capture: VirtualJoystick.#getUniqueDir(this.dataset.direction, direction),
-      release: VirtualJoystick.#getUniqueDir(direction, this.dataset.direction),
-      x: x + this.#rect.left,
-      y: y + this.#rect.top,
-      radian: (angle > 0 ? 2 * Math.PI : 0) - angle,
-      distance: Math.min(hypot, r),
-    });
-
-    this.#setXY(x, y);
+  else if (angle < edgeDeadzone || angle > 360 - edgeDeadzone) {
+    leftMotor = lastLeftMotor;
+    rightMotor = lastRightMotor;
+  } else if (angle > 180 - edgeDeadzone && angle < 180 + edgeDeadzone) {
+    leftMotor = lastLeftMotor;
+    rightMotor = lastRightMotor;
   }
 
-  #up = (event) => {
-    if (this.#pointers.at(-1) === event.pointerId) {
-      this.#pointers.pop();
-      this.#element.part.remove('active');
-      this.#setXY(this.#r, this.#r);
-      this.dispatchEvent(new CustomEvent('joystickup'));
-    }
-    const pointerIndex = this.#pointers.indexOf(event.pointerId);
-    if (pointerIndex !== -1) {
-      this.#pointers.splice(pointerIndex, 1);
-    }
+  lastLeftMotor = leftMotor;
+  lastRightMotor = rightMotor;
+
+  rightMotor = Math.max(-100, Math.min(100, Math.round(rightMotor)));
+  leftMotor = Math.max(-100, Math.min(100, Math.round(leftMotor)));
+
+  return { rightMotor, leftMotor };
+}
+
+manager.on('move', (evt, data) => {
+  if (data) {
+    const distance = data.distance || 0;
+    const angle = data.angle.degree || 0;
+
+    const { rightMotor, leftMotor } = calculateMotorSpeeds(distance, angle);
+
+    const message = `S${rightMotor},${leftMotor}`;
+    sendWebSocketMessage(message);
+
+    updateGauge(rightMotor, rightGaugeFill);
+    updateGauge(leftMotor, leftGaugeFill);
   }
+});
+
+manager.on('end', () => {
+  const message = `S0,0`;
+  sendWebSocketMessage(message);
+  updateGauge(0, rightGaugeFill);
+  updateGauge(0, leftGaugeFill);
 });
