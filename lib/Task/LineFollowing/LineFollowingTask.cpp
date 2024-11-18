@@ -36,14 +36,21 @@ void LineFollowingTask::irMeasureTask(void *_parameters) {
     // naikin ki & kd kalau kp udah pas (ciri-ciri kp pas adalah belok tidak terlalu patah & juga tidak terlalu slow response atau lambat)
 
     // adjust kp, ki & kd disini
-    const float kp = 22;
-    const float ki = 0.5;
+    const float kp = 16;
+    const float ki = 0.15;
     const float kd = 1;
 
     // adjust kecepatan awal & kecepatan paling lambat
-    const int maxSpeed = 100;
-    const int minSpeed = 26;
+    const int maxSpeed = 82;
+    const int minSpeed = 30;
     int baseSpeed = minSpeed;
+
+    // atur tambahan kecepatan untuk salah satu motor kalau misalkan pas maju lurus gak sinkron
+    // contoh: mobil cenderung belok kiri, berarti tambah nilai leftMotorOffset agar balance
+    // dan juga sebaliknya.
+    // tiap dinamo motor punya karakter beda2, karena kita tidak pakai encoder, jadi tidak bisa mengetahui RPM sesungguhnya ketika berjalan dan tidak bisa membuat balance secara otomatis kecuali nge-set kode offset ini.
+    const int rightMotorOffset = 10;
+    const int leftMotorOffset = 0;
     
     // jangan ganti ini ya
     float lastError = 0;
@@ -73,14 +80,18 @@ void LineFollowingTask::irMeasureTask(void *_parameters) {
             error = -2;
         }
 
+        if (abs(error) < 1) {
+            error = 0;
+        }
+
         float proportional = error * kp;
         integral += error * ki * (self->_vdelayTime / 1000.0);
-        integral = constrain(integral, -minSpeed / 3, minSpeed / 3);
+        integral = constrain(integral, -minSpeed / 2, minSpeed / 2);
         
         if (error == 0) integral = 0;
 
         float rawDerivative = (error - lastError) / max(self->_vdelayTime / 1000.0, 0.01);
-        float derivative = prevDerivative + 0.1 * (rawDerivative - prevDerivative); // Filter eksponensial
+        float derivative = prevDerivative + 0.1 * (rawDerivative - prevDerivative);
         prevDerivative = derivative;
 
         float pidOutput = proportional + integral + (kd * derivative);
@@ -88,14 +99,13 @@ void LineFollowingTask::irMeasureTask(void *_parameters) {
 
         if (abs(error) == 0) {
             baseSpeed = constrain(baseSpeed + 1, minSpeed, maxSpeed);
-        } else if (abs(error) == 2) {
-            baseSpeed = constrain(baseSpeed - (baseSpeed * 0.1), minSpeed, maxSpeed);
-        } else {
-            baseSpeed = constrain(baseSpeed - (baseSpeed * 0.02), minSpeed, maxSpeed);
+        }   else {
+            //jika belok kurang agresif angka 0.075 ganti lebih besar jadi 0.1, 0.2 dan seterusnya
+            baseSpeed = constrain(baseSpeed - (baseSpeed * 0.075), minSpeed, maxSpeed);
         }
 
-        int leftSpeed = baseSpeed - pidOutput;
-        int rightSpeed = baseSpeed + pidOutput;
+        int leftSpeed = baseSpeed - pidOutput + leftMotorOffset;
+        int rightSpeed = baseSpeed + pidOutput + rightMotorOffset;
 
         leftSpeed = constrain(leftSpeed, -maxSpeed, maxSpeed);
         rightSpeed = constrain(rightSpeed, -maxSpeed, maxSpeed);

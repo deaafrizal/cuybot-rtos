@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <IR/IR.h>
 #include <Motor/MotorControl.h>
-#include <EEPROM_config.h>
 
 class LineFollowingTask {
 public:
@@ -22,11 +21,8 @@ private:
     const uint32_t _taskStackSize = 4096;
     const UBaseType_t _taskPriority = 6;
 
-    static EEPROMConfig &_eepromConfig;
     static void irMeasureTask(void *_parameters);
     
-    uint8_t motorMaxSpeed;
-    uint8_t motorWeight;
     float _vdelayTime = 10.0;
     bool _taskRunning;
 };
