@@ -36,20 +36,20 @@ void LineFollowingTask::irMeasureTask(void *_parameters) {
     // naikin ki & kd kalau kp udah pas (ciri-ciri kp pas adalah belok tidak terlalu patah & juga tidak terlalu slow response atau lambat)
 
     // adjust kp, ki & kd disini
-    const float kp = 16;
-    const float ki = 0.15;
-    const float kd = 1;
+    const float kp = 34;
+    const float ki = 0.75;
+    const float kd = 1.1;
 
     // adjust kecepatan awal & kecepatan paling lambat
-    const int maxSpeed = 82;
-    const int minSpeed = 30;
-    int baseSpeed = minSpeed;
+    const int maxSpeed = 58;
+    const int minSpeed = 16;
+    int baseSpeed = 24;
 
     // atur tambahan kecepatan untuk salah satu motor kalau misalkan pas maju lurus gak sinkron
     // contoh: mobil cenderung belok kiri, berarti tambah nilai leftMotorOffset agar balance
     // dan juga sebaliknya.
     // tiap dinamo motor punya karakter beda2, karena kita tidak pakai encoder, jadi tidak bisa mengetahui RPM sesungguhnya ketika berjalan dan tidak bisa membuat balance secara otomatis kecuali nge-set kode offset ini.
-    const int rightMotorOffset = 10;
+    const int rightMotorOffset = 0;
     const int leftMotorOffset = 0;
     
     // jangan ganti ini ya
@@ -68,26 +68,26 @@ void LineFollowingTask::irMeasureTask(void *_parameters) {
             error = 0;
         } 
         else if (irLeft == HIGH && irMiddle == HIGH && irRight == LOW) {
-            error = 1;
-        } 
-        else if (irLeft == LOW && irMiddle == HIGH && irRight == HIGH) {
-            error = -1;
-        }
-        else if (irLeft == HIGH && irMiddle == LOW && irRight == LOW) {
             error = 2;
         } 
-        else if (irLeft == LOW && irMiddle == LOW && irRight == HIGH) {
+        else if (irLeft == LOW && irMiddle == HIGH && irRight == HIGH) {
             error = -2;
         }
+        else if (irLeft == HIGH && irMiddle == LOW && irRight == LOW) {
+            error = 1;
+        } 
+        else if (irLeft == LOW && irMiddle == LOW && irRight == HIGH) {
+            error = -1;
+        }
 
-        if (abs(error) < 1) {
+        if (abs(error) < 0.5) {
             error = 0;
         }
 
         float proportional = error * kp;
         integral += error * ki * (self->_vdelayTime / 1000.0);
         integral = constrain(integral, -minSpeed / 2, minSpeed / 2);
-        
+
         if (error == 0) integral = 0;
 
         float rawDerivative = (error - lastError) / max(self->_vdelayTime / 1000.0, 0.01);
@@ -97,15 +97,33 @@ void LineFollowingTask::irMeasureTask(void *_parameters) {
         float pidOutput = proportional + integral + (kd * derivative);
         pidOutput = constrain(pidOutput, -maxSpeed, maxSpeed);
 
-        if (abs(error) == 0) {
+        if (error == 0) {
             baseSpeed = constrain(baseSpeed + 1, minSpeed, maxSpeed);
-        }   else {
-            //jika belok kurang agresif angka 0.075 ganti lebih besar jadi 0.1, 0.2 dan seterusnya
-            baseSpeed = constrain(baseSpeed - (baseSpeed * 0.075), minSpeed, maxSpeed);
+        } else if (abs(error) == 2) {
+            baseSpeed = constrain(baseSpeed + 25, minSpeed, maxSpeed);
+        } else {
+            baseSpeed = constrain(baseSpeed + 15, minSpeed, maxSpeed);
         }
 
-        int leftSpeed = baseSpeed - pidOutput + leftMotorOffset;
-        int rightSpeed = baseSpeed + pidOutput + rightMotorOffset;
+        int leftSpeed, rightSpeed;
+
+        // Adjust motor speeds based on error
+        if (error == -2) { 
+            leftSpeed = constrain(baseSpeed + minSpeed - pidOutput + leftMotorOffset, minSpeed, maxSpeed);
+            rightSpeed = constrain(-(baseSpeed / 1.8) + rightMotorOffset, -maxSpeed, 0);
+        }  else if (error == 2) { 
+            leftSpeed = constrain(-(baseSpeed / 1.8) + leftMotorOffset, -maxSpeed, 0);
+            rightSpeed = constrain(baseSpeed + minSpeed + pidOutput + rightMotorOffset, minSpeed, maxSpeed);
+        } else if (error == -1) { 
+            leftSpeed = constrain(baseSpeed + minSpeed - pidOutput + leftMotorOffset, minSpeed, maxSpeed);  // Left wheel forward
+            rightSpeed = constrain(-(baseSpeed / 2) + rightMotorOffset, -maxSpeed, 0);                      // Right wheel reverse (less aggressive)
+        } else if (error == 1) { 
+            leftSpeed = constrain(-(baseSpeed / 2) + leftMotorOffset, -maxSpeed, 0);                        // Left wheel reverse (less aggressive)
+            rightSpeed = constrain(baseSpeed + minSpeed + pidOutput + rightMotorOffset, minSpeed, maxSpeed); // Right wheel forward
+        }else {
+            leftSpeed = constrain(baseSpeed - pidOutput + leftMotorOffset, minSpeed, maxSpeed);
+            rightSpeed = constrain(baseSpeed + pidOutput + rightMotorOffset, minSpeed, maxSpeed);
+        }
 
         leftSpeed = constrain(leftSpeed, -maxSpeed, maxSpeed);
         rightSpeed = constrain(rightSpeed, -maxSpeed, maxSpeed);
