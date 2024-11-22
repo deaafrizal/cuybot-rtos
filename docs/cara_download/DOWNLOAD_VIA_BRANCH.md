@@ -9,10 +9,10 @@ Ikuti langkah-langkah berikut untuk mendownload source code melalui branch repos
    - `rev-1`
 
 3. Klik branch yang sesuai, misalnya **rev-1**:  
-   ![branch-rev-1](https://github.com/deaafrizal/cuybot-rtos/blob/main/image-1.png)
+   ![branch-rev-1](https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/image-1.png)
 
 4. Klik tombol hijau bertuliskan **"Code"**, lalu pilih **Download ZIP**:  
-   ![download zip](https://github.com/deaafrizal/cuybot-rtos/blob/main/image-2.png)
+   ![download zip](https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/image-2.png)
 
 5. Ekstrak file ZIP yang telah didownload. Simpan file tersebut di lokasi manapun pada komputer kalian.
 
