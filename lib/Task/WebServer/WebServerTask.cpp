@@ -49,7 +49,7 @@ void WebServerTask::webServerTaskFunction(void *parameter) {
     routes.setupRoutes();
     
     server.begin();
-    dnsServer.start(53, "*", WiFi.softAPIP());
+    dnsServer.start(53, "cuybot.local", WiFi.softAPIP());
     Serial.println("Webserver & DNS activated!");
 
     for (;;) {

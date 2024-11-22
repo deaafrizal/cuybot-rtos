@@ -2,7 +2,7 @@ let websocket = null;
 let reconnecting = false;
 
 function connectWebSocket() {
-  websocket = new WebSocket("ws://cuybot.local:81");
+  websocket = new WebSocket("ws://192.168.4.1:81");
 
   websocket.onopen = function () {
     reconnecting = false;

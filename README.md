@@ -1,15 +1,15 @@
-<h3 align="center">CUYBOT V1 Rev.0</h3>
+<h3 align="center">CUYBOT V1 OpenSource Smartcar Project</h3>
 
-<p align="center">
-  <img src="https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/cuybot-sw.jpg" alt="Cuybot" width="450">
-</p>
 Open **cuybot-rtos**! 🚗✨ Custom **SMARTCAR BOARD** khusus buat belajar Robotika dasar, IoT & Web Development. Cocok beut buat yang pengen fullstack dari mulai develop firmware, software & troubleshoot hardware.
 
 Basis MCU **ESP32** yang juga support web development, jadi belajar ngoding makin fun dengan kombinasi sisi hardware. 
 
-DOKUMENTASI Program: [Baca Di Page Ini](https://github.com/deaafrizal/cuybot-rtos/tree/main/docs)
+BACA LENGKAP DOKUMENTASI: [Baca Di Page Ini](https://github.com/deaafrizal/cuybot-rtos/tree/main/docs)
 
-***Lengkap tunggu di YouTube***: [YT deaafrizal](https://youtube.com/@deaafrizal)
+<p align="center">
+  <img src="https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/cuybot-sw.jpg" alt="Cuybot" width="450">
+  <i>ini capture software versi awal</i>
+</p>
 
 ## 🚀 Supported Software Feature:
 - **RTOS**: Task management & efisiensi resource disisi firmware.
@@ -46,16 +46,4 @@ DOKUMENTASI Program: [Baca Di Page Ini](https://github.com/deaafrizal/cuybot-rto
 - Support Up To 4WD Motor
 - Support Parallel Serial Logging  
 
-### Cuybot Firmware Flash Requirement
-- **PlatformIO**
-- **Cuybot Protonano V1 Board**
-
-### 🔧Cara Install Firmware FreeRTOS untuk Cuybot Protonano V1 Rev.0
-1. Clone repositori ini:
-   ```bash
-   git clone https://github.com/deaafrizal/cuybot-rtos.git
-2. Tonton Youtube nya untuk cara setup lebih lengkap.
-
-##  Gimana Cara Bikin Firmware & Software sendiri buat cuybot?
-- Tungguin di youtube eaaaaa
-
+***Video Tutorial Coding Lengkap tunggu di YouTube***: [YT deaafrizal](https://youtube.com/@deaafrizal)

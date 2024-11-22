@@ -4,8 +4,6 @@
 #define NO_CLIENT_TIMEOUT_MS 10000
 #define PLAYTIME_UPDATE_INTERVAL_MS 1000
 
-extern int motorSpeed;
-extern int motorDirection;
 extern int mode;
 unsigned long lastPlaytimeSent = 0;
 
@@ -20,7 +18,7 @@ WebSocketsServer WebSocketTask::webSocket = WebSocketsServer(81);
 WebSocketTask* WebSocketTask::instance = nullptr;
 ModeSelectionTask* WebSocketTask::modeSelectionTask = nullptr;
 
-WebSocketTask::WebSocketTask() {
+WebSocketTask::WebSocketTask(MotorControl &motorControl): _motorControl(motorControl) {
     _taskHandle = NULL;
     activeClientCount = 0;
     noClientTimer = NULL;
@@ -91,7 +89,7 @@ void WebSocketTask::webSocketTaskFunction(void *parameter) {
             self->monitorPlaytime(currentMillis);
             xSemaphoreGive(xSemaphore);
         }
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 
@@ -133,18 +131,20 @@ void WebSocketTask::onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payloa
             case WStype_TEXT: {
                 if (self->activeClientCount > 0 && payload != nullptr) {
                     char* receivedData = (char*)payload;
-
-                    char* sIndex = strchr(receivedData, 'S');
-                    char* dIndex = strchr(receivedData, 'D');
                     char* mIndex = strchr(receivedData, 'M');
 
-                    if (sIndex != nullptr && dIndex != nullptr && dIndex > sIndex + 1) {
-                        int newSpeed = atoi(sIndex + 1);
-                        int newDirection = atoi(dIndex + 1);
-                        motorSpeed = newSpeed;
-                        motorDirection = newDirection;
+                    if (strncmp(receivedData, "S", 1) == 0) {
+                        char* params = receivedData + 1;
+                        int rightMotorSpeed = 0, leftMotorSpeed = 0;
+
+                        if (sscanf(params, "%d,%d", &rightMotorSpeed, &leftMotorSpeed) == 2) {
+                            if (rightMotorSpeed >= -100 && rightMotorSpeed <= 100 &&
+                                leftMotorSpeed >= -100 && leftMotorSpeed <= 100) {
+                                self->_motorControl.setSpeed(rightMotorSpeed, leftMotorSpeed);
+                            }
+                        }
                     }
-                    else if (mIndex != nullptr && mIndex < (receivedData + strlen(receivedData) - 1)) {
+                    if (mIndex != nullptr && mIndex < (receivedData + strlen(receivedData) - 1)) {
                         int newMode = atoi(mIndex + 1);
                         if (newMode > 0) {
                             modeSelectionTask->triggerModeChange(newMode);

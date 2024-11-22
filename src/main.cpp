@@ -3,11 +3,10 @@
 #include <ESPmDNS.h>
 #include <WebServer/WebServerTask.h>
 #include <ModeSelection/ModeSelectionTask.h>
-#include <Motor/MotorTask.h>
 #include <WebSocket/WebSocketTask.h>
 #include <OTA/OTA.h>
 #include <IR/IR.h>   
-#include <IRReading/IRTask.h>
+#include <LineFollowing/LineFollowingTask.h>
 #include <Motor/MotorControl.h>
 #include <Motor/MotorDriver.h>
 #include <freertos/FreeRTOS.h>
@@ -20,6 +19,8 @@
 #include <LedControl/LedControl.h>
 #include <Spinning/SpinningTask.h>
 #include <AutoPatrol/AutoPatrolTask.h>
+#define WM_MDNS
+#define CONFIG_MDNS_STRICT_MODE y //try to fix for some android
 
 // MOTOR PIN
 #define PWM_A1_PIN 9
@@ -61,7 +62,6 @@ LedControl ledControl(LED_STATE_1_PIN, LED_STATE_2_PIN);
 IR ir(IR_LEFT_PIN, IR_MIDDLE_PIN, IR_RIGHT_PIN);
 
 WebServerTask webServerTask;
-WebSocketTask webSocketTask;
 
 OTA ota("cuybot");
 
@@ -69,22 +69,21 @@ MotorDriver rightMotor(PWM_A1_PIN, PWM_A2_PIN);
 MotorDriver leftMotor(PWM_B1_PIN, PWM_B2_PIN);
 
 MotorControl motorControl(rightMotor, leftMotor);
-MotorTask motorTask(rightMotor, leftMotor);
 
 SpinningTask spinningTask(motorControl);
 AutoPatrolTask autoPatrolTask(motorControl);
-IRTask irTask(ir, motorControl);
+LineFollowingTask lineFollowingTask(ir, motorControl);
+WebSocketTask webSocketTask(motorControl);
 
-UltrasonicTask ultrasonicTask(ultrasonic);
-ModeSelectionTask modeSelectionTask(ultrasonicTask, irTask, buzzer, ledControl, spinningTask, autoPatrolTask);
+UltrasonicTask ultrasonicTask(ultrasonic, motorControl);
+ModeSelectionTask modeSelectionTask(ultrasonicTask, lineFollowingTask, buzzer, ledControl, spinningTask, autoPatrolTask);
 HardwareMonitorTask hardwareMonitorTask(&webSocketTask);
 
 BatteryMonitorTask batteryMonitorTask(BATTERY_ADC_PIN, VOLTAGE_MIN, VOLTAGE_MAX, VOLTAGE_DIVIDER_FACTOR, buzzer, &webSocketTask);
 
+
 // EXTERN VAR
 int mode = 1;
-int motorSpeed = 0;
-int motorDirection = 0;
 
 bool clientConnected = false;
 void onClientConnected(WiFiEvent_t event);
@@ -92,14 +91,16 @@ void onClientConnected(WiFiEvent_t event);
 void setup() {
     Serial.begin(9600);
     Serial.println("Setting up WiFi...");
-    
+
     delay(2000);
+
     String macAddr = WiFi.macAddress();
     String lastFourCharMacAddr = macAddr.substring(macAddr.length() - 4);
     String ssid = String(SSID) + "-" + lastFourCharMacAddr;
 
-    WiFi.mode(WIFI_AP);
+    WiFi.mode(WIFI_AP_STA);
     WiFi.setTxPower(WIFI_POWER_8_5dBm);
+    
     if (WiFi.softAP(ssid, password)) {
         Serial.println("Wi-Fi AP started successfully");
         Serial.print("AP IP address: ");
@@ -119,7 +120,14 @@ void setup() {
 
     if (!MDNS.begin("cuybot")) {
         Serial.println("DNS Cannot be started!");
+        while(1) {
+            Serial.print(".");
+            delay(1000);
+        }
     }
+
+    MDNS.addService("http", "tcp", 80);
+    MDNS.addServiceTxt("http", "tcp", "hello", "cuybot"); //try to fix for some android
 
     Serial.println("initializing services...");
     EEPROM.begin(128);
@@ -139,12 +147,11 @@ void setup() {
     webServerTask.startTask();
     webSocketTask.startTask();
     modeSelectionTask.startTask();
-    motorTask.startTask();
     hardwareMonitorTask.startTask();
     batteryMonitorTask.startMonitoring();
     
     Serial.println("RTOS OK");
-    Serial.println("open in browser http://cuybot.local");
+    Serial.println("open in browser http://cuybot.local or http://192.168.4.1");
 }
 
 void loop() {}
