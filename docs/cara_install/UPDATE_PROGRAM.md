@@ -16,4 +16,4 @@ sama percis seperti proses fresh install, tetapi tidak perlu "erase flash", jadi
 
 🎉 **Selesai!** Semoga berhasil!
 
-Jika mendapatkan error ketika proses instalasi, silahkan cek panduan ini [Panduan Troubleshooting](https://github.com/deaafrizal/cuybot-rtos/tree/main/docs/panduan_error/TROUBLESHOOTING.md)
+Jika mendapatkan error ketika proses instalasi, silahkan cek panduan ini [Panduan Troubleshooting](https://github.com/deaafrizal/cuybot-rtos/blob/main/docs/panduan_error/TROUBLESHOOTING.md)

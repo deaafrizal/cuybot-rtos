@@ -1,5 +1,3 @@
-<!-- ![release](https://raw.githubusercontent.com/deaafrizal/cuybot-rtos/main/docs/assets/image-3.png) -->
-
 # 📌 **Catatan Penting untuk Instalasi PlatformIO**
 > **Panduan Solusi Error untuk Pengguna Windows**
 

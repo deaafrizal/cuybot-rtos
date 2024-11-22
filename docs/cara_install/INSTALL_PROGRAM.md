@@ -12,11 +12,11 @@ Setelah memiliki source code **Cuybot FreeRTOS** di PC/laptop masing-masing, kal
 
 ## 📥 **TAHAPAN 1: Download Program**
 Ada dua cara untuk mendownload program / source code **Cuybot FreeRTOS**:
-1. **Download via Branch** [Panduannya klik di sini](https://github.com/deaafrizal/cuybot-rtos/tree/main/cara_download/DOWNLOAD_VIA_BRANCH.md)
+1. **Download via Branch** [Panduannya klik di sini](https://github.com/deaafrizal/cuybot-rtos/blob/main/docs/cara_download/DOWNLOAD_VIA_BRANCH.md)
 
-2. **Download via Releases** [Panduannya klik di sini](https://github.com/deaafrizal/cuybot-rtos/tree/main/docs/cara_download/DOWNLOAD_VIA_RELEASES.md)
+2. **Download via Releases** [Panduannya klik di sini](https://github.com/deaafrizal/cuybot-rtos/blob/main/docs/cara_download/DOWNLOAD_VIA_RELEASES.md)
 
-tutorial berada di dalam folder docs/cara_download [di sini](https://github.com/deaafrizal/cuybot-rtos/tree/main/docs/cara_download)
+tutorial berada di dalam folder docs/cara_download [di sini](https://github.com/deaafrizal/cuybot-rtos/blob/main/docs/cara_download/)
 
 ---
 
@@ -37,7 +37,7 @@ Jika ESP32-C3-Supermini kalian sudah memiliki program lain sebelumnya, mengikuti
 
 3. **Buka File Workspace**  
    Di folder **cuybot-rtos**, cari file dengan ekstensi **`.workspace`**:  
-   ![alt text](https://raw.githubusercontent.com/deaafrizal/cuybot-rtos/main/assets/workspace.png)  
+   ![alt text](https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/workspace.png)  
    Klik file tersebut untuk membuka proyek di VSCode.
 
 ---
@@ -46,11 +46,11 @@ Jika ESP32-C3-Supermini kalian sudah memiliki program lain sebelumnya, mengikuti
 4. **Install PlatformIO**  
    Saat membuka proyek, VSCode akan otomatis meminta kalian menginstall ekstensi **PlatformIO**.  
    Jika notifikasi tidak muncul, install secara manual:  
-   ![alt text](https://raw.githubusercontent.com/deaafrizal/cuybot-rtos/main/assets/platformio.png)
+   ![alt text](https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/platformio.png)
 
 5. **Periksa File `platformio.ini`**  
    Buka file `platformio.ini` yang ada di folder proyek:  
-   ![alt text](https://raw.githubusercontent.com/deaafrizal/cuybot-rtos/main/assets/platformioini.png)  
+   ![alt text](https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/platformioini.png)  
    Pastikan file sudah benar, lalu tekan **CTRL+S** untuk menyimpan.
 
 6. **Tunggu Konfigurasi Ulang**  
@@ -64,7 +64,7 @@ Jika ESP32-C3-Supermini kalian sudah memiliki program lain sebelumnya, mengikuti
 
 8. **Erase Flash**  
    Di sidebar PlatformIO, cari menu **"Erase Flash"**, lalu klik erase flash nya:  
-   ![alt text](https://raw.githubusercontent.com/deaafrizal/cuybot-rtos/main/assets/erase.png)
+   ![alt text](https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/erase.png)
 
 9. **Upload Filesystem Image**  
    Setelah sukses, klik **"Upload Filesystem Image"** di sidebar PlatformIO.
@@ -104,4 +104,4 @@ Jika ESP32-C3-Supermini kalian sudah memiliki program lain sebelumnya, mengikuti
 
 🎉 **Selesai!** kalian sekarang dapat menggunakan dan mengontrol **Cuybot FreeRTOS**. Selamat mencoba!
 
-Jika mendapatkan error ketika proses instalasi, silahkan cek panduan ini [Panduan Troubleshooting](https://github.com/deaafrizal/cuybot-rtos/tree/main/docs/panduan_error/TROUBLESHOOTING.md)
+Jika mendapatkan error ketika proses instalasi, silahkan cek panduan ini [Panduan Troubleshooting](https://github.com/deaafrizal/cuybot-rtos/blob/main/docs/panduan_error/TROUBLESHOOTING.md)

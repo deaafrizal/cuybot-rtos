@@ -8,6 +8,7 @@ BACA LENGKAP DOKUMENTASI: [Baca Di Page Ini](https://github.com/deaafrizal/cuybo
 
 <p align="center">
   <img src="https://github.com/deaafrizal/cuybot-rtos/blob/main/assets/cuybot-sw.jpg" alt="Cuybot" width="450">
+  <i>ini capture software versi awal</i>
 </p>
 
 ## 🚀 Supported Software Feature:
