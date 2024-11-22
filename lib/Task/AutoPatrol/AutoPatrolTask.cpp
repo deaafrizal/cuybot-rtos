@@ -3,8 +3,8 @@
 //sesuaikan sendiri nilai _spinSpeed, _forwardSpeed, _spinDuration, _forwardDuration jika diperlukan patroli yang lebih presisi.
 
 AutoPatrolTask::AutoPatrolTask(MotorControl &motorControl) 
-    : _motorControl(motorControl), _taskHandle(NULL), _spinSpeed(70), _forwardSpeed(45), 
-      _spinDuration(785), _forwardDuration(2000), _pauseDuration(100), 
+    : _motorControl(motorControl), _taskHandle(NULL), _spinSpeed(80), _forwardSpeed(60), 
+      _spinDuration(1024), _forwardDuration(1850), _pauseDuration(100), 
       _taskRunning(false), _state(State::MOVE_FORWARD), _lastStateChangeMillis(0) {}
 
 void AutoPatrolTask::startTask() {
