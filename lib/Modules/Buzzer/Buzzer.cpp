@@ -1,41 +1,32 @@
 #include <Buzzer/Buzzer.h>
 
-Buzzer::Buzzer(int buzzerPin) : _pin(buzzerPin), _state(false) {}
+Buzzer::Buzzer(uint8_t buzzerPin) : _pin(buzzerPin) {}
 
 void Buzzer::begin() {
     pinMode(_pin, OUTPUT);
-    off();
-}
-
-void Buzzer::on() {
-    digitalWrite(_pin, HIGH);
-    _state = true;
-}
-
-void Buzzer::off() {
     digitalWrite(_pin, LOW);
-    _state = false;
 }
 
-void Buzzer::beep(int duration) {
-    on();
-    delay(duration);
-    off();
+Buzzer& Buzzer::beep(uint16_t milliseconds) {
+    digitalWrite(_pin, HIGH);
+    wait(milliseconds);
+    digitalWrite(_pin, LOW);
+    return *this;
+}
+
+void Buzzer::wait(uint16_t milliseconds) {
+  delay(milliseconds);
 }
 
 void Buzzer::playBatteryLowWarning() {
     for (int i = 0; i < 3; i++) {
-        beep(100);
-        delay(200);
+        beep(100).wait(200);
     }
 }
 
 void Buzzer::playCalibrationBeep(int duration) {
     unsigned long startMillis = millis();
     while (millis() - startMillis < duration) {
-        on();
-        delay(250);
-        off();
-        delay(250);
+        beep(250).wait(250);
     }
 }

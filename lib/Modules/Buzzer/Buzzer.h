@@ -5,18 +5,16 @@
 
 class Buzzer {
 public:
-    Buzzer(int buzzerPin);
+    Buzzer(uint8_t buzzerPin);
 
     void begin();
-    void on();
-    void off();
-    void beep(int duration);
+    Buzzer& beep(uint16_t milliseconds);
+    void wait(uint16_t milliseconds);
     void playBatteryLowWarning();
     void playCalibrationBeep(int duration);
 
 private:
-    int _pin;
-    bool _state;
+    uint8_t _pin;
 };
 
 #endif
