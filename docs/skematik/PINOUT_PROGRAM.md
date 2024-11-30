@@ -38,11 +38,11 @@
 
 ---
 
-### Logic State 4 Indikator Mode LED
+### Logic State 4 Indikator Mode LED (REV-1), rev-0 dicoba saja karena hanya beda urutan aja.
 
 - LedState1 LOW  +  LedState2 LOW     = MODE 1 ON
-- LedState1 LOW  +  LedState2 HIGH    = MODE 2 ON
-- LedState1 HIGH +  LedState2 LOW     = MODE 3 ON
+- LedState1 HIGH +  LedState2 LOW     = MODE 2 ON
+- LedState1 LOW  +  LedState2 HIGH    = MODE 3 ON
 - LedState1 HIGH +  LedState2 HIGH    = MODE 4 ON
 
 ---
